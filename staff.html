@@ -49,6 +49,17 @@
   </div>
 
   <script>
+    var API_ENDPOINT = "https://script.google.com/macros/s/AKfycby9yiIo9euB9KTt0zBuwcF3x6pdaeJJ48mAwcTFC6xl53oH8eh0Agfwlr138t3D5KNPYQ/exec";
+
+    function apiCall(payload) {
+      return fetch(API_ENDPOINT, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify(payload)
+      });
+    }
+
     function logAttendance() {
       var id = document.getElementById("workforceId").value.trim();
       var name = document.getElementById("workforceName").value.trim();
@@ -60,21 +71,21 @@
         return;
       }
       button.disabled = true;
-      button.innerText = "Processing authentication...";
+      button.innerText = "Processing...";
 
-      google.script.run
-        .withSuccessHandler(function(response) {
+      apiCall({ action: "markAttendance", staffId: id, staffName: name })
+        .then(function() {
           button.disabled = false;
           button.innerText = "Log Daily Attendance";
-          feedback.innerText = response.message;
-          feedback.style.color = response.success ? "#198754" : "#dc3545";
+          feedback.innerText = "Attendance recorded successfully.";
+          feedback.style.color = "#198754";
         })
-        .withFailureHandler(function(fault) {
+        .catch(function(err) {
           button.disabled = false;
           button.innerText = "Log Daily Attendance";
-          alert("System fault: " + fault.message);
-        })
-        .markAttendance(id, name);
+          feedback.innerText = "Error: " + err.message;
+          feedback.style.color = "#dc3545";
+        });
     }
 
     function retrieveTasks() {
@@ -86,10 +97,11 @@
       }
 
       button.disabled = true;
-      button.innerText = "Querying operational records...";
+      button.innerText = "Querying...";
 
-      google.script.run
-        .withSuccessHandler(function(records) {
+      fetch(API_ENDPOINT + "?action=getStaffTasks&staffId=" + encodeURIComponent(id))
+        .then(function(res) { return res.json(); })
+        .then(function(records) {
           button.disabled = false;
           button.innerText = "Retrieve Assignments";
           var queue = document.getElementById("assignmentQueue");
@@ -119,27 +131,25 @@
           });
           queue.innerHTML = output;
         })
-        .withFailureHandler(function(fault) {
+        .catch(function(err) {
           button.disabled = false;
           button.innerText = "Retrieve Assignments";
-          alert("Database exception: " + fault.message);
-        })
-        .getStaffTasks(id);
+          alert("Error: " + err.message);
+        });
     }
 
     function markTaskComplete(taskId) {
       var remarkInput = document.getElementById("remark_" + taskId);
       var remarkValue = remarkInput ? remarkInput.value : "";
       
-      google.script.run
-        .withSuccessHandler(function() {
+      apiCall({ action: "submitTaskCompletion", taskId: taskId, remark: remarkValue })
+        .then(function() {
           alert("Task marked complete and routed to verification queue.");
-          retrieveTasks();
+          setTimeout(retrieveTasks, 1000);
         })
-        .withFailureHandler(function(fault) {
-          alert("Submission fault: " + fault.message);
-        })
-        .submitTaskCompletion(taskId, remarkValue);
+        .catch(function(err) {
+          alert("Error: " + err.message);
+        });
     }
   </script>
 </body>
