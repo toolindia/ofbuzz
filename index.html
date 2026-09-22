@@ -22,17 +22,18 @@
       <h1>Ofbuzz Technology</h1>
       <p style="color:#6c757d; margin:0; font-size:13px;">Live Active Clients</p>
     </div>
-    <div id="list"></div>
+    <div id="list">Loading clients...</div>
   </div>
 
   <script>
-    var clients = <?= initialData ?>;
-    var box = document.getElementById("list");
-    if(!clients || clients.length === 0){
-      box.innerHTML = "<p style='font-size:13px; color:#6c757d;'>No active clients found.</p>";
-    } else {
+    function renderClients(clients) {
+      var box = document.getElementById("list");
+      if (!clients || clients.length === 0) {
+        box.innerHTML = "<p style='font-size:13px; color:#6c757d; text-align:center;'>No active clients found.</p>";
+        return;
+      }
       var h = "";
-      clients.forEach(function(c){
+      clients.forEach(function(c) {
         h += "<div class='client-card'>" +
              "  <div style='display:flex; justify-content:space-between; align-items:center;'>" +
              "    <strong>" + c.name + "</strong>" +
@@ -42,6 +43,15 @@
              "</div>";
       });
       box.innerHTML = h;
+    }
+
+    try {
+      var clients = <?!= initialData ?>;
+      renderClients(clients);
+    } catch(err) {
+      if (typeof google !== "undefined" && google.script && google.script.run) {
+        google.script.run.withSuccessHandler(renderClients).getLiveClients();
+      }
     }
   </script>
 </body>
