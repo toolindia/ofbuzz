@@ -33,6 +33,8 @@
   </div>
 
   <script>
+    var API_ENDPOINT = "https://script.google.com/macros/s/AKfycby9yiIo9euB9KTt0zBuwcF3x6pdaeJJ48mAwcTFC6xl53oH8eh0Agfwlr138t3D5KNPYQ/exec";
+
     function renderDirectory(dataset) {
       var container = document.getElementById("directoryContainer");
       if (!dataset || dataset.length === 0) {
@@ -52,25 +54,15 @@
       container.innerHTML = compiledHtml;
     }
 
-    function initPage() {
-      if (typeof google === "undefined" || !google.script || !google.script.run) {
-        setTimeout(initPage, 100);
-        return;
-      }
-      google.script.run
-        .withSuccessHandler(renderDirectory)
-        .withFailureHandler(function(fault) {
+    window.onload = function() {
+      fetch(API_ENDPOINT + "?action=getLiveClients")
+        .then(function(res) { return res.json(); })
+        .then(function(data) { renderDirectory(data); })
+        .catch(function(err) {
           document.getElementById("directoryContainer").innerHTML = 
-            '<div class="notification-pane" style="color:#dc3545;">Database connectivity error: ' + fault.message + '</div>';
-        })
-        .getLiveClients();
-    }
-
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", initPage);
-    } else {
-      initPage();
-    }
+            '<div class="notification-pane" style="color:#dc3545;">Connectivity Error: ' + err.message + '</div>';
+        });
+    };
   </script>
 </body>
 </html>
