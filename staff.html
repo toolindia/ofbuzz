@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,125 +9,85 @@
     body { background-color: #f8f9fa; color: #212529; margin: 0; padding: 16px; }
     .container { max-width: 580px; margin: 0 auto; background: #ffffff; padding: 20px; border-radius: 8px; border: 1px solid #e9ecef; }
     .header { text-align: center; margin-bottom: 16px; }
-    .logo { width: 52px; height: 52px; border-radius: 8px; }
-    .card-title { font-size: 15px; font-weight: 600; margin: 16px 0 8px; border-bottom: 1px solid #f1f3f5; padding-bottom: 6px; }
-    input, textarea, button { width: 100%; padding: 10px; margin-top: 6px; border: 1px solid #ced4da; border-radius: 4px; font-size: 14px; }
-    button { background-color: #0d6efd; color: #ffffff; border: none; cursor: pointer; font-weight: 500; }
-    button.alt { background-color: #198754; margin-top: 10px; }
-    .task-card { border: 1px solid #dee2e6; border-radius: 6px; padding: 12px; margin-top: 10px; background: #ffffff; }
+    .logo { width: 50px; height: 50px; border-radius: 8px; }
+    input, textarea, button { width: 100%; padding: 9px; margin-top: 5px; border: 1px solid #ced4da; border-radius: 4px; font-size: 13px; }
+    button { background: #0d6efd; color: #fff; border: none; cursor: pointer; font-weight: 500; }
+    button.alt { background: #198754; margin-top: 10px; }
+    .task-card { border: 1px solid #dee2e6; border-radius: 6px; padding: 12px; margin-top: 10px; }
     .badge { display: inline-block; padding: 3px 6px; font-size: 11px; border-radius: 4px; font-weight: 500; }
-    .badge-assigned { background: #fff3cd; color: #664d03; }
-    .badge-pending { background: #cff4fc; color: #055160; }
-    .badge-approved { background: #d1e7dd; color: #0f5132; }
-    .msg-box { font-size: 13px; margin-top: 6px; }
+    .badge-Assigned { background: #fff3cd; color: #664d03; }
+    .badge-Pending { background: #cff4fc; color: #055160; }
+    .badge-Approved { background: #d1e7dd; color: #0f5132; }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
-      <img src="https://i.pinimg.com/736x/bd/d0/5c/bdd05c94afb66b5a72f5e17a7a879ab3.jpg" class="logo" alt="Ofbuzz Logo">
-      <h2 style="font-size: 17px; margin: 6px 0 0;">Staff Operations Portal</h2>
+      <img src="<?= logoUrl ?>" class="logo" alt="Logo">
+      <h2 style="font-size:17px; margin:6px 0 0;">Staff Workspace</h2>
     </div>
-
     <div>
-      <label style="font-size: 13px;">Staff ID</label>
-      <input type="text" id="staffId" placeholder="e.g. STF01">
-      <label style="font-size: 13px; margin-top: 8px; display:block;">Full Name</label>
-      <input type="text" id="staffName" placeholder="Enter your full name">
-      <button class="alt" onclick="submitAttendance()">Mark Daily Attendance</button>
-      <div id="attResponse" class="msg-box"></div>
-      <button onclick="loadTasks()" style="margin-top: 8px;">View My Tasks</button>
+      <label style="font-size:12px;">Staff ID</label>
+      <input type="text" id="sid" placeholder="e.g. STF01">
+      <label style="font-size:12px; margin-top:8px; display:block;">Full Name</label>
+      <input type="text" id="sname" placeholder="Enter Full Name">
+      <button class="alt" onclick="markAtt()">Mark Daily Attendance</button>
+      <div id="attRes" style="font-size:13px; margin-top:6px;"></div>
+      <button onclick="fetchTasks()" style="margin-top:8px;">View My Tasks</button>
     </div>
-
-    <div>
-      <div class="card-title">My Tasks</div>
-      <div id="taskList"><p style="font-size: 13px; color: #6c757d;">Enter your Staff ID and click View My Tasks.</p></div>
+    <div style="margin-top:16px; border-top:1px solid #e9ecef; padding-top:12px;">
+      <h3 style="font-size:14px; margin:0 0 10px;">Assigned Tasks</h3>
+      <div id="tlist"><p style="font-size:13px; color:#6c757d;">Enter Staff ID and click View My Tasks.</p></div>
     </div>
   </div>
 
   <script>
-    var API_URL = "https://script.google.com/macros/s/AKfycby9yiIo9euB9KTt0zBuwcF3x6pdaeJJ48mAwcTFC6xl53oH8eh0Agfwlr138t3D5KNPYQ/exec";
+    var API = "<?= scriptUrl ?>";
 
-    function submitAttendance() {
-      var id = document.getElementById("staffId").value.trim();
-      var name = document.getElementById("staffName").value.trim();
-      var respBox = document.getElementById("attResponse");
-      if (!id || !name) { alert("Enter both Staff ID and Name."); return; }
-
-      if (typeof google !== "undefined" && google.script && google.script.run) {
-        google.script.run.withSuccessHandler(function(res) {
-          respBox.innerText = res.message;
-          respBox.style.color = res.success ? "#198754" : "#dc3545";
-        }).markAttendance(id, name);
-      } else {
-        fetch(API_URL, {
-          method: "POST",
-          body: JSON.stringify({ action: "markAttendance", staffId: id, staffName: name })
-        }).then(function(r) { return r.json(); }).then(function(res) {
-          respBox.innerText = res.message;
-          respBox.style.color = res.success ? "#198754" : "#dc3545";
+    function markAtt(){
+      var id = document.getElementById("sid").value.trim();
+      var name = document.getElementById("sname").value.trim();
+      if(!id || !name){ alert("Enter both Staff ID and Name."); return; }
+      fetch(API, { method:"POST", body:JSON.stringify({action:"markAttendance", staffId:id, staffName:name}) })
+        .then(function(r){return r.json();}).then(function(res){
+          var b = document.getElementById("attRes");
+          b.innerText = res.message;
+          b.style.color = res.success ? "#198754" : "#dc3545";
         });
-      }
     }
 
-    function loadTasks() {
-      var id = document.getElementById("staffId").value.trim();
-      if (!id) { alert("Please provide your Staff ID."); return; }
-
-      function render(tasks) {
-        var box = document.getElementById("taskList");
-        if (!tasks || tasks.length === 0) {
-          box.innerHTML = "<p style='font-size:13px; color:#6c757d;'>No tasks assigned.</p>";
-          return;
-        }
-        var html = "";
-        tasks.forEach(function(t) {
-          var bClass = t.status === "Approved" ? "badge-approved" : (t.status === "Pending Approval" ? "badge-pending" : "badge-assigned");
-          html += '<div class="task-card">';
-          html += '  <div style="display:flex; justify-content:space-between; align-items:center;">';
-          html += '    <strong>' + t.title + '</strong>';
-          html += '    <span class="badge ' + bClass + '">' + t.status + '</span>';
-          html += '  </div>';
-          html += '  <p style="font-size: 13px; color: #495057; margin: 6px 0;">' + t.description + '</p>';
-          
-          if (t.status === "Assigned") {
-            html += '  <textarea id="rem_' + t.id + '" placeholder="Optional completion remarks..."></textarea>';
-            html += '  <button onclick="completeTask(\'' + t.id + '\')">Mark Completed</button>';
-          } else if (t.status === "Pending Approval") {
-            html += '  <div style="font-size: 12px; color: #055160; margin-top: 6px;">Status: Awaiting Admin Approval</div>';
-          } else if (t.status === "Approved") {
-            html += '  <div style="font-size: 12px; color: #0f5132; margin-top: 6px;">Approved' + (t.adminRemark ? ': ' + t.adminRemark : '') + '</div>';
-          }
-          html += '</div>';
+    function fetchTasks(){
+      var id = document.getElementById("sid").value.trim();
+      if(!id){ alert("Enter Staff ID."); return; }
+      fetch(API + "?action=getStaffTasks&staffId=" + encodeURIComponent(id))
+        .then(function(r){return r.json();}).then(function(tasks){
+          var box = document.getElementById("tlist");
+          if(!tasks || tasks.length === 0){ box.innerHTML = "<p style='font-size:13px; color:#6c757d;'>No tasks found.</p>"; return; }
+          var h = "";
+          tasks.forEach(function(t){
+            var cls = t.status === "Pending Approval" ? "badge-Pending" : (t.status === "Approved" ? "badge-Approved" : "badge-Assigned");
+            h += "<div class='task-card'>" +
+                 "  <div style='display:flex; justify-content:space-between;'>" +
+                 "    <strong>" + t.title + "</strong>" +
+                 "    <span class='badge " + cls + "'>" + t.status + "</span>" +
+                 "  </div>" +
+                 "  <p style='font-size:13px; color:#495057; margin:6px 0;'>" + t.description + "</p>";
+            if(t.status === "Assigned"){
+              h += "<textarea id='rm_" + t.id + "' placeholder='Optional remarks...'></textarea>" +
+                   "<button onclick='finishTask(\"" + t.id + "\")'>Mark Completed</button>";
+            } else {
+              h += "<div style='font-size:12px; color:#6c757d; margin-top:4px;'>Status: " + t.status + "</div>";
+            }
+            h += "</div>";
+          });
+          box.innerHTML = h;
         });
-        box.innerHTML = html;
-      }
-
-      if (typeof google !== "undefined" && google.script && google.script.run) {
-        google.script.run.withSuccessHandler(render).getStaffTasks(id);
-      } else {
-        fetch(API_URL + "?action=getStaffTasks&staffId=" + encodeURIComponent(id))
-          .then(function(r) { return r.json(); })
-          .then(render);
-      }
     }
 
-    function completeTask(taskId) {
-      var rem = document.getElementById("rem_" + taskId).value;
-      if (typeof google !== "undefined" && google.script && google.script.run) {
-        google.script.run.withSuccessHandler(function(res) {
-          alert("Task sent for admin approval.");
-          loadTasks();
-        }).submitTaskCompletion(taskId, rem);
-      } else {
-        fetch(API_URL, {
-          method: "POST",
-          body: JSON.stringify({ action: "submitTaskCompletion", taskId: taskId, remark: rem })
-        }).then(function(r) { return r.json(); }).then(function(res) {
-          alert("Task sent for admin approval.");
-          loadTasks();
-        });
-      }
+    function finishTask(tid){
+      var rem = document.getElementById("rm_" + tid).value;
+      fetch(API, { method:"POST", body:JSON.stringify({action:"submitTaskCompletion", taskId:tid, remark:rem}) })
+        .then(function(r){return r.json();}).then(function(){ alert("Submitted for approval."); fetchTasks(); });
     }
   </script>
 </body>
