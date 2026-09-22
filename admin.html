@@ -147,6 +147,8 @@
     .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
     .btn-bill { background: rgba(242, 92, 59, 0.12); color: var(--primary); border: 1px solid rgba(242, 92, 59, 0.25); }
     .btn-bill:hover { background: var(--primary); color: #fff; }
+    .btn-profile { background: rgba(16, 185, 129, 0.12); color: #059669; border: 1px solid rgba(16, 185, 129, 0.25); }
+    .btn-profile:hover { background: #059669; color: #fff; }
     .btn-del { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
     .btn-del:hover { background: var(--danger); color: #fff; }
     .btn-edit { background: rgba(245, 158, 11, 0.1); color: #d97706; }
@@ -168,7 +170,7 @@
     td { padding: 12px 10px; border-bottom: 1px solid var(--border); color: #334155; }
     .status-badge { padding: 3px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; background: #e0f2fe; color: #0284c7; }
 
-    /* INVOICE & ADJUSTMENT MODALS */
+    /* MODALS */
     .modal-backdrop {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(6px);
@@ -190,7 +192,7 @@
 
     .toast { position: fixed; top: 20px; right: 20px; padding: 12px 20px; border-radius: 8px; background: #0f172a; color: #fff; font-size: 0.85rem; font-weight: 600; display: none; z-index: 2000; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
 
-    /* INVOICE SHEET PREVIEW */
+    /* INVOICE PREVIEW STYLES */
     .zylker-invoice {
       background: #ffffff; color: #1e293b; padding: 40px 38px; border-radius: 4px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; font-size: 0.86rem; line-height: 1.45;
@@ -381,7 +383,7 @@
       </div>
     </div>
 
-    <!-- PAYMENT & RECEIVABLES LEDGER (CLIENT-SIDE DYNAMIC CALCULATION) -->
+    <!-- PAYMENT & RECEIVABLES LEDGER (WITH PASSBOOK DASHBOARD & ADJUSTMENT) -->
     <div class="section-card">
       <div class="section-head">
         <span>Payment & Receivables Ledger</span>
@@ -576,6 +578,54 @@
             <tr><td colspan="5" style="text-align:center;">No deliverables awaiting approval.</td></tr>
           </tbody>
         </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEDICATED CUSTOMER FINANCIAL DASHBOARD / PASSBOOK MODAL -->
+  <div class="modal-backdrop" id="customerProfileModal">
+    <div class="modal-window" style="max-width: 680px;">
+      <div class="modal-header">
+        <div>
+          <h3 style="font-size: 1.1rem; font-weight: 800;" id="profClientName">Customer Financial Profile</h3>
+          <p style="font-size: 0.75rem; color: var(--text-muted);" id="profClientDetails">Client ID & Contact</p>
+        </div>
+        <button class="btn-del" onclick="closeCustomerProfileModal()">Close</button>
+      </div>
+      <div class="modal-body">
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px;">
+          <div style="background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:14px; text-align:center;">
+            <span style="font-size:0.72rem; text-transform:uppercase; color:#64748b; font-weight:700;">Total Deal Billed</span>
+            <div style="font-size:1.25rem; font-weight:800; color:#0f172a; margin-top:4px;" id="profBilledAmt">INR 0.00</div>
+          </div>
+          <div style="background:#ecfdf5; border:1px solid #d1fae5; border-radius:10px; padding:14px; text-align:center;">
+            <span style="font-size:0.72rem; text-transform:uppercase; color:#065f46; font-weight:700;">Total Received</span>
+            <div style="font-size:1.25rem; font-weight:800; color:#059669; margin-top:4px;" id="profReceivedAmt">INR 0.00</div>
+          </div>
+          <div style="background:#fff7ed; border:1px solid #ffedd5; border-radius:10px; padding:14px; text-align:center;">
+            <span style="font-size:0.72rem; text-transform:uppercase; color:#9a3412; font-weight:700;">Balance Pending</span>
+            <div style="font-size:1.25rem; font-weight:800; color:#ea580c; margin-top:4px;" id="profPendingAmt">INR 0.00</div>
+          </div>
+        </div>
+
+        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:16px;">
+          <h4 style="font-size:0.85rem; font-weight:800; color:#0f172a; margin-bottom:10px;">Payment & Advance History</h4>
+          <div class="table-box" style="margin-top:0;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Type / Method</th>
+                  <th>Amount</th>
+                  <th>Reference Note</th>
+                </tr>
+              </thead>
+              <tbody id="profPaymentsHistoryBody">
+                <tr><td colspan="4" style="text-align:center;">No payment records found.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -1005,6 +1055,7 @@
             <td style="color:#059669; font-weight:700;">INR ${clientPaid.toFixed(2)}</td>
             <td style="color:${pendingDue > 0 ? '#ea580c' : '#64748b'}; font-weight:700;">INR ${pendingDue.toFixed(2)}</td>
             <td style="text-align: right; white-space: nowrap;">
+              <button class="btn-profile" onclick="openCustomerProfileModal('${clientId}')">View Passbook</button>
               <button class="btn-adjust" onclick="openPaymentAdjustmentModal('${clientId}')">Adjust Payment</button>
               ${pendingDue > 0 ? `<button class="btn-reminder" onclick="sendPaymentReminderMail('${clientId}', '${pendingDue.toFixed(2)}')">Send Reminder</button>` : `<span style="font-size:0.75rem; color:#059669; font-weight:700; margin-left:6px;">Settled</span>`}
             </td>
@@ -1018,6 +1069,50 @@
       document.getElementById("todaySales").innerText = "INR " + calculatedTodaySales.toFixed(2);
       document.getElementById("kpiTotalPaid").innerText = "INR " + totalReceivedAll.toFixed(2);
       document.getElementById("kpiTotalPending").innerText = "INR " + totalPendingAll.toFixed(2);
+    }
+
+    // DEDICATED CUSTOMER FINANCIAL DASHBOARD (PASSBOOK)
+    function openCustomerProfileModal(clientId) {
+      const c = (state.clients || []).find(item => String(item[0]).trim() === String(clientId).trim());
+      if (!c) return;
+
+      const oneTime = parseFloat(c[5]) || 0;
+      const monthly = parseFloat(c[7]) || 0;
+      const annual = parseFloat(c[9]) || 0;
+      const clientBilled = oneTime + monthly + annual;
+
+      let clientPaid = 0;
+      let historyRows = "";
+
+      (state.payments || []).forEach(p => {
+        if (String(p[1] || "").trim() === String(clientId).trim()) {
+          const amt = parseFloat(p[4]) || 0;
+          clientPaid += amt;
+          historyRows += `
+            <tr>
+              <td>${p[5] ? String(p[5]).substring(0, 10) : "—"}</td>
+              <td><span class="status-badge" style="${amt < 0 ? 'background:#fee2e2; color:#dc2626;' : ''}">${p[3] || 'Payment'}</span></td>
+              <td style="font-weight:700; color:${amt < 0 ? '#dc2626' : '#059669'};">INR ${amt.toFixed(2)}</td>
+              <td style="font-size:0.78rem; color:#64748b;">${p[6] || '—'}</td>
+            </tr>
+          `;
+        }
+      });
+
+      const pendingDue = Math.max(0, clientBilled - clientPaid);
+
+      document.getElementById("profClientName").innerText = `${c[1]}`;
+      document.getElementById("profClientDetails").innerText = `Client ID: ${c[0]} | Phone: ${c[2] || '—'} | Email: ${c[3] || '—'}`;
+      document.getElementById("profBilledAmt").innerText = `INR ${clientBilled.toFixed(2)}`;
+      document.getElementById("profReceivedAmt").innerText = `INR ${clientPaid.toFixed(2)}`;
+      document.getElementById("profPendingAmt").innerText = `INR ${pendingDue.toFixed(2)}`;
+      document.getElementById("profPaymentsHistoryBody").innerHTML = historyRows || '<tr><td colspan="4" style="text-align:center;">No payment entries found for this customer.</td></tr>';
+
+      document.getElementById("customerProfileModal").style.display = "flex";
+    }
+
+    function closeCustomerProfileModal() {
+      document.getElementById("customerProfileModal").style.display = "none";
     }
 
     // PAYMENT ADJUSTMENT MODAL CONTROLS (WITH ADD & DEDUCT MODES)
