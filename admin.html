@@ -72,6 +72,8 @@
     .btn-del:hover { background: var(--danger); color: #fff; }
     .btn-edit { background: rgba(245, 158, 11, 0.1); color: #d97706; }
     .btn-edit:hover { background: #d97706; color: #fff; }
+    .btn-mail { background: #0284c7; color: #fff; }
+    .btn-mail:hover { background: #0369a1; }
 
     .table-box { overflow-x: auto; margin-top: 12px; }
     table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
@@ -491,6 +493,7 @@
           <p style="font-size: 0.75rem; color: var(--text-muted);" id="modalClientHeader">Client Billing Console</p>
         </div>
         <div style="display:flex; gap: 8px;">
+          <button class="btn-mail" id="btnSendEmail" onclick="sendInvoiceToClientEmail()">📧 Send Bill via Email</button>
           <button class="btn-primary" style="background:#059669;" onclick="openDedicatedPrintWindow()">⚡ Print / Download 1-Page PDF</button>
           <button class="btn-del" onclick="closeInvoiceModal()">✕ Close</button>
         </div>
@@ -707,14 +710,15 @@
       client: null,
       lineItems: [],
       advances: [],
-      calculatedNextDue: ""
+      calculatedNextDue: "",
+      financials: {}
     };
 
     function showToast(msg) {
       const toast = document.getElementById("toast");
       toast.innerText = msg;
       toast.style.display = "block";
-      setTimeout(() => { toast.style.display = "none"; }, 3000);
+      setTimeout(() => { toast.style.display = "none"; }, 3500);
     }
 
     function jsonp(url, callbackName) {
@@ -925,7 +929,6 @@
       syncAllData();
     };
 
-    // SMART INVOICE ENGINE: DYNAMIC CYCLES & SMART EXPIRATION
     function openInvoiceModal(clientId) {
       const c = (state.clients || []).find(item => item[0] === clientId);
       if (!c) return;
@@ -933,7 +936,7 @@
       currentInvoice.client = c;
       currentInvoice.advances = [];
       
-      document.getElementById("invoiceCycleSelector").value = "monthly"; // Default to recurring monthly
+      document.getElementById("invoiceCycleSelector").value = "monthly";
       changeInvoiceCycle();
 
       document.getElementById("modalClientHeader").innerText = `Generating bill for: ${c[1]} (${c[0]})`;
@@ -958,7 +961,6 @@
       let dueOffsetDays = 15;
 
       if (cycle === "monthly") {
-        // Excludes One-Time completely
         if (c[6] && parseFloat(c[7]) > 0) {
           currentInvoice.lineItems.push({
             name: c[6],
@@ -970,7 +972,6 @@
         termLabel = "Monthly Retainer (Net 7)";
         dueOffsetDays = 7;
       } else if (cycle === "initial") {
-        // Includes One-Time + Monthly
         if (c[4] && parseFloat(c[5]) > 0) {
           currentInvoice.lineItems.push({
             name: c[4],
@@ -990,7 +991,6 @@
         termLabel = "Due on Receipt";
         dueOffsetDays = 0;
       } else if (cycle === "annual") {
-        // Excludes One-Time and Monthly
         if (c[8] && parseFloat(c[9]) > 0) {
           currentInvoice.lineItems.push({
             name: c[8],
@@ -1002,7 +1002,6 @@
         termLabel = "Annual Subscription (Net 15)";
         dueOffsetDays = 15;
       } else {
-        // Consolidated Full Statement
         if (c[4] && parseFloat(c[5]) > 0) currentInvoice.lineItems.push({ name: c[4], desc: "One-Time Custom Setup", price: parseFloat(c[5]), qty: 1 });
         if (c[6] && parseFloat(c[7]) > 0) currentInvoice.lineItems.push({ name: c[6], desc: "Monthly Recurring Retainer", price: parseFloat(c[7]), qty: 1 });
         if (c[8] && parseFloat(c[9]) > 0) currentInvoice.lineItems.push({ name: c[8], desc: "Annual Contract", price: parseFloat(c[9]), qty: 1 });
@@ -1021,11 +1020,9 @@
       document.getElementById("previewInvDate").innerText = todayFormatted;
       document.getElementById("previewTerms").innerText = termLabel;
 
-      // Smart Due Date: Today + Offset Days (Guaranteed never in the past)
       const calculatedDueDate = new Date(now.getTime() + dueOffsetDays * 24 * 60 * 60 * 1000);
       document.getElementById("previewDueDate").innerText = calculatedDueDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
       
-      // Calculate Next Cycle Rollover Date
       const rolloverTarget = new Date(now);
       if (cycle === "annual") {
         rolloverTarget.setFullYear(rolloverTarget.getFullYear() + 1);
@@ -1053,6 +1050,44 @@
         syncAllData();
       }
     };
+
+    function sendInvoiceToClientEmail() {
+      const c = currentInvoice.client;
+      if (!c || !c[3]) {
+        showToast("Client does not have a registered email address.");
+        return;
+      }
+
+      const btn = document.getElementById("btnSendEmail");
+      btn.disabled = true;
+      btn.innerText = "Sending Mail...";
+
+      const payload = {
+        name: c[1],
+        email: c[3],
+        invoiceNumber: document.getElementById("previewInvNumber").innerText,
+        date: document.getElementById("previewInvDate").innerText,
+        dueDate: document.getElementById("previewDueDate").innerText,
+        items: currentInvoice.lineItems,
+        subtotal: currentInvoice.financials.subtotal,
+        total: currentInvoice.financials.total,
+        paid: currentInvoice.financials.paid,
+        balanceDue: currentInvoice.financials.balanceDue,
+        upi: document.getElementById("invUpiId").value.trim()
+      };
+
+      window.onMailSent = function(res) {
+        btn.disabled = false;
+        btn.innerText = "📧 Send Bill via Email";
+        if (res && res.success) {
+          showToast(res.message);
+        } else {
+          showToast((res && res.message) ? res.message : "Failed to dispatch email.");
+        }
+      };
+
+      jsonp(API_ENDPOINT + `?action=sendInvoiceMail&data=${encodeURIComponent(JSON.stringify(payload))}`, "onMailSent");
+    }
 
     function closeInvoiceModal() {
       document.getElementById("invoiceModal").style.display = "none";
@@ -1129,6 +1164,14 @@
       const taxAmt = taxableAmount * (taxRate / 100);
       const grandTotal = taxableAmount + taxAmt;
       const balanceDue = Math.max(0, grandTotal - totalPaid);
+
+      // Save to financials cache for email dispatch
+      currentInvoice.financials = {
+        subtotal: subtotal.toFixed(2),
+        total: grandTotal.toFixed(2),
+        paid: totalPaid.toFixed(2),
+        balanceDue: balanceDue.toFixed(2)
+      };
 
       document.getElementById("prevSubtotal").innerText = subtotal.toFixed(2);
 
