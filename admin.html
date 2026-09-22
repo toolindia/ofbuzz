@@ -159,6 +159,8 @@
     .btn-profile:hover { background: #059669; color: #fff; }
     .btn-del { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
     .btn-del:hover { background: var(--danger); color: #fff; }
+    .btn-cancel-service { background: rgba(239, 68, 68, 0.12); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.25); }
+    .btn-cancel-service:hover { background: #dc2626; color: #fff; }
     .btn-edit { background: rgba(245, 158, 11, 0.1); color: #d97706; }
     .btn-edit:hover { background: #d97706; color: #fff; }
     .btn-adjust { background: rgba(24, 119, 242, 0.1); color: #1877f2; border: 1px solid rgba(24, 119, 242, 0.25); }
@@ -469,7 +471,7 @@
       </div>
     </div>
 
-    <!-- 2. CLIENTS TABLE WITH STRICT CATEGORY FILTERING -->
+    <!-- 2. CLIENTS TABLE WITH STRICT CATEGORY FILTERING & CANCEL SERVICE ACTION -->
     <div class="section-card">
       <div class="section-head">
         <span>Active Clients Directory</span>
@@ -1066,6 +1068,9 @@
       let calculatedTodaySales = 0;
 
       (state.clients || []).forEach(c => {
+        const status = String(c[11] || "").trim().toLowerCase();
+        if (status === "cancelled") return; // Skip cancelled accounts
+
         const clientId = String(c[0] || "").trim();
         const clientName = c[1] || "Account";
         const phone = c[2] || "—";
@@ -1108,7 +1113,7 @@
         `;
       });
 
-      tbody.innerHTML = rowsHtml || '<tr><td colspan="6" style="text-align:center;">No accounts available in ledger.</td></tr>';
+      tbody.innerHTML = rowsHtml || '<tr><td colspan="6" style="text-align:center;">No active accounts available in ledger.</td></tr>';
       
       document.getElementById("todaySales").innerText = "INR " + calculatedTodaySales.toFixed(2);
       document.getElementById("kpiTotalPaid").innerText = "INR " + totalReceivedAll.toFixed(2);
@@ -1220,6 +1225,20 @@
       jsonp(API_ENDPOINT + `?action=adjustClientPayment&clientId=${encodeURIComponent(clientId)}&amount=${encodeURIComponent(amount)}&type=${encodeURIComponent(type)}&remark=${encodeURIComponent(remark)}`, "onAdjustmentSaved");
     }
 
+    function cancelClientService(clientId) {
+      if (!confirm("Are you sure you want to cancel/deactivate service for client " + clientId + "?")) return;
+      jsonp(API_ENDPOINT + `?action=deactivateClient&clientId=${encodeURIComponent(clientId)}`, "onServiceCancelled");
+    }
+
+    window.onServiceCancelled = function(res) {
+      if (res && res.success) {
+        showToast("Client service successfully deactivated/cancelled.");
+        syncAllData();
+      } else {
+        showToast("Failed to cancel service.");
+      }
+    };
+
     function sendPaymentReminderMail(clientId, dueAmt) {
       showToast("Dispatching formal payment reminder...");
       jsonp(API_ENDPOINT + `?action=sendPaymentReminder&clientId=${encodeURIComponent(clientId)}&amount=${encodeURIComponent(dueAmt)}`, "onReminderDispatched");
@@ -1270,6 +1289,9 @@
       let activeAccounts = 0;
 
       (state.clients || []).forEach(c => {
+        const status = String(c[11] || "").trim().toLowerCase();
+        if (status === "cancelled") return;
+
         const cDate = c[12] ? new Date(c[12]) : null;
         if (!filterStartDate || (cDate && cDate >= filterStartDate)) {
           const ot = parseFloat(c[5]) || 0;
@@ -1413,6 +1435,9 @@
       let cHtml = "";
       
       (state.clients || []).forEach(c => {
+        const status = String(c[11] || "").trim().toLowerCase();
+        if (status === "cancelled") return; // Hide cancelled clients from active directory
+
         const otAmt = parseFloat(c[5]) || 0;
         const moAmt = parseFloat(c[7]) || 0;
         const anAmt = parseFloat(c[9]) || 0;
@@ -1441,9 +1466,10 @@
             <td><strong>${c[1]}</strong></td>
             <td>${c[2]}<br><span style="font-size:0.75rem; color:#64748b;">${c[3]}</span></td>
             <td>${serv.join("<br>") || "—"}</td>
-            <td>${c[10] ? c[10].substring(0,10) : "—"}</td>
+            <td><strong>${c[10] ? c[10].substring(0,10) : "—"}</strong></td>
             <td style="text-align: right; white-space: nowrap;">
               <button class="btn-bill" onclick="openInvoiceModal('${c[0]}')">Generate Bill</button>
+              <button class="btn-cancel-service" onclick="cancelClientService('${c[0]}')">Cancel Service</button>
               <button class="btn-edit" onclick="editClientRecord('${c[0]}')">Edit</button>
               <button class="btn-del" onclick="deleteClientRecord('${c[0]}')">Delete</button>
             </td>
@@ -1767,7 +1793,6 @@
         dueOffsetDays = 0;
       }
 
-      // Append custom items if any added
       currentInvoice.customItems.forEach(ci => {
         currentInvoice.lineItems.push(ci);
       });
@@ -1829,6 +1854,8 @@
       const nextDate = currentInvoice.calculatedNextDue;
 
       showToast("Updating client next billing cycle...");
+      c[10] = nextDate;
+
       jsonp(API_ENDPOINT + `?action=rolloverCycle&clientId=${encodeURIComponent(c[0])}&cycleType=${cycle}&nextDate=${nextDate}`, "onRolloverDone");
     }
 
