@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,18 +8,18 @@
     * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background-color: #f8f9fa; color: #212529; margin: 0; padding: 16px; }
     .container { max-width: 1024px; margin: 0 auto; }
-    .header { background: #ffffff; padding: 14px; border-radius: 8px; display: flex; align-items: center; gap: 12px; border: 1px solid #e9ecef; margin-bottom: 14px; }
-    .logo { width: 44px; height: 44px; border-radius: 6px; }
+    .header { background:#ffffff; padding:14px; border-radius:8px; display:flex; align-items:center; gap:14px; border:1px solid #e9ecef; margin-bottom:14px; }
+    .logo { width: 48px; height: 48px; border-radius: 6px; object-fit: cover; flex-shrink: 0; }
     .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 14px; }
     .kpi-card { background: #ffffff; padding: 14px; border-radius: 8px; border-left: 4px solid #0d6efd; border-top:1px solid #e9ecef; border-right:1px solid #e9ecef; border-bottom:1px solid #e9ecef; }
     .card { background: #ffffff; padding: 16px; border-radius: 8px; margin-bottom: 14px; border: 1px solid #e9ecef; }
     .grid-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; }
     label { font-size: 11px; color: #495057; font-weight: 500; }
     input, textarea, button, select { width: 100%; padding: 8px; border: 1px solid #ced4da; border-radius: 4px; font-size: 13px; margin-top: 3px; }
-    button { background: #0d6efd; color: #fff; border: none; cursor: pointer; font-weight: 500; }
+    button { background: #0d6efd; color: #ffffff; border: none; cursor: pointer; font-weight: 500; }
     button.alt { background: #198754; }
     button.del { background: #dc3545; }
-    button.warn { background: #ffc107; color: #000; }
+    button.warn { background: #ffc107; color: #000000; }
     table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 12px; }
     th, td { text-align: left; padding: 8px; border-bottom: 1px solid #e9ecef; vertical-align: middle; }
     th { background: #f8f9fa; }
@@ -29,7 +29,7 @@
 <body>
   <div class="container">
     <div class="header">
-      <img src="<?= https://i.pinimg.com/736x/bd/d0/5c/bdd05c94afb66b5a72f5e17a7a879ab3.jpg ?>" class="logo" alt="Logo">
+      <img src="https://i.pinimg.com/736x/bd/d0/5c/bdd05c94afb66b5a72f5e17a7a879ab3.jpg" class="logo" alt="Ofbuzz Technology Logo" referrerpolicy="no-referrer">
       <div>
         <h1 style="font-size:16px; margin:0;">Ofbuzz Technology</h1>
         <div style="font-size:12px; color:#6c757d;">Administrative Control Dashboard</div>
@@ -154,7 +154,6 @@
       for(var m in d.monthlySales){ mstr += m + ": INR " + d.monthlySales[m] + " | "; }
       document.getElementById("msale").innerText = mstr || "No recorded sales";
 
-      // Clients
       var cHtml = "";
       (d.clients || []).forEach(function(c){
         var bDetails = [];
@@ -176,7 +175,6 @@
       });
       document.getElementById("clientTbl").innerHTML = cHtml || "<tr><td colspan='7'>No clients found.</td></tr>";
 
-      // Staff
       var sHtml = "";
       var sOptions = "<option value=''>Select Staff</option>";
       (d.staff || []).forEach(function(s){
@@ -196,7 +194,6 @@
       document.getElementById("staffTbl").innerHTML = sHtml || "<tr><td colspan='6'>No staff members found.</td></tr>";
       document.getElementById("taskStaffSelect").innerHTML = sOptions;
 
-      // Pending Approvals
       var aHtml = "";
       (d.tasks || []).forEach(function(t){
         if(t[6] === "Pending Approval"){
