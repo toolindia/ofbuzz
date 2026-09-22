@@ -8,35 +8,46 @@
     * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
     body { background-color: #f8f9fa; color: #212529; margin: 0; padding: 16px; }
     .container { max-width: 1040px; margin: 0 auto; }
-    .header { background: #ffffff; padding: 16px; border-radius: 8px; display: flex; align-items: center; gap: 14px; border: 1px solid #e9ecef; margin-bottom: 16px; }
+    .header { background: #ffffff; padding: 16px; border-radius: 8px; display: flex; align-items: center; gap: 14px; border: 1px solid #e9ecef; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
     .brand-logo { width: 48px; height: 48px; border-radius: 6px; object-fit: cover; flex-shrink: 0; }
     .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 16px; }
     .metric-card { background: #ffffff; padding: 16px; border-radius: 8px; border-left: 4px solid #0d6efd; border-top: 1px solid #e9ecef; border-right: 1px solid #e9ecef; border-bottom: 1px solid #e9ecef; }
-    .metric-title { font-size: 12px; color: #6c757d; font-weight: 500; }
-    .metric-value { font-size: 20px; font-weight: 600; margin-top: 4px; }
-    .panel-card { background: #ffffff; padding: 18px; border-radius: 8px; margin-bottom: 16px; border: 1px solid #e9ecef; }
-    .panel-heading { font-size: 15px; margin: 0 0 12px; border-bottom: 1px solid #f1f3f5; padding-bottom: 8px; font-weight: 600; }
+    .metric-title { font-size: 12px; color: #6c757d; font-weight: 600; }
+    .metric-value { font-size: 20px; font-weight: 700; margin-top: 4px; color: #111827; }
+    .panel-card { background: #ffffff; padding: 18px; border-radius: 8px; margin-bottom: 16px; border: 1px solid #e9ecef; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+    .panel-heading { font-size: 15px; margin: 0 0 12px; border-bottom: 1px solid #f1f3f5; padding-bottom: 8px; font-weight: 700; color: #111827; }
     .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; }
-    label { font-size: 11px; color: #495057; font-weight: 500; }
-    input, textarea, button, select { width: 100%; padding: 8px 10px; border: 1px solid #ced4da; border-radius: 4px; font-size: 13px; margin-top: 4px; }
-    button { background: #0d6efd; color: #ffffff; border: none; cursor: pointer; font-weight: 500; }
-    button.btn-action-edit { background: #ffc107; color: #000000; width: auto; padding: 4px 8px; font-size: 11px; margin-right: 4px; }
-    button.btn-action-delete { background: #dc3545; color: #ffffff; width: auto; padding: 4px 8px; font-size: 11px; }
-    button.btn-action-approve { background: #198754; color: #ffffff; width: auto; padding: 4px 10px; font-size: 12px; }
+    label { font-size: 11px; color: #495057; font-weight: 600; }
+    input, textarea, button, select { width: 100%; padding: 8px 10px; border: 1px solid #ced4da; border-radius: 6px; font-size: 13px; margin-top: 4px; }
+    button { background: #0d6efd; color: #ffffff; border: none; cursor: pointer; font-weight: 600; transition: all 0.15s ease; }
+    button:hover { opacity: 0.92; transform: translateY(-1px); }
+    button:active { transform: translateY(1px); }
+    button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    button.btn-action-edit { background: #ffc107; color: #000000; width: auto; padding: 4px 10px; font-size: 11px; margin-right: 4px; }
+    button.btn-action-delete { background: #dc3545; color: #ffffff; width: auto; padding: 4px 10px; font-size: 11px; }
+    button.btn-action-approve { background: #198754; color: #ffffff; width: auto; padding: 5px 12px; font-size: 12px; }
     table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
-    th, td { text-align: left; padding: 9px; border-bottom: 1px solid #e9ecef; vertical-align: middle; }
-    th { background: #f8f9fa; font-weight: 600; color: #495057; }
+    th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid #e9ecef; vertical-align: middle; }
+    th { background: #f8f9fa; font-weight: 700; color: #495057; }
     .table-container { overflow-x: auto; }
-    .badge { padding: 3px 6px; border-radius: 4px; font-size: 11px; }
+    .badge { padding: 3px 6px; border-radius: 4px; font-size: 11px; font-weight: 600; }
     .badge-pending { background: #cff4fc; color: #055160; }
+
+    /* On-Screen Toast Notification */
+    .toast-box { position: fixed; top: 20px; right: 20px; padding: 12px 18px; border-radius: 8px; color: #fff; font-size: 13px; font-weight: 600; display: none; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,0.15); animation: slideIn 0.25s ease; }
+    .toast-success { background: #198754; }
+    .toast-error { background: #dc3545; }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
   </style>
 </head>
 <body>
+  <div id="toast" class="toast-box"></div>
+
   <div class="container">
     <div class="header">
       <img src="https://i.pinimg.com/736x/bd/d0/5c/bdd05c94afb66b5a72f5e17a7a879ab3.jpg" class="brand-logo" alt="Ofbuzz Technology Identity" referrerpolicy="no-referrer">
       <div>
-        <h1 style="font-size:17px; margin:0;">Ofbuzz Technology</h1>
+        <h1 style="font-size:17px; margin:0; font-weight:700;">Ofbuzz Technology</h1>
         <div style="font-size:12px; color:#6c757d;">Administrative Operations Console</div>
       </div>
     </div>
@@ -49,7 +60,7 @@
       </div>
       <div class="metric-card" style="border-left-color:#198754;">
         <div class="metric-title">Aggregated Monthly Performance</div>
-        <div class="metric-value" id="kpiMonthlyVolume" style="font-size:14px; font-weight:500; margin-top:6px;">Querying...</div>
+        <div class="metric-value" id="kpiMonthlyVolume" style="font-size:14px; font-weight:600; margin-top:6px;">Connecting...</div>
       </div>
     </div>
 
@@ -74,7 +85,7 @@
         <button id="btnCancelClientEdit" onclick="abortClientEdit()" style="display:none; width:auto; background:#6c757d;">Cancel Revision</button>
       </div>
 
-      <h3 style="font-size:14px; margin:20px 0 8px;">Client Management Registry</h3>
+      <h3 style="font-size:14px; margin:20px 0 8px; font-weight:700;">Client Management Registry</h3>
       <div class="table-container">
         <table>
           <thead>
@@ -110,7 +121,7 @@
         <button id="btnCancelStaffEdit" onclick="abortStaffEdit()" style="display:none; width:auto; background:#6c757d;">Cancel Revision</button>
       </div>
 
-      <h3 style="font-size:14px; margin:20px 0 8px;">Workforce Directory</h3>
+      <h3 style="font-size:14px; margin:20px 0 8px; font-weight:700;">Workforce Directory</h3>
       <div class="table-container">
         <table>
           <thead>
@@ -177,13 +188,19 @@
     var API_ENDPOINT = "https://script.google.com/macros/s/AKfycby9yiIo9euB9KTt0zBuwcF3x6pdaeJJ48mAwcTFC6xl53oH8eh0Agfwlr138t3D5KNPYQ/exec";
     var administrativeCache = { clients: [], payments: [], tasks: [], staff: [], todaySales: 0, monthlySales: {} };
 
-    function apiCall(payload) {
-      return fetch(API_ENDPOINT, {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "text/plain" },
-        body: JSON.stringify(payload)
-      });
+    function showToast(msg, isSuccess) {
+      var toast = document.getElementById("toast");
+      toast.innerText = msg;
+      toast.className = "toast-box " + (isSuccess ? "toast-success" : "toast-error");
+      toast.style.display = "block";
+      setTimeout(function() { toast.style.display = "none"; }, 3500);
+    }
+
+    function jsonp(url, callbackName) {
+      var script = document.createElement("script");
+      script.src = url + (url.indexOf("?") >= 0 ? "&" : "?") + "callback=" + callbackName;
+      document.body.appendChild(script);
+      script.onload = function() { script.remove(); };
     }
 
     function renderDashboard(dataset) {
@@ -262,14 +279,15 @@
     }
 
     function synchronizeDashboard() {
-      fetch(API_ENDPOINT + "?action=getAdminData")
-        .then(function(res) { return res.json(); })
-        .then(function(data) { renderDashboard(data); })
-        .catch(function(err) {
-          alert("Synchronization error: " + err.message);
-        });
+      window.onAdminDataReceived = function(res) {
+        if (res && res.success && res.data) {
+          renderDashboard(res.data);
+        }
+      };
+      jsonp(API_ENDPOINT + "?action=getAdminData", "onAdminDataReceived");
     }
 
+    // Client Management
     function processClientSave() {
       var button = document.getElementById("btnSubmitClient");
       var recordId = document.getElementById("fieldClientId").value;
@@ -288,28 +306,36 @@
       };
 
       if (!clientEntity.name) {
-        alert("Client Account Name is required.");
+        showToast("Client Account Name is required.", false);
         return;
       }
 
       button.disabled = true;
-      button.innerText = "Saving...";
+      button.innerText = "Persisting...";
+
+      // Optimistic Instant UI Update
+      if (!recordId) {
+        var tempId = "CLI-" + Date.now();
+        administrativeCache.clients.unshift([
+          tempId, clientEntity.name, clientEntity.phone, clientEntity.email,
+          clientEntity.oneTimeService, clientEntity.oneTimeAmount,
+          clientEntity.monthlyService, clientEntity.monthlyAmount,
+          clientEntity.annualService, clientEntity.annualAmount,
+          clientEntity.nextBillingDate, "Active"
+        ]);
+        renderDashboard(administrativeCache);
+      }
+
+      window.onClientSaved = function(res) {
+        button.disabled = false;
+        button.innerText = "Persist Client Record";
+        showToast(recordId ? "Client record updated successfully." : "Client enrolled successfully.", true);
+        abortClientEdit();
+        synchronizeDashboard();
+      };
 
       var actionType = recordId ? "editClient" : "addClient";
-
-      apiCall({ action: actionType, client: clientEntity })
-        .then(function() {
-          button.disabled = false;
-          button.innerText = "Persist Client Record";
-          alert(recordId ? "Client record updated successfully." : "Client enrolled successfully.");
-          abortClientEdit();
-          setTimeout(synchronizeDashboard, 1000);
-        })
-        .catch(function(err) {
-          button.disabled = false;
-          button.innerText = "Persist Client Record";
-          alert("Error: " + err.message);
-        });
+      jsonp(API_ENDPOINT + "?action=" + actionType + "&data=" + encodeURIComponent(JSON.stringify(clientEntity)), "onClientSaved");
     }
 
     function stageClientModification(id) {
@@ -353,15 +379,18 @@
     }
 
     function commitClientDeletion(id) {
-      if (!confirm("Are you certain you wish to purge client record " + id + "?")) return;
-      apiCall({ action: "deleteClient", clientId: id })
-        .then(function() {
-          alert("Client record purged.");
-          setTimeout(synchronizeDashboard, 1000);
-        })
-        .catch(function(err) { alert("Error: " + err.message); });
+      // Optimistic delete
+      administrativeCache.clients = administrativeCache.clients.filter(function(c) { return c[0] != id; });
+      renderDashboard(administrativeCache);
+
+      window.onClientDeleted = function(res) {
+        showToast("Client record purged.", true);
+        synchronizeDashboard();
+      };
+      jsonp(API_ENDPOINT + "?action=deleteClient&clientId=" + encodeURIComponent(id), "onClientDeleted");
     }
 
+    // Workforce Management
     function processStaffSave() {
       var button = document.getElementById("btnSubmitStaff");
       var isRevision = document.getElementById("staffIsEditMode").value === "true";
@@ -373,28 +402,29 @@
       };
 
       if (!staffEntity.id || !staffEntity.name) {
-        alert("Both Staff ID and Full Name are mandatory.");
+        showToast("Both Staff ID and Full Name are mandatory.", false);
         return;
       }
 
       button.disabled = true;
-      button.innerText = "Saving...";
+      button.innerText = "Persisting...";
+
+      // Optimistic addition
+      if (!isRevision) {
+        administrativeCache.staff.push([staffEntity.id, staffEntity.name, staffEntity.email, staffEntity.role, "Active"]);
+        renderDashboard(administrativeCache);
+      }
+
+      window.onStaffSaved = function(res) {
+        button.disabled = false;
+        button.innerText = "Commit Associate Record";
+        showToast(isRevision ? "Personnel file revised." : "Personnel file added.", true);
+        abortStaffEdit();
+        synchronizeDashboard();
+      };
 
       var actionType = isRevision ? "editStaff" : "addStaff";
-
-      apiCall({ action: actionType, staff: staffEntity })
-        .then(function() {
-          button.disabled = false;
-          button.innerText = "Commit Associate Record";
-          alert(isRevision ? "Personnel file revised." : "Personnel file added.");
-          abortStaffEdit();
-          setTimeout(synchronizeDashboard, 1000);
-        })
-        .catch(function(err) {
-          button.disabled = false;
-          button.innerText = "Commit Associate Record";
-          alert("Error: " + err.message);
-        });
+      jsonp(API_ENDPOINT + "?action=" + actionType + "&data=" + encodeURIComponent(JSON.stringify(staffEntity)), "onStaffSaved");
     }
 
     function stageStaffModification(id) {
@@ -427,13 +457,14 @@
     }
 
     function commitStaffDeletion(id) {
-      if (!confirm("Are you certain you wish to purge personnel record " + id + "?")) return;
-      apiCall({ action: "deleteStaff", staffId: id })
-        .then(function() {
-          alert("Personnel profile purged.");
-          setTimeout(synchronizeDashboard, 1000);
-        })
-        .catch(function(err) { alert("Error: " + err.message); });
+      administrativeCache.staff = administrativeCache.staff.filter(function(s) { return s[0] != id; });
+      renderDashboard(administrativeCache);
+
+      window.onStaffDeleted = function(res) {
+        showToast("Personnel profile purged.", true);
+        synchronizeDashboard();
+      };
+      jsonp(API_ENDPOINT + "?action=deleteStaff&staffId=" + encodeURIComponent(id), "onStaffDeleted");
     }
 
     function synchronizeAssigneeDetails() {
@@ -460,7 +491,7 @@
       };
 
       if (!taskEntity.staffId || !taskEntity.title) {
-        alert("Please designate an operational associate and state assignment title.");
+        showToast("Designate an associate and task title.", false);
         return;
       }
 
@@ -468,32 +499,28 @@
       button.disabled = true;
       button.innerText = "Authorizing...";
 
-      apiCall({ action: "assignTask", task: taskEntity })
-        .then(function() {
-          button.disabled = false;
-          button.innerText = "Authorize Assignment & Dispatch Email Notification";
-          alert("Assignment delegated and confirmation email dispatched.");
-          document.getElementById("taskTitle").value = "";
-          document.getElementById("taskDescription").value = "";
-          setTimeout(synchronizeDashboard, 1000);
-        })
-        .catch(function(err) {
-          button.disabled = false;
-          button.innerText = "Authorize Assignment & Dispatch Email Notification";
-          alert("Error: " + err.message);
-        });
+      window.onTaskDelegated = function(res) {
+        button.disabled = false;
+        button.innerText = "Authorize Assignment & Dispatch Email Notification";
+        showToast("Assignment authorized and notification dispatched.", true);
+        document.getElementById("taskTitle").value = "";
+        document.getElementById("taskDescription").value = "";
+        synchronizeDashboard();
+      };
+
+      jsonp(API_ENDPOINT + "?action=assignTask&data=" + encodeURIComponent(JSON.stringify(taskEntity)), "onTaskDelegated");
     }
 
     function commitTaskVerification(taskId) {
       var input = document.getElementById("adminVerificationRemark_" + taskId);
       var remarkValue = input ? input.value : "";
 
-      apiCall({ action: "approveTask", taskId: taskId, remark: remarkValue })
-        .then(function() {
-          alert("Assignment approved and closed.");
-          setTimeout(synchronizeDashboard, 1000);
-        })
-        .catch(function(err) { alert("Error: " + err.message); });
+      window.onTaskApproved = function(res) {
+        showToast("Assignment authorized and closed.", true);
+        synchronizeDashboard();
+      };
+
+      jsonp(API_ENDPOINT + "?action=approveTask&taskId=" + encodeURIComponent(taskId) + "&remark=" + encodeURIComponent(remarkValue), "onTaskApproved");
     }
 
     window.onload = synchronizeDashboard;
