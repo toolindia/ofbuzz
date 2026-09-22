@@ -1,235 +1,386 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Panel - Ofbuzz Technology</title>
+  <title>Admin Console - Ofbuzz Technology</title>
   <style>
     * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background-color: #f8f9fa; color: #212529; margin: 0; padding: 16px; }
-    .container { max-width: 980px; margin: 0 auto; }
-    .header { background: #ffffff; padding: 16px; border-radius: 8px; display: flex; align-items: center; gap: 12px; border: 1px solid #e9ecef; margin-bottom: 16px; }
-    .logo { width: 48px; height: 48px; border-radius: 6px; }
-    .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 16px; }
-    .kpi-card { background: #ffffff; padding: 16px; border-radius: 8px; border-left: 4px solid #0d6efd; border-top: 1px solid #e9ecef; border-right: 1px solid #e9ecef; border-bottom: 1px solid #e9ecef; }
-    .kpi-title { font-size: 13px; color: #6c757d; }
-    .kpi-value { font-size: 20px; font-weight: 600; margin-top: 4px; }
-    .card { background: #ffffff; padding: 18px; border-radius: 8px; margin-bottom: 16px; border: 1px solid #e9ecef; }
-    h2 { font-size: 15px; margin: 0 0 12px 0; border-bottom: 1px solid #f1f3f5; padding-bottom: 8px; }
-    .grid-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; }
-    label { font-size: 12px; color: #495057; }
-    input, textarea, button { width: 100%; padding: 8px 10px; border: 1px solid #ced4da; border-radius: 4px; font-size: 13px; margin-top: 4px; }
-    button { background: #0d6efd; color: #ffffff; border: none; cursor: pointer; font-weight: 500; margin-top: 12px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
-    th, td { text-align: left; padding: 8px; border-bottom: 1px solid #e9ecef; }
+    .container { max-width: 1024px; margin: 0 auto; }
+    .header { background: #ffffff; padding: 14px; border-radius: 8px; display: flex; align-items: center; gap: 12px; border: 1px solid #e9ecef; margin-bottom: 14px; }
+    .logo { width: 44px; height: 44px; border-radius: 6px; }
+    .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 14px; }
+    .kpi-card { background: #ffffff; padding: 14px; border-radius: 8px; border-left: 4px solid #0d6efd; border-top:1px solid #e9ecef; border-right:1px solid #e9ecef; border-bottom:1px solid #e9ecef; }
+    .card { background: #ffffff; padding: 16px; border-radius: 8px; margin-bottom: 14px; border: 1px solid #e9ecef; }
+    .grid-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; }
+    label { font-size: 11px; color: #495057; font-weight: 500; }
+    input, textarea, button, select { width: 100%; padding: 8px; border: 1px solid #ced4da; border-radius: 4px; font-size: 13px; margin-top: 3px; }
+    button { background: #0d6efd; color: #fff; border: none; cursor: pointer; font-weight: 500; }
+    button.alt { background: #198754; }
+    button.del { background: #dc3545; }
+    button.warn { background: #ffc107; color: #000; }
+    table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 12px; }
+    th, td { text-align: left; padding: 8px; border-bottom: 1px solid #e9ecef; vertical-align: middle; }
     th { background: #f8f9fa; }
-    .table-responsive { overflow-x: auto; }
-    .badge { padding: 3px 6px; border-radius: 4px; font-size: 11px; font-weight: 500; }
-    .badge-pending { background: #cff4fc; color: #055160; }
+    .table-resp { overflow-x: auto; }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
-      <img src="https://i.pinimg.com/736x/bd/d0/5c/bdd05c94afb66b5a72f5e17a7a879ab3.jpg" class="logo" alt="Ofbuzz Logo">
+      <img src="<?= logoUrl ?>" class="logo" alt="Logo">
       <div>
-        <h1 style="font-size: 17px; margin: 0;">Ofbuzz Technology</h1>
-        <div style="font-size: 12px; color: #6c757d;">Administrative Workspace</div>
+        <h1 style="font-size:16px; margin:0;">Ofbuzz Technology</h1>
+        <div style="font-size:12px; color:#6c757d;">Administrative Control Dashboard</div>
       </div>
     </div>
 
-    <!-- Analytics Section -->
+    <!-- Analytics -->
     <div class="kpi-row">
       <div class="kpi-card">
-        <div class="kpi-title">Today's Sales</div>
-        <div class="kpi-value" id="todaySales">INR 0</div>
+        <div style="font-size:12px; color:#6c757d;">Today's Sales</div>
+        <div id="tsale" style="font-size:18px; font-weight:600; margin-top:2px;">INR 0</div>
       </div>
-      <div class="kpi-card" style="border-left-color: #198754;">
-        <div class="kpi-title">Monthly Business Growth</div>
-        <div class="kpi-value" id="monthlyTrends" style="font-size: 14px; font-weight: normal; margin-top: 6px;">Loading...</div>
+      <div class="kpi-card" style="border-left-color:#198754;">
+        <div style="font-size:12px; color:#6c757d;">Monthly Revenue Trends</div>
+        <div id="msale" style="font-size:13px; margin-top:4px;">Loading...</div>
       </div>
     </div>
 
-    <!-- Client Registration & Custom Billing -->
+    <!-- Client Management -->
     <div class="card">
-      <h2>Register Client & Setup Custom Billing</h2>
+      <h2 id="clientFormTitle" style="font-size:14px; margin:0 0 10px; border-bottom:1px solid #f1f3f5; padding-bottom:6px;">Add Client with Custom Billing</h2>
+      <input type="hidden" id="editClientId">
       <div class="grid-form">
-        <div><label>Customer Name</label><input type="text" id="cName"></div>
-        <div><label>Phone Number</label><input type="text" id="cPhone"></div>
-        <div><label>Email Address</label><input type="email" id="cEmail"></div>
-        <div><label>Next Billing Date</label><input type="date" id="cNextDate"></div>
-        <div><label>One-Time Service</label><input type="text" id="cOneName"></div>
-        <div><label>One-Time Amount (INR)</label><input type="number" id="cOneAmt"></div>
-        <div><label>Monthly Service</label><input type="text" id="cMonName"></div>
-        <div><label>Monthly Amount (INR)</label><input type="number" id="cMonAmt"></div>
-        <div><label>Annual Service</label><input type="text" id="cAnnName"></div>
-        <div><label>Annual Amount (INR)</label><input type="number" id="cAnnAmt"></div>
+        <div><label>Customer Name</label><input type="text" id="cn"></div>
+        <div><label>Phone Number</label><input type="text" id="cp"></div>
+        <div><label>Email Address</label><input type="email" id="ce"></div>
+        <div><label>Next Billing Date</label><input type="date" id="cb"></div>
+        <div><label>One-Time Service</label><input type="text" id="co"></div>
+        <div><label>One-Time Amount (INR)</label><input type="number" id="coa"></div>
+        <div><label>Monthly Service</label><input type="text" id="cm"></div>
+        <div><label>Monthly Amount (INR)</label><input type="number" id="cma"></div>
+        <div><label>Annual Service</label><input type="text" id="ca"></div>
+        <div><label>Annual Amount (INR)</label><input type="number" id="caa"></div>
       </div>
-      <button onclick="submitClient()">Save Client Billing Record</button>
-    </div>
-
-    <!-- Staff Task Assignment -->
-    <div class="card">
-      <h2>Assign Staff Task</h2>
-      <div class="grid-form">
-        <div><label>Staff ID</label><input type="text" id="tStaffId" placeholder="e.g. STF01"></div>
-        <div><label>Staff Name</label><input type="text" id="tStaffName"></div>
-        <div><label>Staff Email (For Notification)</label><input type="email" id="tStaffEmail"></div>
-        <div><label>Task Title</label><input type="text" id="tTitle"></div>
+      <div style="display:flex; gap:8px; margin-top:10px;">
+        <button id="btnClientSubmit" onclick="saveClient()">Save Client Record</button>
+        <button id="btnClientCancel" onclick="resetClientForm()" class="warn" style="display:none; width:auto;">Cancel Edit</button>
       </div>
-      <div style="margin-top: 8px;">
-        <label>Task Description</label>
-        <textarea id="tDesc" rows="2"></textarea>
-      </div>
-      <button onclick="submitTask()">Assign Task & Send Email</button>
-    </div>
-
-    <!-- Task Review & Approval -->
-    <div class="card">
-      <h2>Pending Task Approvals</h2>
-      <div class="table-responsive">
+      <h3 style="font-size:13px; margin:16px 0 6px;">Client Directory</h3>
+      <div class="table-resp">
         <table>
           <thead>
             <tr>
-              <th>Task</th>
-              <th>Assigned Staff</th>
-              <th>Staff Remark</th>
-              <th>Status</th>
-              <th>Action</th>
+              <th>ID</th><th>Customer</th><th>Phone</th><th>Email</th><th>Billing Details</th><th>Next Due</th><th>Action</th>
             </tr>
           </thead>
-          <tbody id="approvalTable">
-            <tr><td colspan="5">Loading review list...</td></tr>
-          </tbody>
+          <tbody id="clientTbl"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Staff Management -->
+    <div class="card">
+      <h2 id="staffFormTitle" style="font-size:14px; margin:0 0 10px; border-bottom:1px solid #f1f3f5; padding-bottom:6px;">Add New Staff Member</h2>
+      <input type="hidden" id="isEditStaff">
+      <div class="grid-form">
+        <div><label>Staff ID</label><input type="text" id="stfId" placeholder="e.g. STF01"></div>
+        <div><label>Full Name</label><input type="text" id="stfName"></div>
+        <div><label>Email Address</label><input type="email" id="stfEmail"></div>
+        <div><label>Role</label><input type="text" id="stfRole" placeholder="e.g. Designer"></div>
+      </div>
+      <div style="display:flex; gap:8px; margin-top:10px;">
+        <button id="btnStaffSubmit" onclick="saveStaff()">Add Staff</button>
+        <button id="btnStaffCancel" onclick="resetStaffForm()" class="warn" style="display:none; width:auto;">Cancel Edit</button>
+      </div>
+      <h3 style="font-size:13px; margin:16px 0 6px;">Staff Directory</h3>
+      <div class="table-resp">
+        <table>
+          <thead>
+            <tr>
+              <th>Staff ID</th><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="staffTbl"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Task Assignment -->
+    <div class="card">
+      <h2 style="font-size:14px; margin:0 0 10px; border-bottom:1px solid #f1f3f5; padding-bottom:6px;">Assign Task to Staff</h2>
+      <div class="grid-form">
+        <div>
+          <label>Staff Member</label>
+          <select id="taskStaffSelect" onchange="autoFillStaffInfo()">
+            <option value="">Select Staff</option>
+          </select>
+        </div>
+        <div><label>Staff ID</label><input type="text" id="tid" readonly style="background:#e9ecef;"></div>
+        <div><label>Staff Email</label><input type="email" id="tem" readonly style="background:#e9ecef;"></div>
+        <div><label>Task Title</label><input type="text" id="ttl"></div>
+      </div>
+      <div style="margin-top:6px;">
+        <label>Task Instructions</label>
+        <textarea id="tdsc" rows="2"></textarea>
+      </div>
+      <button id="btnTaskSubmit" onclick="saveTask()" style="margin-top:10px;">Assign Task & Send Email</button>
+    </div>
+
+    <!-- Task Approvals -->
+    <div class="card">
+      <h2 style="font-size:14px; margin:0 0 10px; border-bottom:1px solid #f1f3f5; padding-bottom:6px;">Pending Task Approvals</h2>
+      <div class="table-resp">
+        <table>
+          <thead>
+            <tr><th>Task</th><th>Staff</th><th>Remark</th><th>Action</th></tr>
+          </thead>
+          <tbody id="apptbl"></tbody>
         </table>
       </div>
     </div>
   </div>
 
   <script>
-    var API_URL = "https://script.google.com/macros/s/AKfycby9yiIo9euB9KTt0zBuwcF3x6pdaeJJ48mAwcTFC6xl53oH8eh0Agfwlr138t3D5KNPYQ/exec";
+    var API = "<?= scriptUrl ?>";
+    var globalData = <?= initialData ?>;
 
-    function renderDashboard(data) {
-      document.getElementById("todaySales").innerText = "INR " + (data.todaySales || 0);
+    function renderAll(d){
+      globalData = d;
+      document.getElementById("tsale").innerText = "INR " + (d.todaySales || 0);
+      var mstr = "";
+      for(var m in d.monthlySales){ mstr += m + ": INR " + d.monthlySales[m] + " | "; }
+      document.getElementById("msale").innerText = mstr || "No recorded sales";
 
-      var trendStr = "";
-      for (var month in data.monthlySales) {
-        trendStr += month + ": INR " + data.monthlySales[month] + " | ";
-      }
-      document.getElementById("monthlyTrends").innerText = trendStr || "No recorded sales";
+      // Clients
+      var cHtml = "";
+      (d.clients || []).forEach(function(c){
+        var bDetails = [];
+        if(c[4]) bDetails.push("One-Time: INR " + c[5]);
+        if(c[6]) bDetails.push("Monthly: INR " + c[7]);
+        if(c[8]) bDetails.push("Annual: INR " + c[9]);
+        cHtml += "<tr>" +
+                 "  <td>" + c[0] + "</td>" +
+                 "  <td><strong>" + c[1] + "</strong></td>" +
+                 "  <td>" + (c[2]||"-") + "</td>" +
+                 "  <td>" + (c[3]||"-") + "</td>" +
+                 "  <td>" + (bDetails.join("<br>")||"None") + "</td>" +
+                 "  <td>" + (c[10]?c[10].substring(0,10):"-") + "</td>" +
+                 "  <td style='white-space:nowrap;'>" +
+                 "    <button onclick='populateClientEdit(\"" + c[0] + "\")' class='warn' style='width:auto; padding:3px 8px; font-size:11px; margin-right:4px;'>Edit</button>" +
+                 "    <button onclick='removeClient(\"" + c[0] + "\")' class='del' style='width:auto; padding:3px 8px; font-size:11px;'>Delete</button>" +
+                 "  </td>" +
+                 "</tr>";
+      });
+      document.getElementById("clientTbl").innerHTML = cHtml || "<tr><td colspan='7'>No clients found.</td></tr>";
 
-      var tBody = document.getElementById("approvalTable");
-      var html = "";
-      var tasks = data.tasks || [];
+      // Staff
+      var sHtml = "";
+      var sOptions = "<option value=''>Select Staff</option>";
+      (d.staff || []).forEach(function(s){
+        sHtml += "<tr>" +
+                 "  <td>" + s[0] + "</td>" +
+                 "  <td><strong>" + s[1] + "</strong></td>" +
+                 "  <td>" + s[2] + "</td>" +
+                 "  <td>" + (s[3]||"-") + "</td>" +
+                 "  <td>" + s[4] + "</td>" +
+                 "  <td style='white-space:nowrap;'>" +
+                 "    <button onclick='populateStaffEdit(\"" + s[0] + "\")' class='warn' style='width:auto; padding:3px 8px; font-size:11px; margin-right:4px;'>Edit</button>" +
+                 "    <button onclick='removeStaff(\"" + s[0] + "\")' class='del' style='width:auto; padding:3px 8px; font-size:11px;'>Delete</button>" +
+                 "  </td>" +
+                 "</tr>";
+        sOptions += "<option value='" + s[0] + "'>" + s[1] + " (" + s[0] + ")</option>";
+      });
+      document.getElementById("staffTbl").innerHTML = sHtml || "<tr><td colspan='6'>No staff members found.</td></tr>";
+      document.getElementById("taskStaffSelect").innerHTML = sOptions;
 
-      tasks.forEach(function(t) {
-        var id = t[0];
-        var staffName = t[2];
-        var title = t[3];
-        var status = t[6];
-        var sRemark = t[7];
-
-        if (status === "Pending Approval") {
-          html += '<tr>';
-          html += '  <td><strong>' + title + '</strong></td>';
-          html += '  <td>' + staffName + '</td>';
-          html += '  <td>' + (sRemark || '-') + '</td>';
-          html += '  <td><span class="badge badge-pending">' + status + '</span></td>';
-          html += '  <td>';
-          html += '    <input type="text" id="admRem_' + id + '" placeholder="Optional remark" style="margin-bottom:4px; font-size:12px;">';
-          html += '    <button onclick="approve(\'' + id + '\')" style="margin-top:0; padding:4px 8px; font-size:12px; background:#198754;">Approve</button>';
-          html += '  </td>';
-          html += '</tr>';
+      // Pending Approvals
+      var aHtml = "";
+      (d.tasks || []).forEach(function(t){
+        if(t[6] === "Pending Approval"){
+          aHtml += "<tr>" +
+                   "  <td><strong>" + t[3] + "</strong></td>" +
+                   "  <td>" + t[2] + "</td>" +
+                   "  <td>" + (t[7]||"-") + "</td>" +
+                   "  <td>" +
+                   "    <input type='text' id='ar_" + t[0] + "' placeholder='Remark' style='font-size:11px; padding:4px;'>" +
+                   "    <button onclick='approve(\"" + t[0] + "\")' class='alt' style='margin-top:2px; padding:3px 6px; font-size:11px;'>Approve</button>" +
+                   "  </td>" +
+                   "</tr>";
         }
       });
-
-      tBody.innerHTML = html || '<tr><td colspan="5">No pending task approvals.</td></tr>';
+      document.getElementById("apptbl").innerHTML = aHtml || "<tr><td colspan='4'>No tasks pending approval.</td></tr>";
     }
 
-    function refreshData() {
-      if (typeof google !== "undefined" && google.script && google.script.run) {
-        google.script.run.withSuccessHandler(renderDashboard).getAdminData();
-      } else {
-        fetch(API_URL + "?action=getAdminData")
-          .then(function(r) { return r.json(); })
-          .then(renderDashboard);
-      }
+    function reloadAdmin(){
+      fetch(API + "?action=getAdminData").then(function(r){return r.json();}).then(renderAll);
     }
 
-    function submitClient() {
-      var client = {
-        name: document.getElementById("cName").value,
-        phone: document.getElementById("cPhone").value,
-        email: document.getElementById("cEmail").value,
-        nextBillingDate: document.getElementById("cNextDate").value,
-        oneTimeService: document.getElementById("cOneName").value,
-        oneTimeAmount: document.getElementById("cOneAmt").value,
-        monthlyService: document.getElementById("cMonName").value,
-        monthlyAmount: document.getElementById("cMonAmt").value,
-        annualService: document.getElementById("cAnnName").value,
-        annualAmount: document.getElementById("cAnnAmt").value
+    function saveClient(){
+      var btn = document.getElementById("btnClientSubmit");
+      var editId = document.getElementById("editClientId").value;
+      var payload = {
+        id: editId,
+        name: document.getElementById("cn").value.trim(),
+        phone: document.getElementById("cp").value.trim(),
+        email: document.getElementById("ce").value.trim(),
+        nextBillingDate: document.getElementById("cb").value,
+        oneTimeService: document.getElementById("co").value,
+        oneTimeAmount: document.getElementById("coa").value,
+        monthlyService: document.getElementById("cm").value,
+        monthlyAmount: document.getElementById("cma").value,
+        annualService: document.getElementById("ca").value,
+        annualAmount: document.getElementById("caa").value
       };
-
-      if (typeof google !== "undefined" && google.script && google.script.run) {
-        google.script.run.withSuccessHandler(function() {
-          alert("Client record created.");
-          refreshData();
-        }).addClient(client);
-      } else {
-        fetch(API_URL, {
-          method: "POST",
-          body: JSON.stringify({ action: "addClient", client: client })
-        }).then(function(r) { return r.json(); }).then(function() {
-          alert("Client record created.");
-          refreshData();
-        });
-      }
+      if(!payload.name){ alert("Please enter Customer Name."); return; }
+      btn.disabled = true; btn.innerText = "Saving...";
+      var actionType = editId ? "editClient" : "addClient";
+      fetch(API, { method:"POST", body:JSON.stringify({action:actionType, client:payload}) })
+        .then(function(r){return r.json();}).then(function(){
+          alert(editId ? "Client updated successfully." : "Client added successfully.");
+          resetClientForm();
+          reloadAdmin();
+        }).finally(function(){ btn.disabled = false; btn.innerText = "Save Client Record"; });
     }
 
-    function submitTask() {
-      var task = {
-        staffId: document.getElementById("tStaffId").value,
-        staffName: document.getElementById("tStaffName").value,
-        staffEmail: document.getElementById("tStaffEmail").value,
-        title: document.getElementById("tTitle").value,
-        description: document.getElementById("tDesc").value
+    function populateClientEdit(id){
+      var c = (globalData.clients||[]).find(function(item){ return item[0] == id; });
+      if(!c) return;
+      document.getElementById("editClientId").value = c[0];
+      document.getElementById("cn").value = c[1] || "";
+      document.getElementById("cp").value = c[2] || "";
+      document.getElementById("ce").value = c[3] || "";
+      document.getElementById("cb").value = c[10] ? c[10].substring(0,10) : "";
+      document.getElementById("co").value = c[4] || "";
+      document.getElementById("coa").value = c[5] || "";
+      document.getElementById("cm").value = c[6] || "";
+      document.getElementById("cma").value = c[7] || "";
+      document.getElementById("ca").value = c[8] || "";
+      document.getElementById("caa").value = c[9] || "";
+      document.getElementById("clientFormTitle").innerText = "Edit Client (" + c[0] + ")";
+      document.getElementById("btnClientSubmit").innerText = "Update Client";
+      document.getElementById("btnClientCancel").style.display = "inline-block";
+      window.scrollTo({top:0, behavior:"smooth"});
+    }
+
+    function resetClientForm(){
+      document.getElementById("editClientId").value = "";
+      document.getElementById("cn").value = "";
+      document.getElementById("cp").value = "";
+      document.getElementById("ce").value = "";
+      document.getElementById("cb").value = "";
+      document.getElementById("co").value = "";
+      document.getElementById("coa").value = "";
+      document.getElementById("cm").value = "";
+      document.getElementById("cma").value = "";
+      document.getElementById("ca").value = "";
+      document.getElementById("caa").value = "";
+      document.getElementById("clientFormTitle").innerText = "Add Client with Custom Billing";
+      document.getElementById("btnClientSubmit").innerText = "Save Client Record";
+      document.getElementById("btnClientCancel").style.display = "none";
+    }
+
+    function removeClient(id){
+      if(!confirm("Are you sure you want to delete client " + id + "?")) return;
+      fetch(API, { method:"POST", body:JSON.stringify({action:"deleteClient", clientId:id}) })
+        .then(function(r){return r.json();}).then(function(){ alert("Client removed."); reloadAdmin(); });
+    }
+
+    function saveStaff(){
+      var btn = document.getElementById("btnStaffSubmit");
+      var isEdit = document.getElementById("isEditStaff").value === "true";
+      var s = {
+        id: document.getElementById("stfId").value.trim(),
+        name: document.getElementById("stfName").value.trim(),
+        email: document.getElementById("stfEmail").value.trim(),
+        role: document.getElementById("stfRole").value.trim()
       };
+      if(!s.id || !s.name){ alert("Enter both Staff ID and Full Name."); return; }
+      btn.disabled = true; btn.innerText = "Saving...";
+      var actionType = isEdit ? "editStaff" : "addStaff";
+      fetch(API, { method:"POST", body:JSON.stringify({action:actionType, staff:s}) })
+        .then(function(r){return r.json();}).then(function(){
+          alert(isEdit ? "Staff updated." : "Staff added.");
+          resetStaffForm();
+          reloadAdmin();
+        }).finally(function(){ btn.disabled = false; btn.innerText = "Add Staff"; });
+    }
 
-      if (typeof google !== "undefined" && google.script && google.script.run) {
-        google.script.run.withSuccessHandler(function() {
-          alert("Task assigned and email sent.");
-          refreshData();
-        }).assignTask(task);
+    function populateStaffEdit(id){
+      var s = (globalData.staff||[]).find(function(item){ return item[0] == id; });
+      if(!s) return;
+      document.getElementById("stfId").value = s[0];
+      document.getElementById("stfId").readOnly = true;
+      document.getElementById("stfName").value = s[1];
+      document.getElementById("stfEmail").value = s[2];
+      document.getElementById("stfRole").value = s[3] || "";
+      document.getElementById("isEditStaff").value = "true";
+      document.getElementById("staffFormTitle").innerText = "Edit Staff (" + s[0] + ")";
+      document.getElementById("btnStaffSubmit").innerText = "Update Staff";
+      document.getElementById("btnStaffCancel").style.display = "inline-block";
+    }
+
+    function resetStaffForm(){
+      document.getElementById("stfId").value = "";
+      document.getElementById("stfId").readOnly = false;
+      document.getElementById("stfName").value = "";
+      document.getElementById("stfEmail").value = "";
+      document.getElementById("stfRole").value = "";
+      document.getElementById("isEditStaff").value = "false";
+      document.getElementById("staffFormTitle").innerText = "Add New Staff Member";
+      document.getElementById("btnStaffSubmit").innerText = "Add Staff";
+      document.getElementById("btnStaffCancel").style.display = "none";
+    }
+
+    function removeStaff(id){
+      if(!confirm("Are you sure you want to delete staff member " + id + "?")) return;
+      fetch(API, { method:"POST", body:JSON.stringify({action:"deleteStaff", staffId:id}) })
+        .then(function(r){return r.json();}).then(function(){ alert("Staff removed."); reloadAdmin(); });
+    }
+
+    function autoFillStaffInfo(){
+      var id = document.getElementById("taskStaffSelect").value;
+      var s = (globalData.staff||[]).find(function(item){ return item[0] == id; });
+      if(s){
+        document.getElementById("tid").value = s[0];
+        document.getElementById("tem").value = s[2];
       } else {
-        fetch(API_URL, {
-          method: "POST",
-          body: JSON.stringify({ action: "assignTask", task: task })
-        }).then(function(r) { return r.json(); }).then(function() {
-          alert("Task assigned and email sent.");
-          refreshData();
-        });
+        document.getElementById("tid").value = "";
+        document.getElementById("tem").value = "";
       }
     }
 
-    function approve(taskId) {
-      var rem = document.getElementById("admRem_" + taskId).value;
-      if (typeof google !== "undefined" && google.script && google.script.run) {
-        google.script.run.withSuccessHandler(function() {
-          alert("Task approved.");
-          refreshData();
-        }).approveTask(taskId, rem);
-      } else {
-        fetch(API_URL, {
-          method: "POST",
-          body: JSON.stringify({ action: "approveTask", taskId: taskId, remark: rem })
-        }).then(function(r) { return r.json(); }).then(function() {
-          alert("Task approved.");
-          refreshData();
-        });
-      }
+    function saveTask(){
+      var staffId = document.getElementById("tid").value;
+      var s = (globalData.staff||[]).find(function(item){ return item[0] == staffId; });
+      var t = {
+        staffId: staffId,
+        staffName: s ? s[1] : "",
+        staffEmail: document.getElementById("tem").value,
+        title: document.getElementById("ttl").value.trim(),
+        description: document.getElementById("tdsc").value.trim()
+      };
+      if(!t.staffId || !t.title){ alert("Please select staff and enter task title."); return; }
+      var btn = document.getElementById("btnTaskSubmit");
+      btn.disabled = true; btn.innerText = "Assigning...";
+      fetch(API, { method:"POST", body:JSON.stringify({action:"assignTask", task:t}) })
+        .then(function(r){return r.json();}).then(function(){
+          alert("Task assigned and email dispatched.");
+          document.getElementById("ttl").value = "";
+          document.getElementById("tdsc").value = "";
+          reloadAdmin();
+        }).finally(function(){ btn.disabled = false; btn.innerText = "Assign Task & Send Email"; });
     }
 
-    window.onload = refreshData;
+    function approve(id){
+      var r = document.getElementById("ar_" + id).value;
+      fetch(API, { method:"POST", body:JSON.stringify({action:"approveTask", taskId:id, remark:r}) })
+        .then(function(r){return r.json();}).then(function(){ alert("Task approved."); reloadAdmin(); });
+    }
+
+    window.onload = function(){ renderAll(globalData); };
   </script>
 </body>
 </html>
