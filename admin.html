@@ -69,7 +69,7 @@
     .kpi-title { font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); }
     .kpi-val { font-size: 1.5rem; font-weight: 800; margin-top: 6px; color: var(--text); }
 
-    /* META ADS STYLE ANALYTICS DRAWER */
+    /* ON-DEMAND META ANALYTICS DRAWER */
     #analyticsPanel {
       display: none;
       background: #ffffff;
@@ -121,7 +121,7 @@
     .meter-bar-track { width: 100%; height: 8px; background: #e2e8f0; border-radius: 6px; overflow: hidden; margin: 6px 0; }
     .meter-bar-fill { height: 100%; background: #10b981; border-radius: 6px; width: 0%; transition: width 0.6s ease; }
 
-    /* GENERAL PANELS */
+    /* PANELS & TABLES */
     .section-card {
       background: var(--surface); border: 1px solid var(--border);
       border-radius: var(--radius); padding: 22px; margin-bottom: 24px;
@@ -188,7 +188,7 @@
 
     .toast { position: fixed; top: 20px; right: 20px; padding: 12px 20px; border-radius: 8px; background: #0f172a; color: #fff; font-size: 0.85rem; font-weight: 600; display: none; z-index: 2000; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
 
-    /* EXACT INVOICE SHEET */
+    /* INVOICE SHEET PREVIEW */
     .zylker-invoice {
       background: #ffffff; color: #1e293b; padding: 40px 38px; border-radius: 4px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; font-size: 0.86rem; line-height: 1.45;
@@ -379,7 +379,7 @@
       </div>
     </div>
 
-    <!-- PAYMENT & RECOVERY LEDGER (WHO OWES WHAT WITH EMAIL REMINDERS) -->
+    <!-- PAYMENT & RECEIVABLES LEDGER (ADVANCE RECEIVED & PENDING DUE DETAILS) -->
     <div class="section-card">
       <div class="section-head">
         <span>Payment & Receivables Ledger</span>
@@ -391,7 +391,7 @@
               <th>Client Account</th>
               <th>Contact Details</th>
               <th>Total Billed</th>
-              <th>Total Received</th>
+              <th>Advance Received</th>
               <th>Pending Due</th>
               <th style="text-align: right;">Action</th>
             </tr>
@@ -611,14 +611,14 @@
             </div>
 
             <div class="section-card" style="padding: 16px; margin-bottom: 16px;">
-              <h4 style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px;">1. Advance Payments (3 Options)</h4>
+              <h4 style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px;">Record Advance Payment</h4>
               <div class="input-grid">
                 <div class="input-group">
                   <label>Payment Method</label>
                   <select id="advMode">
-                    <option value="UPI / QR Scan">1. UPI / QR Scan</option>
-                    <option value="Bank Transfer / NEFT">2. Bank Transfer / NEFT</option>
-                    <option value="Cash / Cheque">3. Cash / Cheque</option>
+                    <option value="UPI / QR Scan">UPI / QR Scan</option>
+                    <option value="Bank Transfer / NEFT">Bank Transfer / NEFT</option>
+                    <option value="Cash / Cheque">Cash / Cheque</option>
                   </select>
                 </div>
                 <div class="input-group">
@@ -627,14 +627,14 @@
                 </div>
                 <div class="input-group" style="grid-column: span 2;">
                   <label>Installment Reference / Note</label>
-                  <input type="text" id="advNote" placeholder="1st Token Advance (Txn #9283)">
+                  <input type="text" id="advNote" placeholder="e.g. 1st Advance Token">
                 </div>
               </div>
-              <button class="btn-primary" style="margin-top: 10px; width: 100%; background: #059669;" onclick="addAdvanceReceipt()">Record Advance Payment</button>
+              <button class="btn-primary" id="btnCommitAdvance" style="margin-top: 10px; width: 100%; background: #059669;" onclick="addAdvanceReceipt()">Record & Save Advance to Database</button>
             </div>
 
             <div class="section-card" style="padding: 16px;">
-              <h4 style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px;">2. Tax & Discount Config</h4>
+              <h4 style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px;">Tax & Discount Config</h4>
               <div class="input-grid">
                 <div class="input-group">
                   <label>GST / Tax Rate (%)</label>
@@ -914,7 +914,7 @@
       renderMetaAnalytics();
     }
 
-    // PAYMENT & RECEIVABLES LEDGER (RECOVERY ENGINE)
+    // ACCURATE PAYMENT & RECEIVABLES LEDGER (EXACT ADVANCE VS DUE LOGIC)
     function renderPaymentLedger() {
       const tbody = document.getElementById("recoveryLedgerBody");
       let totalReceivedAll = 0;
@@ -922,8 +922,8 @@
       let rowsHtml = "";
 
       (state.clients || []).forEach(c => {
-        const clientId = c[0];
-        const clientName = c[1];
+        const clientId = String(c[0] || "").trim();
+        const clientName = c[1] || "Account";
         const phone = c[2] || "—";
         const email = c[3] || "—";
 
@@ -932,9 +932,10 @@
         const annual = parseFloat(c[9]) || 0;
         const clientBilled = oneTime + monthly + annual;
 
+        // Accurate match against Payments table
         let clientPaid = 0;
         (state.payments || []).forEach(p => {
-          if (p[1] === clientId) {
+          if (String(p[1] || "").trim() === clientId) {
             clientPaid += parseFloat(p[4]) || 0;
           }
         });
@@ -1255,7 +1256,7 @@
     };
 
     function editClientRecord(id) {
-      const c = (state.clients || []).find(item => item[0] === id);
+      const c = (state.clients || []).find(item => String(item[0]).trim() === String(id).trim());
       if (!c) return;
 
       document.getElementById("clientId").value = c[0];
@@ -1333,7 +1334,7 @@
     };
 
     function editStaffRecord(id) {
-      const s = (state.staff || []).find(item => item[0] === id);
+      const s = (state.staff || []).find(item => String(item[0]).trim() === String(id).trim());
       if (!s) return;
 
       document.getElementById("staffEditId").value = s[0];
@@ -1409,11 +1410,22 @@
 
     // INVOICE BUILDER
     function openInvoiceModal(clientId) {
-      const c = (state.clients || []).find(item => item[0] === clientId);
+      const c = (state.clients || []).find(item => String(item[0]).trim() === String(clientId).trim());
       if (!c) return;
 
       currentInvoice.client = c;
       currentInvoice.advances = [];
+
+      // Pre-populate already recorded advance payments from the database
+      (state.payments || []).forEach(p => {
+        if (String(p[1] || "").trim() === String(c[0]).trim() && parseFloat(p[4]) > 0) {
+          currentInvoice.advances.push({
+            mode: p[6] ? (p[6].includes("[") ? p[6].split("[")[1].replace("]", "") : "Direct") : "Direct",
+            amount: parseFloat(p[4]),
+            note: p[6] ? p[6].split("[")[0].trim() : "Advance Payment"
+          });
+        }
+      });
       
       document.getElementById("invoiceCycleSelector").value = "monthly";
       changeInvoiceCycle();
@@ -1525,7 +1537,7 @@
 
     window.onRolloverDone = function(res) {
       if (res && res.success) {
-        showToast("Billing cycle rolled over to: " + res.nextBillingDate);
+        showToast("Billing cycle successfully rolled over to: " + res.nextBillingDate);
         syncAllData();
       }
     };
@@ -1572,23 +1584,41 @@
       document.getElementById("invoiceModal").style.display = "none";
     }
 
+    // ACCURATE DATABASE WRITE FOR ADVANCE PAYMENT
     function addAdvanceReceipt() {
+      const c = currentInvoice.client;
+      if (!c) return;
+
       const mode = document.getElementById("advMode").value;
       const amt = parseFloat(document.getElementById("advAmount").value) || 0;
       const note = document.getElementById("advNote").value.trim() || "Advance Installment";
 
       if (amt <= 0) { showToast("Enter a valid advance amount."); return; }
 
-      currentInvoice.advances.push({
-        mode: mode,
-        amount: amt,
-        note: note
-      });
+      const btn = document.getElementById("btnCommitAdvance");
+      btn.disabled = true;
+      btn.innerText = "Saving to Database...";
 
-      document.getElementById("advAmount").value = "";
-      document.getElementById("advNote").value = "";
-      renderInvoicePreview();
-      showToast("Advance payment recorded.");
+      window.onAdvanceRecorded = function(res) {
+        btn.disabled = false;
+        btn.innerText = "Record & Save Advance to Database";
+        if (res && res.success) {
+          currentInvoice.advances.push({
+            mode: mode,
+            amount: amt,
+            note: note
+          });
+          document.getElementById("advAmount").value = "";
+          document.getElementById("advNote").value = "";
+          renderInvoicePreview();
+          showToast("Advance of INR " + amt.toFixed(2) + " saved to database.");
+          syncAllData();
+        } else {
+          showToast("Failed to write advance payment.");
+        }
+      };
+
+      jsonp(API_ENDPOINT + `?action=recordAdvancePayment&clientId=${encodeURIComponent(c[0])}&amount=${encodeURIComponent(amt)}&mode=${encodeURIComponent(mode)}&note=${encodeURIComponent(note)}`, "onAdvanceRecorded");
     }
 
     function renderInvoicePreview() {
