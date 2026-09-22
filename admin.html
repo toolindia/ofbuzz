@@ -57,7 +57,7 @@
       display: flex; justify-content: space-between; align-items: center;
       background: var(--surface); padding: 16px 24px; border-radius: var(--radius);
       border: 1px solid var(--border); box-shadow: 0 4px 20px rgba(0,0,0,0.03);
-      margin-bottom: 24px;
+      margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
     }
     .brand-box { display: flex; align-items: center; gap: 12px; }
     .brand-logo { width: 44px; height: 44px; border-radius: 8px; object-fit: cover; }
@@ -171,6 +171,8 @@
     .btn-reminder:hover { background: #ea580c; color: #fff; }
     .btn-analytics { background: #1e293b; color: #fff; }
     .btn-analytics:hover { background: #0f172a; }
+    .btn-staff-mgmt { background: #0ea5e9; color: #fff; }
+    .btn-staff-mgmt:hover { background: #0284c7; }
     .btn-logout { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); }
     .btn-logout:hover { background: var(--danger); color: #fff; }
 
@@ -269,10 +271,11 @@
         <img src="https://i.pinimg.com/736x/bd/d0/5c/bdd05c94afb66b5a72f5e17a7a879ab3.jpg" class="brand-logo" alt="Ofbuzz Logo" referrerpolicy="no-referrer">
         <div>
           <div class="brand-title">Ofbuzz Technology — Admin Studio</div>
-          <p style="font-size: 0.75rem; color: var(--text-muted);">Operations, Billing Ledger & Workforce Manager</p>
+          <p style="font-size: 0.75rem; color: var(--text-muted);">Operations & Billing Ledger</p>
         </div>
       </div>
-      <div style="display: flex; gap: 8px; align-items: center;">
+      <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+        <button class="btn-staff-mgmt" onclick="openStaffModal()">Staff Management</button>
         <button class="btn-analytics" id="btnToggleAnalytics" onclick="toggleAnalyticsDrawer()">Analytics View</button>
         <button class="btn-primary" id="btnRefresh" onclick="syncAllData()">Refresh Data</button>
         <button class="btn-logout" onclick="lockAdminSession()">Logout</button>
@@ -471,7 +474,7 @@
       </div>
     </div>
 
-    <!-- 2. CLIENTS TABLE WITH STRICT CATEGORY FILTERING & CANCEL SERVICE ACTION -->
+    <!-- 2. CLIENTS TABLE WITH STRICT CATEGORY FILTERING -->
     <div class="section-card">
       <div class="section-head">
         <span>Active Clients Directory</span>
@@ -500,100 +503,111 @@
         </table>
       </div>
     </div>
+  </div>
 
-    <!-- 3. ADD STAFF MEMBER -->
-    <div class="section-card">
-      <div class="section-head">
-        <span id="staffFormTitle">Add New Workforce / Staff Member</span>
+  <!-- DEDICATED STAFF MANAGEMENT MODAL -->
+  <div class="modal-backdrop" id="staffManagementModal">
+    <div class="modal-window" style="max-width: 900px;">
+      <div class="modal-header">
+        <h3 style="font-size: 1.1rem; font-weight: 800;">Workforce & Staff Management Studio</h3>
+        <button class="btn-del" onclick="closeStaffModal()">Close</button>
       </div>
-      <input type="hidden" id="staffEditId">
-      <div class="input-grid">
-        <div class="input-group">
-          <label>Staff ID</label>
-          <input type="text" id="stfId" placeholder="STF01">
+      <div class="modal-body">
+        <!-- ADD STAFF MEMBER -->
+        <div class="section-card" style="margin-bottom: 20px;">
+          <div class="section-head">
+            <span id="staffFormTitle">Add New Workforce / Staff Member</span>
+          </div>
+          <input type="hidden" id="staffEditId">
+          <div class="input-grid">
+            <div class="input-group">
+              <label>Staff ID</label>
+              <input type="text" id="stfId" placeholder="STF01">
+            </div>
+            <div class="input-group">
+              <label>Full Legal Name</label>
+              <input type="text" id="stfName" placeholder="Full Name">
+            </div>
+            <div class="input-group">
+              <label>Corporate Email Address</label>
+              <input type="email" id="stfEmail" placeholder="staff@ofbuzz.com">
+            </div>
+            <div class="input-group">
+              <label>Functional Role</label>
+              <input type="text" id="stfRole" placeholder="Senior Designer / Developer">
+            </div>
+          </div>
+          <div style="margin-top: 16px; display: flex; gap: 10px;">
+            <button class="btn-primary" id="btnSaveStaff" onclick="saveStaffRecord()">Commit Associate Record</button>
+            <button class="btn-del" id="btnCancelStaffEdit" style="display:none;" onclick="cancelStaffEdit()">Cancel</button>
+          </div>
         </div>
-        <div class="input-group">
-          <label>Full Legal Name</label>
-          <input type="text" id="stfName" placeholder="Full Name">
-        </div>
-        <div class="input-group">
-          <label>Corporate Email Address</label>
-          <input type="email" id="stfEmail" placeholder="staff@ofbuzz.com">
-        </div>
-        <div class="input-group">
-          <label>Functional Role</label>
-          <input type="text" id="stfRole" placeholder="Senior Designer / Developer">
-        </div>
-      </div>
-      <div style="margin-top: 16px; display: flex; gap: 10px;">
-        <button class="btn-primary" id="btnSaveStaff" onclick="saveStaffRecord()">Commit Associate Record</button>
-        <button class="btn-del" id="btnCancelStaffEdit" style="display:none;" onclick="cancelStaffEdit()">Cancel</button>
-      </div>
-    </div>
 
-    <!-- 4. STAFF DIRECTORY TABLE -->
-    <div class="section-card">
-      <div class="section-head">
-        <span>Workforce Directory</span>
-      </div>
-      <div class="table-box">
-        <table>
-          <thead>
-            <tr>
-              <th>Staff ID</th>
-              <th>Associate Name</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Status</th>
-              <th style="text-align: right;">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="staffTableBody">
-            <tr><td colspan="6" style="text-align:center;">Loading staff...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+        <!-- STAFF DIRECTORY TABLE -->
+        <div class="section-card" style="margin-bottom: 20px;">
+          <div class="section-head">
+            <span>Workforce Directory</span>
+          </div>
+          <div class="table-box">
+            <table>
+              <thead>
+                <tr>
+                  <th>Staff ID</th>
+                  <th>Associate Name</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Status</th>
+                  <th style="text-align: right;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="staffTableBody">
+                <tr><td colspan="6" style="text-align:center;">Loading staff...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
 
-    <!-- 5. STAFF DELEGATION & TASK APPROVALS -->
-    <div class="section-card">
-      <div class="section-head">
-        <span>Task Delegation & Assignment Queue</span>
-      </div>
-      <div class="input-grid">
-        <div class="input-group">
-          <label>Select Staff Member</label>
-          <select id="staffSelect">
-            <option value="">Choose Staff Profile</option>
-          </select>
+        <!-- STAFF DELEGATION & TASK APPROVALS -->
+        <div class="section-card" style="margin-bottom: 0;">
+          <div class="section-head">
+            <span>Task Delegation & Assignment Queue</span>
+          </div>
+          <div class="input-grid">
+            <div class="input-group">
+              <label>Select Staff Member</label>
+              <select id="staffSelect">
+                <option value="">Choose Staff Profile</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label>Task Title</label>
+              <input type="text" id="taskTitle" placeholder="Assignment Title">
+            </div>
+            <div class="input-group" style="grid-column: span 2;">
+              <label>Assignment Instructions</label>
+              <input type="text" id="taskDesc" placeholder="Describe instructions and timeline...">
+            </div>
+          </div>
+          <button class="btn-primary" style="margin-top: 12px;" onclick="assignStaffTask()">Assign Task & Send Notification Email</button>
+          
+          <div class="table-box" style="margin-top: 20px;">
+            <h4 style="font-size: 0.85rem; margin-bottom: 8px;">Pending Task Approvals</h4>
+            <table>
+              <thead>
+                <tr>
+                  <th>Task</th>
+                  <th>Assigned Associate</th>
+                  <th>Staff Remark</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="taskApprovalBody">
+                <tr><td colspan="5" style="text-align:center;">No deliverables awaiting approval.</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
-        <div class="input-group">
-          <label>Task Title</label>
-          <input type="text" id="taskTitle" placeholder="Assignment Title">
-        </div>
-        <div class="input-group" style="grid-column: span 2;">
-          <label>Assignment Instructions</label>
-          <input type="text" id="taskDesc" placeholder="Describe instructions and timeline...">
-        </div>
-      </div>
-      <button class="btn-primary" style="margin-top: 12px;" onclick="assignStaffTask()">Assign Task & Send Notification Email</button>
-      
-      <div class="table-box" style="margin-top: 20px;">
-        <h4 style="font-size: 0.85rem; margin-bottom: 8px;">Pending Task Approvals</h4>
-        <table>
-          <thead>
-            <tr>
-              <th>Task</th>
-              <th>Assigned Associate</th>
-              <th>Staff Remark</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody id="taskApprovalBody">
-            <tr><td colspan="5" style="text-align:center;">No deliverables awaiting approval.</td></tr>
-          </tbody>
-        </table>
       </div>
     </div>
   </div>
@@ -851,7 +865,7 @@
                   <table class="zylker-table" style="margin-bottom: 0;">
                     <thead>
                       <tr>
-                        <th style="background:#059669;" colspan="2">Payments Settled</th>
+                        <th style="background:#059669;" colspan="2">Installments / Payments Settled</th>
                         <th style="background:#059669; text-align:center;">Mode</th>
                         <th style="background:#059669; text-align:right;" colspan="2">Amount Paid</th>
                       </tr>
@@ -1042,6 +1056,14 @@
       }
     }
 
+    function openStaffModal() {
+      document.getElementById("staffManagementModal").style.display = "flex";
+    }
+
+    function closeStaffModal() {
+      document.getElementById("staffManagementModal").style.display = "none";
+    }
+
     function setTimeFilter(filter, el) {
       activeTimeFilter = filter;
       document.querySelectorAll(".time-pill").forEach(btn => btn.classList.remove("active"));
@@ -1069,7 +1091,7 @@
 
       (state.clients || []).forEach(c => {
         const status = String(c[11] || "").trim().toLowerCase();
-        if (status === "cancelled") return; // Skip cancelled accounts
+        if (status === "cancelled") return;
 
         const clientId = String(c[0] || "").trim();
         const clientName = c[1] || "Account";
@@ -1436,13 +1458,12 @@
       
       (state.clients || []).forEach(c => {
         const status = String(c[11] || "").trim().toLowerCase();
-        if (status === "cancelled") return; // Hide cancelled clients from active directory
+        if (status === "cancelled") return;
 
         const otAmt = parseFloat(c[5]) || 0;
         const moAmt = parseFloat(c[7]) || 0;
         const anAmt = parseFloat(c[9]) || 0;
 
-        // Strict Filtering: Show ONLY the active service matching the selected filter
         if (activeClientCategory === "monthly" && moAmt <= 0) return;
         if (activeClientCategory === "annual" && anAmt <= 0) return;
         if (activeClientCategory === "onetime" && otAmt <= 0) return;
