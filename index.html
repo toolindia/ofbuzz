@@ -3,53 +3,61 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Live Directory - Ofbuzz Technology</title>
+  <title>Public Client Directory - Ofbuzz Technology</title>
   <style>
-    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
     body { background-color: #f8f9fa; color: #212529; margin: 0; padding: 16px; }
-    .container { max-width: 680px; margin: 0 auto; background: #ffffff; padding: 20px; border-radius: 8px; border: 1px solid #e9ecef; }
-    .header { text-align: center; border-bottom: 1px solid #f1f3f5; padding-bottom: 14px; margin-bottom: 18px; }
-    .logo { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; display: block; margin: 0 auto 10px auto; }
-    h1 { font-size: 19px; margin: 0 0 4px; }
-    .client-card { border: 1px solid #e9ecef; border-radius: 6px; padding: 12px; margin-bottom: 10px; background: #fafbfc; }
-    .badge { display: inline-block; padding: 3px 8px; font-size: 11px; border-radius: 4px; background: #e6f4ea; color: #137333; font-weight: 500; }
+    .container { max-width: 680px; margin: 0 auto; background: #ffffff; padding: 24px; border-radius: 8px; border: 1px solid #e9ecef; }
+    .header { text-align: center; border-bottom: 1px solid #f1f3f5; padding-bottom: 16px; margin-bottom: 20px; }
+    .brand-logo { width: 64px; height: 64px; border-radius: 8px; object-fit: cover; display: block; margin: 0 auto 12px auto; }
+    h1 { font-size: 20px; margin: 0 0 4px; font-weight: 600; }
+    .subtitle { color: #6c757d; margin: 0; font-size: 13px; }
+    .directory-item { border: 1px solid #e9ecef; border-radius: 6px; padding: 14px; margin-bottom: 12px; background: #ffffff; }
+    .item-top { display: flex; justify-content: space-between; align-items: center; }
+    .item-title { font-size: 15px; font-weight: 600; color: #111827; }
+    .item-service { margin: 6px 0 0; font-size: 13px; color: #4b5563; }
+    .status-badge { display: inline-block; padding: 3px 8px; font-size: 11px; border-radius: 4px; background: #e6f4ea; color: #137333; font-weight: 500; }
+    .notification-pane { text-align: center; color: #6c757d; font-size: 13px; padding: 20px 0; }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
-      <img src="<?= logoUrl ?>" class="logo" alt="Ofbuzz Technology Logo" referrerpolicy="no-referrer">
+      <img src="https://i.pinimg.com/736x/bd/d0/5c/bdd05c94afb66b5a72f5e17a7a879ab3.jpg" class="brand-logo" alt="Ofbuzz Technology Identity" referrerpolicy="no-referrer">
       <h1>Ofbuzz Technology</h1>
-      <p style="color:#6c757d; margin:0; font-size:13px;">Live Active Clients</p>
+      <p class="subtitle">Active Client Registry</p>
     </div>
-    <div id="list">Loading clients directly</div>
+    <div id="directoryContainer">
+      <div class="notification-pane">Querying database registry...</div>
+    </div>
   </div>
 
   <script>
-    function renderClients(clients) {
-      var box = document.getElementById("list");
-      if (!clients || clients.length === 0) {
-        box.innerHTML = "<p style='font-size:13px; color:#6c757d; text-align:center;'>No active clients found.</p>";
+    function renderDirectory(dataset) {
+      var container = document.getElementById("directoryContainer");
+      if (!dataset || dataset.length === 0) {
+        container.innerHTML = '<div class="notification-pane">No active enterprise accounts found.</div>';
         return;
       }
-      var h = "";
-      clients.forEach(function(c) {
-        h += "<div class='client-card'>" +
-             "  <div style='display:flex; justify-content:space-between; align-items:center;'>" +
-             "    <strong>" + c.name + "</strong>" +
-             "    <span class='badge'>" + c.status + "</span>" +
-             "  </div>" +
-             "  <p style='margin:5px 0 0; font-size:13px; color:#495057;'>" + (c.services || "Active Retainer") + "</p>" +
-             "</div>";
+      var compiledHtml = "";
+      dataset.forEach(function(record) {
+        compiledHtml += '<div class="directory-item">';
+        compiledHtml += '  <div class="item-top">';
+        compiledHtml += '    <div class="item-title">' + record.name + '</div>';
+        compiledHtml += '    <span class="status-badge">' + record.status + '</span>';
+        compiledHtml += '  </div>';
+        compiledHtml += '  <div class="item-service">' + record.services + '</div>';
+        compiledHtml += '</div>';
       });
-      box.innerHTML = h;
+      container.innerHTML = compiledHtml;
     }
 
     window.onload = function() {
       google.script.run
-        .withSuccessHandler(renderClients)
-        .withFailureHandler(function(err) {
-          document.getElementById("list").innerHTML = "<p style='color:#dc3545;'>Error loading clients: " + err.message + "</p>";
+        .withSuccessHandler(renderDirectory)
+        .withFailureHandler(function(fault) {
+          document.getElementById("directoryContainer").innerHTML = 
+            '<div class="notification-pane" style="color:#dc3545;">Database connectivity error: ' + fault.message + '</div>';
         })
         .getLiveClients();
     };
