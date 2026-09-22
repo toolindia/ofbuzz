@@ -151,6 +151,8 @@
     .btn-del:hover { background: var(--danger); color: #fff; }
     .btn-edit { background: rgba(245, 158, 11, 0.1); color: #d97706; }
     .btn-edit:hover { background: #d97706; color: #fff; }
+    .btn-adjust { background: rgba(24, 119, 242, 0.1); color: #1877f2; border: 1px solid rgba(24, 119, 242, 0.25); }
+    .btn-adjust:hover { background: #1877f2; color: #fff; }
     .btn-mail { background: #0284c7; color: #fff; }
     .btn-mail:hover { background: #0369a1; }
     .btn-reminder { background: rgba(234, 88, 12, 0.12); color: #ea580c; border: 1px solid rgba(234, 88, 12, 0.3); }
@@ -166,7 +168,7 @@
     td { padding: 12px 10px; border-bottom: 1px solid var(--border); color: #334155; }
     .status-badge { padding: 3px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; background: #e0f2fe; color: #0284c7; }
 
-    /* INVOICE MODAL */
+    /* INVOICE & ADJUSTMENT MODALS */
     .modal-backdrop {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(6px);
@@ -379,7 +381,7 @@
       </div>
     </div>
 
-    <!-- PAYMENT & RECEIVABLES LEDGER (ADVANCE RECEIVED & PENDING DUE DETAILS) -->
+    <!-- PAYMENT & RECEIVABLES LEDGER WITH MANUAL PAYMENT ADJUSTMENT -->
     <div class="section-card">
       <div class="section-head">
         <span>Payment & Receivables Ledger</span>
@@ -574,6 +576,39 @@
             <tr><td colspan="5" style="text-align:center;">No deliverables awaiting approval.</td></tr>
           </tbody>
         </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAYMENT ADJUSTMENT MODAL (CUSTOMER PAYMENT EDIT / UPDATE) -->
+  <div class="modal-backdrop" id="paymentAdjustmentModal">
+    <div class="modal-window" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3 style="font-size: 1.05rem; font-weight: 800;">Adjust Client Payment</h3>
+        <button class="btn-del" onclick="closePaymentAdjustmentModal()">Close</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="adjClientId">
+        <div style="margin-bottom: 14px; background: #fff; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+          <span style="font-size: 0.75rem; color: #64748b; font-weight: 700;">Account:</span>
+          <strong id="adjClientName" style="display: block; font-size: 0.95rem; color: #0f172a; margin-top: 2px;"></strong>
+          <div style="display:flex; justify-content:space-between; margin-top: 6px; font-size: 0.8rem;">
+            <span>Total Billed: <strong id="adjBilledVal">INR 0.00</strong></span>
+            <span>Current Received: <strong id="adjCurrentPaidVal" style="color:#059669;">INR 0.00</strong></span>
+          </div>
+        </div>
+
+        <div class="input-group" style="margin-bottom: 12px;">
+          <label>Add Payment / Adjustment Amount (INR)</label>
+          <input type="number" id="adjAmount" placeholder="e.g. 5000 (Use negative for refund)">
+        </div>
+
+        <div class="input-group" style="margin-bottom: 16px;">
+          <label>Adjustment Remark / Note</label>
+          <input type="text" id="adjRemark" placeholder="e.g. Cash received in office / Settlement">
+        </div>
+
+        <button class="btn-primary" id="btnSaveAdjustment" style="width: 100%;" onclick="savePaymentAdjustment()">Save Adjustment & Update Balances</button>
       </div>
     </div>
   </div>
@@ -914,7 +949,7 @@
       renderMetaAnalytics();
     }
 
-    // ACCURATE PAYMENT & RECEIVABLES LEDGER (EXACT ADVANCE VS DUE LOGIC)
+    // ACCURATE PAYMENT & RECEIVABLES LEDGER WITH "ADJUST PAYMENT" ACTION
     function renderPaymentLedger() {
       const tbody = document.getElementById("recoveryLedgerBody");
       let totalReceivedAll = 0;
@@ -932,7 +967,6 @@
         const annual = parseFloat(c[9]) || 0;
         const clientBilled = oneTime + monthly + annual;
 
-        // Accurate match against Payments table
         let clientPaid = 0;
         (state.payments || []).forEach(p => {
           if (String(p[1] || "").trim() === clientId) {
@@ -952,7 +986,8 @@
             <td style="color:#059669; font-weight:700;">INR ${clientPaid.toFixed(2)}</td>
             <td style="color:${pendingDue > 0 ? '#ea580c' : '#64748b'}; font-weight:700;">INR ${pendingDue.toFixed(2)}</td>
             <td style="text-align: right; white-space: nowrap;">
-              ${pendingDue > 0 ? `<button class="btn-reminder" onclick="sendPaymentReminderMail('${clientId}', '${pendingDue.toFixed(2)}')">Send Reminder via Email</button>` : `<span style="font-size:0.75rem; color:#059669; font-weight:700;">Settled</span>`}
+              <button class="btn-adjust" onclick="openPaymentAdjustmentModal('${clientId}')">Adjust Payment</button>
+              ${pendingDue > 0 ? `<button class="btn-reminder" onclick="sendPaymentReminderMail('${clientId}', '${pendingDue.toFixed(2)}')">Send Reminder</button>` : `<span style="font-size:0.75rem; color:#059669; font-weight:700; margin-left:6px;">Settled</span>`}
             </td>
           </tr>
         `;
@@ -961,6 +996,66 @@
       tbody.innerHTML = rowsHtml || '<tr><td colspan="6" style="text-align:center;">No accounts available in ledger.</td></tr>';
       document.getElementById("kpiTotalPaid").innerText = "INR " + totalReceivedAll.toFixed(2);
       document.getElementById("kpiTotalPending").innerText = "INR " + totalPendingAll.toFixed(2);
+    }
+
+    // PAYMENT ADJUSTMENT MODAL CONTROLS
+    function openPaymentAdjustmentModal(clientId) {
+      const c = (state.clients || []).find(item => String(item[0]).trim() === String(clientId).trim());
+      if (!c) return;
+
+      const oneTime = parseFloat(c[5]) || 0;
+      const monthly = parseFloat(c[7]) || 0;
+      const annual = parseFloat(c[9]) || 0;
+      const clientBilled = oneTime + monthly + annual;
+
+      let clientPaid = 0;
+      (state.payments || []).forEach(p => {
+        if (String(p[1] || "").trim() === String(clientId).trim()) {
+          clientPaid += parseFloat(p[4]) || 0;
+        }
+      });
+
+      document.getElementById("adjClientId").value = c[0];
+      document.getElementById("adjClientName").innerText = `${c[1]} (${c[0]})`;
+      document.getElementById("adjBilledVal").innerText = `INR ${clientBilled.toFixed(2)}`;
+      document.getElementById("adjCurrentPaidVal").innerText = `INR ${clientPaid.toFixed(2)}`;
+      document.getElementById("adjAmount").value = "";
+      document.getElementById("adjRemark").value = "";
+
+      document.getElementById("paymentAdjustmentModal").style.display = "flex";
+    }
+
+    function closePaymentAdjustmentModal() {
+      document.getElementById("paymentAdjustmentModal").style.display = "none";
+    }
+
+    function savePaymentAdjustment() {
+      const clientId = document.getElementById("adjClientId").value;
+      const amount = parseFloat(document.getElementById("adjAmount").value) || 0;
+      const remark = document.getElementById("adjRemark").value.trim();
+
+      if (amount === 0) {
+        showToast("Please enter an adjustment amount.");
+        return;
+      }
+
+      const btn = document.getElementById("btnSaveAdjustment");
+      btn.disabled = true;
+      btn.innerText = "Saving Adjustment...";
+
+      window.onAdjustmentSaved = function(res) {
+        btn.disabled = false;
+        btn.innerText = "Save Adjustment & Update Balances";
+        if (res && res.success) {
+          showToast("Payment adjusted successfully.");
+          closePaymentAdjustmentModal();
+          syncAllData();
+        } else {
+          showToast("Failed to save payment adjustment.");
+        }
+      };
+
+      jsonp(API_ENDPOINT + `?action=adjustClientPayment&clientId=${encodeURIComponent(clientId)}&amount=${encodeURIComponent(amount)}&remark=${encodeURIComponent(remark)}`, "onAdjustmentSaved");
     }
 
     function sendPaymentReminderMail(clientId, dueAmt) {
@@ -1416,7 +1511,6 @@
       currentInvoice.client = c;
       currentInvoice.advances = [];
 
-      // Pre-populate already recorded advance payments from the database
       (state.payments || []).forEach(p => {
         if (String(p[1] || "").trim() === String(c[0]).trim() && parseFloat(p[4]) > 0) {
           currentInvoice.advances.push({
@@ -1584,7 +1678,6 @@
       document.getElementById("invoiceModal").style.display = "none";
     }
 
-    // ACCURATE DATABASE WRITE FOR ADVANCE PAYMENT
     function addAdvanceReceipt() {
       const c = currentInvoice.client;
       if (!c) return;
