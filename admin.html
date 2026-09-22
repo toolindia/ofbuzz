@@ -500,6 +500,21 @@
         <div class="modal-grid">
           <!-- ADJUSTMENT CONTROLS -->
           <div>
+            <!-- SMART BILLING CYCLE SELECTOR -->
+            <div class="section-card" style="padding: 16px; margin-bottom: 16px; border-left: 4px solid var(--primary);">
+              <h4 style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px;">Select Invoice Cycle</h4>
+              <div class="input-group">
+                <label>Billing Period / Type</label>
+                <select id="invoiceCycleSelector" onchange="changeInvoiceCycle()">
+                  <option value="monthly" selected>🔄 Monthly Retainer (Excludes One-Time)</option>
+                  <option value="initial">🚀 Initial Onboarding (One-Time + Retainer)</option>
+                  <option value="annual">📅 Annual Renewal (Excludes One-Time)</option>
+                  <option value="full">🛠️ Consolidated Statement (All Services)</option>
+                </select>
+              </div>
+              <button class="btn-primary" style="margin-top: 10px; width: 100%; font-size: 0.78rem;" onclick="markCycleRenewed()">✓ Save & Rollover Due Date (+1 Month / +1 Year)</button>
+            </div>
+
             <div class="section-card" style="padding: 16px; margin-bottom: 16px;">
               <h4 style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px;">1. Advance Payments (3 Options)</h4>
               <div class="input-grid">
@@ -585,7 +600,7 @@
                     </div>
                     <div class="date-meta-row">
                       <span class="lbl">Terms :</span>
-                      <span class="val">Due on Receipt</span>
+                      <span class="val" id="previewTerms">Due on Receipt</span>
                     </div>
                     <div class="date-meta-row">
                       <span class="lbl">Due Date :</span>
@@ -691,7 +706,8 @@
     let currentInvoice = {
       client: null,
       lineItems: [],
-      advances: []
+      advances: [],
+      calculatedNextDue: ""
     };
 
     function showToast(msg) {
@@ -704,7 +720,6 @@
     function jsonp(url, callbackName) {
       const script = document.createElement("script");
       const connector = url.indexOf("?") >= 0 ? "&" : "?";
-      // Anti-caching timestamp (_t) guarantees fresh network fetch
       script.src = url + connector + "callback=" + callbackName + "&_t=" + Date.now();
       document.body.appendChild(script);
       script.onload = () => script.remove();
@@ -910,54 +925,134 @@
       syncAllData();
     };
 
-    // INVOICE BUILDER & GENERATE BILL MODAL WITH ACCURATE DATES
+    // SMART INVOICE ENGINE: DYNAMIC CYCLES & SMART EXPIRATION
     function openInvoiceModal(clientId) {
       const c = (state.clients || []).find(item => item[0] === clientId);
       if (!c) return;
 
       currentInvoice.client = c;
       currentInvoice.advances = [];
-      currentInvoice.lineItems = [];
-
-      if (c[4] && parseFloat(c[5]) > 0) currentInvoice.lineItems.push({ name: c[4], desc: "One-Time Custom Deliverable", price: parseFloat(c[5]), qty: 1 });
-      if (c[6] && parseFloat(c[7]) > 0) currentInvoice.lineItems.push({ name: c[6], desc: "Monthly Retainer Package", price: parseFloat(c[7]), qty: 1 });
-      if (c[8] && parseFloat(c[9]) > 0) currentInvoice.lineItems.push({ name: c[8], desc: "Annual Contract & Maintenance", price: parseFloat(c[9]), qty: 1 });
-
-      if (currentInvoice.lineItems.length === 0) {
-        currentInvoice.lineItems.push({ name: "Digital Consulting Services", desc: "Professional Retainer Services", price: 2500, qty: 1 });
-      }
-
-      const invCode = "INV-" + Math.floor(100000 + Math.random() * 900000);
-      document.getElementById("modalClientHeader").innerText = `Generating bill for: ${c[1]} (${c[0]})`;
-      document.getElementById("previewInvNumber").innerText = `# ${invCode}`;
       
-      // CURRENT TIME FOR ACCURACY (23 Sep 2026)
-      const now = new Date();
-      const todayFormatted = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-      document.getElementById("previewInvDate").innerText = todayFormatted;
+      document.getElementById("invoiceCycleSelector").value = "monthly"; // Default to recurring monthly
+      changeInvoiceCycle();
 
-      // PREVENT PREVIOUS DATE ERROR (Due Date can NEVER be before Invoice Date)
-      let finalDueDateObj = now;
-      if (c[10]) {
-        const rawSaved = new Date(c[10]);
-        // Set time to midnight for true date comparison
-        const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        const savedMidnight = new Date(rawSaved.getFullYear(), rawSaved.getMonth(), rawSaved.getDate());
-
-        if (!isNaN(savedMidnight.getTime()) && savedMidnight >= todayMidnight) {
-          finalDueDateObj = rawSaved;
-        }
-      }
-
-      const dueFormatted = finalDueDateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-      document.getElementById("previewDueDate").innerText = dueFormatted;
-
+      document.getElementById("modalClientHeader").innerText = `Generating bill for: ${c[1]} (${c[0]})`;
       document.getElementById("previewCustName").innerText = c[1];
       document.getElementById("previewCustAddress").innerHTML = `Phone: ${c[2] || '—'}<br>Email: ${c[3] || '—'}`;
 
       document.getElementById("invoiceModal").style.display = "flex";
+    }
+
+    function changeInvoiceCycle() {
+      const c = currentInvoice.client;
+      if (!c) return;
+
+      const cycle = document.getElementById("invoiceCycleSelector").value;
+      currentInvoice.lineItems = [];
+
+      const now = new Date();
+      const currentMonthStr = now.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+      const currentYear = now.getFullYear();
+
+      let termLabel = "Net 15 Days";
+      let dueOffsetDays = 15;
+
+      if (cycle === "monthly") {
+        // Excludes One-Time completely
+        if (c[6] && parseFloat(c[7]) > 0) {
+          currentInvoice.lineItems.push({
+            name: c[6],
+            desc: `Monthly Recurring Service Retainer (${currentMonthStr})`,
+            price: parseFloat(c[7]),
+            qty: 1
+          });
+        }
+        termLabel = "Monthly Retainer (Net 7)";
+        dueOffsetDays = 7;
+      } else if (cycle === "initial") {
+        // Includes One-Time + Monthly
+        if (c[4] && parseFloat(c[5]) > 0) {
+          currentInvoice.lineItems.push({
+            name: c[4],
+            desc: "One-Time Initial Setup & Project Deployment",
+            price: parseFloat(c[5]),
+            qty: 1
+          });
+        }
+        if (c[6] && parseFloat(c[7]) > 0) {
+          currentInvoice.lineItems.push({
+            name: c[6],
+            desc: `1st Month Service Retainer (${currentMonthStr})`,
+            price: parseFloat(c[7]),
+            qty: 1
+          });
+        }
+        termLabel = "Due on Receipt";
+        dueOffsetDays = 0;
+      } else if (cycle === "annual") {
+        // Excludes One-Time and Monthly
+        if (c[8] && parseFloat(c[9]) > 0) {
+          currentInvoice.lineItems.push({
+            name: c[8],
+            desc: `Annual AMC, Cloud Infrastructure & Maintenance (${currentYear} - ${currentYear + 1})`,
+            price: parseFloat(c[9]),
+            qty: 1
+          });
+        }
+        termLabel = "Annual Subscription (Net 15)";
+        dueOffsetDays = 15;
+      } else {
+        // Consolidated Full Statement
+        if (c[4] && parseFloat(c[5]) > 0) currentInvoice.lineItems.push({ name: c[4], desc: "One-Time Custom Setup", price: parseFloat(c[5]), qty: 1 });
+        if (c[6] && parseFloat(c[7]) > 0) currentInvoice.lineItems.push({ name: c[6], desc: "Monthly Recurring Retainer", price: parseFloat(c[7]), qty: 1 });
+        if (c[8] && parseFloat(c[9]) > 0) currentInvoice.lineItems.push({ name: c[8], desc: "Annual Contract", price: parseFloat(c[9]), qty: 1 });
+        termLabel = "Consolidated Statement";
+        dueOffsetDays = 0;
+      }
+
+      if (currentInvoice.lineItems.length === 0) {
+        currentInvoice.lineItems.push({ name: "Agency Services", desc: "Digital Technology Consulting", price: 2000, qty: 1 });
+      }
+
+      const invCode = "INV-" + Math.floor(100000 + Math.random() * 900000);
+      document.getElementById("previewInvNumber").innerText = `# ${invCode}`;
+
+      const todayFormatted = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+      document.getElementById("previewInvDate").innerText = todayFormatted;
+      document.getElementById("previewTerms").innerText = termLabel;
+
+      // Smart Due Date: Today + Offset Days (Guaranteed never in the past)
+      const calculatedDueDate = new Date(now.getTime() + dueOffsetDays * 24 * 60 * 60 * 1000);
+      document.getElementById("previewDueDate").innerText = calculatedDueDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+      
+      // Calculate Next Cycle Rollover Date
+      const rolloverTarget = new Date(now);
+      if (cycle === "annual") {
+        rolloverTarget.setFullYear(rolloverTarget.getFullYear() + 1);
+      } else {
+        rolloverTarget.setMonth(rolloverTarget.getMonth() + 1);
+      }
+      currentInvoice.calculatedNextDue = rolloverTarget.toISOString().split('T')[0];
+
       renderInvoicePreview();
     }
+
+    function markCycleRenewed() {
+      const c = currentInvoice.client;
+      if (!c) return;
+      const cycle = document.getElementById("invoiceCycleSelector").value;
+      const nextDate = currentInvoice.calculatedNextDue;
+
+      showToast("Updating client next billing cycle...");
+      jsonp(API_ENDPOINT + `?action=rolloverCycle&clientId=${encodeURIComponent(c[0])}&cycleType=${cycle}&nextDate=${nextDate}`, "onRolloverDone");
+    }
+
+    window.onRolloverDone = function(res) {
+      if (res && res.success) {
+        showToast("Billing cycle successfully rolled over to: " + res.nextBillingDate);
+        syncAllData();
+      }
+    };
 
     function closeInvoiceModal() {
       document.getElementById("invoiceModal").style.display = "none";
@@ -1078,7 +1173,6 @@
       }
     }
 
-    // STRICT 1-PAGE A4 GUARANTEE WITH AUTO-SCALING & EMBEDDED LOGO
     function openDedicatedPrintWindow() {
       const printableContent = document.getElementById("printableInvoice").outerHTML;
       const printWindow = window.open("", "_blank", "width=920,height=1000");
