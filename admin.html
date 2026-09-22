@@ -12,17 +12,15 @@
 
   <style>
     :root {
-      --primary: #1e40af;
-      --primary-hover: #1e3a8a;
-      --primary-glow: rgba(30, 64, 175, 0.15);
+      --primary: #f25c3b;
+      --primary-dark: #d94827;
       --bg: #f8fafc;
       --surface: #ffffff;
       --border: #e2e8f0;
       --text: #0f172a;
       --text-muted: #64748b;
-      --accent: #059669;
-      --danger: #dc2626;
-      --warning: #d97706;
+      --accent: #10b981;
+      --danger: #ef4444;
       --radius: 12px;
     }
 
@@ -59,20 +57,20 @@
       padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px;
       font-size: 0.85rem; outline: none; transition: all 0.2s; background: #fff;
     }
-    input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
+    input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(242, 92, 59, 0.15); }
 
     button {
       padding: 10px 16px; border: none; border-radius: 8px; font-weight: 700;
       font-size: 0.85rem; cursor: pointer; transition: all 0.2s;
     }
     .btn-primary { background: var(--primary); color: #fff; }
-    .btn-primary:hover { background: var(--primary-hover); }
-    .btn-bill { background: rgba(30, 64, 175, 0.1); color: var(--primary); border: 1px solid rgba(30, 64, 175, 0.25); }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-bill { background: rgba(242, 92, 59, 0.12); color: var(--primary); border: 1px solid rgba(242, 92, 59, 0.25); }
     .btn-bill:hover { background: var(--primary); color: #fff; }
-    .btn-del { background: rgba(220, 38, 38, 0.1); color: var(--danger); }
+    .btn-del { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
     .btn-del:hover { background: var(--danger); color: #fff; }
-    .btn-edit { background: rgba(217, 119, 6, 0.1); color: var(--warning); }
-    .btn-edit:hover { background: var(--warning); color: #000; }
+    .btn-edit { background: rgba(245, 158, 11, 0.1); color: #d97706; }
+    .btn-edit:hover { background: #d97706; color: #fff; }
 
     .table-box { overflow-x: auto; margin-top: 12px; }
     table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
@@ -80,14 +78,14 @@
     td { padding: 12px 10px; border-bottom: 1px solid var(--border); color: #334155; }
     .status-badge { padding: 3px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; background: #e0f2fe; color: #0284c7; }
 
-    /* INVOICE MODAL POPUP */
+    /* INVOICE MODAL BACKDROP */
     .modal-backdrop {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(6px);
       z-index: 1000; display: none; align-items: center; justify-content: center; padding: 16px;
     }
     .modal-window {
-      background: #f1f5f9; width: 100%; max-width: 1060px; max-height: 94vh;
+      background: #f1f5f9; width: 100%; max-width: 1100px; max-height: 94vh;
       border-radius: var(--radius); overflow-y: auto; box-shadow: 0 25px 60px rgba(0,0,0,0.3);
       display: flex; flex-direction: column;
     }
@@ -100,105 +98,237 @@
     .modal-grid { display: grid; grid-template-columns: 360px 1fr; gap: 24px; align-items: start; }
     @media (max-width: 960px) { .modal-grid { grid-template-columns: 1fr; } }
 
-    /* PROFESSIONAL INVOICE SHEET (A4 PROPORTIONS) */
-    .invoice-preview-card {
-      background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px;
-      padding: 36px 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.06); font-size: 0.85rem; color: #1e293b;
-    }
-    .inv-top-bar {
-      display: flex; justify-content: space-between; align-items: flex-start;
-      border-bottom: 2px solid #0f172a; padding-bottom: 16px; margin-bottom: 20px;
-    }
-    .inv-brand-info { display: flex; align-items: center; gap: 14px; }
-    .inv-brand-logo { width: 54px; height: 54px; border-radius: 8px; object-fit: cover; }
-    .inv-brand-name { font-size: 1.35rem; font-weight: 800; color: #0f172a; letter-spacing: -0.02em; }
-    .inv-brand-sub { font-size: 0.78rem; color: #64748b; font-weight: 500; margin-top: 2px; }
-
-    .inv-meta-block { text-align: right; }
-    .inv-main-tag { font-size: 1.1rem; font-weight: 800; color: #1e40af; font-family: 'JetBrains Mono', monospace; }
-    .inv-meta-row { font-size: 0.78rem; color: #475569; margin-top: 3px; }
-
-    .inv-party-grid {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
-      background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;
-      padding: 14px 18px; margin-bottom: 22px;
-    }
-    .party-title { font-size: 0.68rem; text-transform: uppercase; font-weight: 800; color: #94a3b8; letter-spacing: 0.06em; margin-bottom: 4px; }
-    .party-name { font-size: 0.95rem; font-weight: 700; color: #0f172a; }
-    .party-desc { font-size: 0.8rem; color: #475569; margin-top: 2px; }
-
-    /* PROFESSIONAL FINANCIAL TABLE */
-    .pro-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-    .pro-table th {
-      background: #f1f5f9; color: #334155; font-size: 0.72rem; font-weight: 800;
-      text-transform: uppercase; letter-spacing: 0.05em; padding: 10px 12px;
-      border: 1px solid #e2e8f0;
-    }
-    .pro-table td {
-      padding: 11px 12px; font-size: 0.82rem; color: #1e293b;
-      border: 1px solid #e2e8f0; vertical-align: middle;
-    }
-    .pro-table tbody tr:nth-child(even) { background: #fafbfc; }
-
-    /* ADVANCE ACCORDION TABLE */
-    .adv-section-title { font-size: 0.72rem; text-transform: uppercase; font-weight: 800; color: #047857; margin-bottom: 6px; letter-spacing: 0.05em; }
-    .adv-table th { background: #ecfdf5; color: #065f46; border-color: #d1fae5; }
-    .adv-table td { border-color: #d1fae5; }
-
-    /* BOTTOM SUMMARY AND SIGNATURE SPLIT */
-    .inv-footer-grid {
-      display: grid; grid-template-columns: 1.1fr 1fr; gap: 20px;
-      align-items: start; margin-top: 20px; padding-top: 14px;
-    }
-    .payment-instruction-box {
-      border: 1px dashed #cbd5e1; border-radius: 8px; padding: 12px 14px;
-      background: #fafbfc; display: flex; gap: 14px; align-items: center;
-    }
-    .qr-holder { width: 75px; height: 75px; flex-shrink: 0; background: #fff; padding: 4px; border-radius: 6px; border: 1px solid #e2e8f0; }
-
-    .summary-card {
-      background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;
-      padding: 12px 16px;
-    }
-    .calc-line { display: flex; justify-content: space-between; padding: 4px 0; font-size: 0.8rem; color: #475569; }
-    .calc-line.total {
-      border-top: 1px solid #cbd5e1; margin-top: 6px; padding-top: 8px;
-      font-weight: 800; font-size: 0.95rem; color: #0f172a;
-    }
-    .calc-line.advance { color: #059669; font-weight: 700; }
-    
-    .due-callout {
-      margin-top: 10px; background: #eff6ff; border: 1.5px solid #bfdbfe;
-      border-radius: 6px; padding: 10px 12px; display: flex;
-      justify-content: space-between; align-items: center;
-    }
-    .due-label { font-size: 0.85rem; font-weight: 800; color: #1e40af; text-transform: uppercase; letter-spacing: 0.03em; }
-    .due-amount { font-size: 1.25rem; font-weight: 800; color: #1e40af; font-family: 'JetBrains Mono', monospace; white-space: nowrap; }
-
-    .sign-section {
-      margin-top: 36px; padding-top: 14px; display: flex;
-      justify-content: space-between; align-items: flex-end;
-    }
-    .terms-text { font-size: 0.7rem; color: #94a3b8; max-width: 320px; line-height: 1.4; }
-    .signature-box { text-align: right; }
-    .sign-line { width: 160px; height: 1px; background: #0f172a; margin-left: auto; margin-bottom: 6px; }
-    .sign-name { font-size: 0.78rem; font-weight: 700; color: #0f172a; }
-    .sign-title { font-size: 0.7rem; color: #64748b; }
-
-    /* ON-SCREEN TOAST */
+    /* TOAST */
     .toast { position: fixed; top: 20px; right: 20px; padding: 12px 20px; border-radius: 8px; background: #0f172a; color: #fff; font-size: 0.85rem; font-weight: 600; display: none; z-index: 2000; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
 
-    /* CLEAN HIGH-RES PRINT STYLES */
-    @media print {
-      body { background: #fff !important; padding: 0 !important; }
-      body * { visibility: hidden !important; }
-      #printableInvoice, #printableInvoice * { visibility: visible !important; }
-      #printableInvoice {
-        position: absolute !important; left: 0 !important; top: 0 !important;
-        width: 100% !important; border: none !important; box-shadow: none !important;
-        padding: 24px !important; margin: 0 !important;
-      }
-      .modal-header, .no-print, .modal-backdrop, header, .kpi-grid, .section-card { display: none !important; }
+    /* EXACT INVOICE SHEET (MATCHING PROVIDED DESIGN SPECIFICATION) */
+    .zylker-invoice {
+      background: #ffffff;
+      color: #1e293b;
+      padding: 48px 44px;
+      border-radius: 4px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+      border: 1px solid #e2e8f0;
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+    .inv-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 28px;
+    }
+    .inv-brand-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .inv-logo-img {
+      width: 58px;
+      height: 58px;
+      border-radius: 10px;
+      object-fit: cover;
+    }
+    .inv-brand-text {
+      font-size: 1.7rem;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.03em;
+    }
+    .inv-brand-meta {
+      font-size: 0.82rem;
+      color: #475569;
+      margin-top: 6px;
+      line-height: 1.4;
+    }
+
+    .inv-title-col {
+      text-align: right;
+    }
+    .inv-title-main {
+      font-size: 2.2rem;
+      font-weight: 400;
+      color: #f25c3b;
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+    .inv-hash-num {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin-top: 8px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .inv-balance-top-tag {
+      margin-top: 14px;
+    }
+    .inv-balance-top-tag span {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #475569;
+    }
+    .inv-balance-top-tag strong {
+      display: block;
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.02em;
+      margin-top: 2px;
+    }
+
+    .inv-dates-grid {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 30px;
+      padding-top: 10px;
+    }
+    .bill-to-box span {
+      display: block;
+      font-size: 0.8rem;
+      color: #64748b;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    .bill-to-box strong {
+      display: block;
+      font-size: 1rem;
+      color: #0f172a;
+      font-weight: 800;
+    }
+    .bill-to-box p {
+      font-size: 0.82rem;
+      color: #475569;
+      line-height: 1.4;
+      margin-top: 2px;
+    }
+
+    .date-meta-box {
+      text-align: right;
+      font-size: 0.85rem;
+    }
+    .date-meta-row {
+      display: flex;
+      justify-content: flex-end;
+      gap: 24px;
+      margin-bottom: 6px;
+    }
+    .date-meta-row span.lbl {
+      color: #475569;
+      font-weight: 500;
+    }
+    .date-meta-row span.val {
+      color: #0f172a;
+      font-weight: 700;
+      min-width: 100px;
+      text-align: right;
+    }
+
+    /* RED HEADER TABLE */
+    .zylker-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 16px;
+    }
+    .zylker-table th {
+      background: #f25c3b;
+      color: #ffffff;
+      padding: 10px 14px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-align: left;
+    }
+    .zylker-table th:last-child {
+      text-align: right;
+    }
+    .zylker-table td {
+      padding: 14px;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 0.85rem;
+      vertical-align: top;
+    }
+    .zylker-table td:last-child {
+      text-align: right;
+    }
+    .item-sub-desc {
+      display: block;
+      font-size: 0.76rem;
+      color: #64748b;
+      margin-top: 3px;
+    }
+
+    /* SUMMARY TOTALS */
+    .summary-section {
+      width: 100%;
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 8px;
+    }
+    .summary-table {
+      width: 320px;
+      border-collapse: collapse;
+      font-size: 0.86rem;
+    }
+    .summary-table td {
+      padding: 6px 8px;
+    }
+    .summary-table td.label {
+      text-align: right;
+      color: #475569;
+      font-weight: 500;
+    }
+    .summary-table td.value {
+      text-align: right;
+      color: #0f172a;
+      font-weight: 700;
+      width: 120px;
+    }
+    .summary-table tr.grand-total td {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #0f172a;
+      padding-top: 10px;
+    }
+    .balance-due-strip {
+      background: #fff8f6;
+      border-radius: 4px;
+    }
+    .balance-due-strip td {
+      padding: 10px 8px !important;
+      font-size: 1rem !important;
+      font-weight: 800 !important;
+      color: #0f172a !important;
+    }
+
+    /* FOOTER NOTES & TERMS */
+    .inv-bottom-notes {
+      margin-top: 36px;
+      padding-top: 20px;
+      border-top: 1px solid #f1f5f9;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 20px;
+      align-items: flex-end;
+    }
+    .notes-block h5 {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 4px;
+    }
+    .notes-block p {
+      font-size: 0.8rem;
+      color: #64748b;
+      line-height: 1.4;
+      margin-bottom: 14px;
+    }
+    .qr-container-box {
+      text-align: center;
+      background: #fafbfc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 10px 14px;
     }
   </style>
 </head>
@@ -215,7 +345,7 @@
           <p style="font-size: 0.75rem; color: var(--text-muted);">Custom Billing, Task Engine & Smart Invoicing</p>
         </div>
       </div>
-      <button class="btn-primary" onclick="syncAllData()">Refresh Data</button>
+      <button class="btn-primary" onclick="syncAllData()">↻ Refresh Data</button>
     </header>
 
     <!-- METRICS -->
@@ -360,15 +490,15 @@
           <p style="font-size: 0.75rem; color: var(--text-muted);" id="modalClientHeader">Client Billing Console</p>
         </div>
         <div style="display:flex; gap: 8px;">
-          <button class="btn-primary" onclick="printInvoice()">Print / Save PDF</button>
-          <button class="btn-del" onclick="closeInvoiceModal()">Close</button>
+          <button class="btn-primary" style="background:#059669;" onclick="openDedicatedPrintWindow()">⚡ Print / Download PDF</button>
+          <button class="btn-del" onclick="closeInvoiceModal()">✕ Close</button>
         </div>
       </div>
 
       <div class="modal-body">
         <div class="modal-grid">
           <!-- ADJUSTMENT CONTROLS -->
-          <div class="no-print">
+          <div>
             <div class="section-card" style="padding: 16px; margin-bottom: 16px;">
               <h4 style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px;">1. Advance Payments (3 Options)</h4>
               <div class="input-grid">
@@ -393,14 +523,14 @@
             </div>
 
             <div class="section-card" style="padding: 16px;">
-              <h4 style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px;">2. Tax & Payment Config</h4>
+              <h4 style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px;">2. Tax & Discount Config</h4>
               <div class="input-grid">
                 <div class="input-group">
                   <label>GST / Tax Rate (%)</label>
                   <input type="number" id="invTaxRate" value="0" oninput="renderInvoicePreview()">
                 </div>
                 <div class="input-group">
-                  <label>Discount Amount (₹)</label>
+                  <label>Discount (%)</label>
                   <input type="number" id="invDiscountRate" value="0" oninput="renderInvoicePreview()">
                 </div>
                 <div class="input-group" style="grid-column: span 2;">
@@ -411,107 +541,133 @@
             </div>
           </div>
 
-          <!-- REDESIGNED CORPORATE INVOICE PAPER -->
+          <!-- EXACT PREVIEW CONTAINER -->
           <div>
-            <div class="invoice-preview-card" id="printableInvoice">
-              
-              <!-- TOP BANNER -->
-              <div class="inv-top-bar">
-                <div class="inv-brand-info">
-                  <img src="https://i.pinimg.com/736x/bd/d0/5c/bdd05c94afb66b5a72f5e17a7a879ab3.jpg" class="inv-brand-logo" alt="Ofbuzz Technology"[cite: 6]>
+            <div id="invoiceRenderWrapper">
+              <div class="zylker-invoice" id="printableInvoice">
+                
+                <!-- TOP ROW: BRAND & INVOICE -->
+                <div class="inv-top-row">
                   <div>
-                    <h2 class="inv-brand-name">Ofbuzz Technology</h2>
-                    <p class="inv-brand-sub">Digital Marketing, Technology & Creative Agency</p>
-                    <p style="font-size: 0.72rem; color: #64748b;">Delhi NCR, India | support@ofbuzz.com</p>
+                    <div class="inv-brand-wrapper">
+                      <img src="https://i.pinimg.com/736x/bd/d0/5c/bdd05c94afb66b5a72f5e17a7a879ab3.jpg" class="inv-logo-img" alt="Ofbuzz Technology"[cite: 6]>
+                      <div class="inv-brand-text">Ofbuzz Technology</div>
+                    </div>
+                    <div class="inv-brand-meta">
+                      1912 Tech Hub, Delhi NCR<br>
+                      India | ofbuzztechnology@gmail.com
+                    </div>
+                  </div>
+
+                  <div class="inv-title-col">
+                    <div class="inv-title-main">Invoice</div>
+                    <div class="inv-hash-num" id="previewInvNumber"># INV-000085</div>
+                    <div class="inv-balance-top-tag">
+                      <span>Balance Due</span>
+                      <strong id="topBalanceDue">₹0.00</strong>
+                    </div>
                   </div>
                 </div>
-                <div class="inv-meta-block">
-                  <div class="inv-main-tag" id="previewInvNumber">#INV-9080</div>
-                  <div class="inv-meta-row"><strong>Date:</strong> <span id="previewInvDate"></span></div>
-                  <div class="inv-meta-row"><strong>Status:</strong> <span style="color:#059669; font-weight:700;">CONFIRMED</span></div>
-                </div>
-              </div>
 
-              <!-- BILLED TO -->
-              <div class="inv-party-grid">
-                <div>
-                  <div class="party-title">Billed To (Client):</div>
-                  <div class="party-name" id="previewCustName">Satyam Pandey</div>
-                  <div class="party-desc" id="previewCustPhone">+91 7827201014</div>
-                  <div class="party-desc" id="previewCustEmail">ofbuzztechnology@gmail.com</div>
-                </div>
-                <div style="border-left: 1px solid #e2e8f0; padding-left: 16px;">
-                  <div class="party-title">Payment Terms:</div>
-                  <div class="party-desc"><strong>Cycle:</strong> Multi-Tier Service Contract</div>
-                  <div class="party-desc"><strong>Payment Mode:</strong> UPI / NetBanking / Cheque</div>
-                </div>
-              </div>
+                <!-- DATES & BILL TO ROW -->
+                <div class="inv-dates-grid">
+                  <div class="bill-to-box">
+                    <span>Bill To</span>
+                    <strong id="previewCustName">Customer Name</strong>
+                    <p id="previewCustAddress">Delhi NCR, India<br>Phone: +91 7827201014</p>
+                  </div>
 
-              <!-- SERVICES TABLE -->
-              <table class="pro-table">
-                <thead>
-                  <tr>
-                    <th style="width: 45px; text-align: center;">#</th>
-                    <th>Service Description</th>
-                    <th style="width: 140px; text-align: right;">Amount (INR)</th>
-                  </tr>
-                </thead>
-                <tbody id="previewLineItems"></tbody>
-              </table>
+                  <div class="date-meta-box">
+                    <div class="date-meta-row">
+                      <span class="lbl">Invoice Date :</span>
+                      <span class="val" id="previewInvDate">23 Sep 2026</span>
+                    </div>
+                    <div class="date-meta-row">
+                      <span class="lbl">Terms :</span>
+                      <span class="val">Due on Receipt</span>
+                    </div>
+                    <div class="date-meta-row">
+                      <span class="lbl">Due Date :</span>
+                      <span class="val" id="previewDueDate">23 Sep 2026</span>
+                    </div>
+                  </div>
+                </div>
 
-              <!-- ADVANCE PAYMENTS TABLE (IF ANY) -->
-              <div id="previewAdvanceBox" style="display: none; margin-bottom: 16px;">
-                <div class="adv-section-title">Advance Installments Received:</div>
-                <table class="pro-table adv-table">
+                <!-- PRIMARY ITEMS TABLE -->
+                <table class="zylker-table">
                   <thead>
                     <tr>
-                      <th>Receipt Note & Method</th>
-                      <th style="width: 140px; text-align: right;">Paid (INR)</th>
+                      <th style="width: 38px; text-align: center;">#</th>
+                      <th>Item & Description</th>
+                      <th style="width: 70px; text-align: center;">Qty</th>
+                      <th style="width: 100px; text-align: right;">Rate</th>
+                      <th style="width: 110px; text-align: right;">Amount</th>
                     </tr>
                   </thead>
-                  <tbody id="previewAdvanceItems"></tbody>
+                  <tbody id="previewLineItems"></tbody>
                 </table>
-              </div>
 
-              <!-- SUMMARY & PAYMENT DETAILS -->
-              <div class="inv-footer-grid">
-                <div class="payment-instruction-box">
-                  <div class="qr-holder" id="invoiceQr"></div>
-                  <div>
-                    <strong style="font-size: 0.8rem; color: #0f172a; display: block;">Instant Payment via UPI</strong>
-                    <span style="font-size: 0.72rem; color: #64748b; display: block; margin-top: 2px;" id="qrUpiText">satyamxpandey11@gmail.com</span>
-                    <span style="font-size: 0.68rem; color: #059669; font-weight: 700; display: block; margin-top: 4px;">GooglePay / PhonePe / Paytm</span>
+                <!-- ADVANCE RECEIPTS (IF ANY) -->
+                <div id="previewAdvanceBox" style="display: none; margin-top: 10px; margin-bottom: 14px;">
+                  <table class="zylker-table" style="margin-bottom: 0;">
+                    <thead>
+                      <tr>
+                        <th style="background:#059669;" colspan="2">Advance Receipts Settled</th>
+                        <th style="background:#059669; text-align:center;">Mode</th>
+                        <th style="background:#059669; text-align:right;" colspan="2">Amount Paid</th>
+                      </tr>
+                    </thead>
+                    <tbody id="previewAdvanceItems"></tbody>
+                  </table>
+                </div>
+
+                <!-- FINANCIAL SUMMARY -->
+                <div class="summary-section">
+                  <table class="summary-table">
+                    <tr>
+                      <td class="label">Sub Total</td>
+                      <td class="value" id="prevSubtotal">0.00</td>
+                    </tr>
+                    <tr id="rowDiscount" style="display:none;">
+                      <td class="label" id="lblDiscount">Discount(0%)</td>
+                      <td class="value" id="prevDiscount">(-) 0.00</td>
+                    </tr>
+                    <tr id="rowTax" style="display:none;">
+                      <td class="label" id="lblTax">Sales Tax (0%)</td>
+                      <td class="value" id="prevTax">0.00</td>
+                    </tr>
+                    <tr class="grand-total">
+                      <td class="label">Total</td>
+                      <td class="value" id="prevTotal">₹0.00</td>
+                    </tr>
+                    <tr id="rowPaid" style="display:none; color: #059669;">
+                      <td class="label" style="color: #059669;">Advance Paid</td>
+                      <td class="value" style="color: #059669;" id="prevPaid">(-) ₹0.00</td>
+                    </tr>
+                    <tr class="balance-due-strip">
+                      <td class="label">Balance Due</td>
+                      <td class="value" id="prevDue">₹0.00</td>
+                    </tr>
+                  </table>
+                </div>
+
+                <!-- FOOTER NOTES & TERMS -->
+                <div class="inv-bottom-notes">
+                  <div class="notes-block">
+                    <h5>Notes</h5>
+                    <p>It was wonderful doing business with you.<br>If you have any questions, do let me know. Thank you!</p>
+
+                    <h5>Terms & Conditions</h5>
+                    <p>Please make payment before the due date.</p>
+                  </div>
+
+                  <div class="qr-container-box">
+                    <div id="invoiceQr" style="width: 75px; height: 75px; margin: 0 auto;"></div>
+                    <span style="font-size: 0.68rem; color: #64748b; font-weight: 700; display: block; margin-top: 4px;">Instant UPI Scan</span>
                   </div>
                 </div>
 
-                <div class="summary-card">
-                  <div class="calc-line"><span>Subtotal</span><span id="prevSubtotal">₹0.00</span></div>
-                  <div class="calc-line"><span>Tax (GST)</span><span id="prevTax">₹0.00</span></div>
-                  <div class="calc-line"><span>Discount</span><span id="prevDiscount">-₹0.00</span></div>
-                  <div class="calc-line total"><span>Total Contract Value</span><span id="prevTotal">₹0.00</span></div>
-                  <div class="calc-line advance"><span>Advance Paid (-)</span><span id="prevPaid">-₹0.00</span></div>
-                  
-                  <!-- FIXED BALANCE DUE CALLOUT (NO OVERLAPPING) -->
-                  <div class="due-callout">
-                    <span class="due-label">Balance Due</span>
-                    <span class="due-amount" id="prevDue">₹0.00</span>
-                  </div>
-                </div>
               </div>
-
-              <!-- SIGNATURE & TERMS -->
-              <div class="sign-section">
-                <div class="terms-text">
-                  <strong>Terms & Conditions:</strong><br>
-                  This invoice is computer-generated and confirms active contractual services with Ofbuzz Technology. Please quote the invoice number for all accounting references.
-                </div>
-                <div class="signature-box">
-                  <div class="sign-line"></div>
-                  <div class="sign-name">Ofbuzz Technology</div>
-                  <div class="sign-title">Authorised Signatory</div>
-                </div>
-              </div>
-
             </div>
           </div>
         </div>
@@ -587,7 +743,7 @@
             <td>${serv.join("<br>") || "—"}</td>
             <td>${c[10] ? c[10].substring(0,10) : "—"}</td>
             <td style="text-align: right; white-space: nowrap;">
-              <button class="btn-bill" onclick="openInvoiceModal('${c[0]}')">Generate Bill</button>
+              <button class="btn-bill" onclick="openInvoiceModal('${c[0]}')">⚡ Generate Bill</button>
               <button class="btn-edit" onclick="editClientRecord('${c[0]}')">Edit</button>
               <button class="btn-del" onclick="deleteClientRecord('${c[0]}')">Delete</button>
             </td>
@@ -744,20 +900,24 @@
       currentInvoice.lineItems = [];
 
       // Auto populate active services
-      if (c[4] && parseFloat(c[5]) > 0) currentInvoice.lineItems.push({ name: `One-Time: ${c[4]}`, price: parseFloat(c[5]) });
-      if (c[6] && parseFloat(c[7]) > 0) currentInvoice.lineItems.push({ name: `Monthly Retainer: ${c[6]}`, price: parseFloat(c[7]) });
-      if (c[8] && parseFloat(c[9]) > 0) currentInvoice.lineItems.push({ name: `Annual Contract: ${c[8]}`, price: parseFloat(c[9]) });
+      if (c[4] && parseFloat(c[5]) > 0) currentInvoice.lineItems.push({ name: c[4], desc: "One-Time Custom Deliverable", price: parseFloat(c[5]), qty: 1 });
+      if (c[6] && parseFloat(c[7]) > 0) currentInvoice.lineItems.push({ name: c[6], desc: "Monthly Retainer Package", price: parseFloat(c[7]), qty: 1 });
+      if (c[8] && parseFloat(c[9]) > 0) currentInvoice.lineItems.push({ name: c[8], desc: "Annual Contract & Maintenance", price: parseFloat(c[9]), qty: 1 });
 
       if (currentInvoice.lineItems.length === 0) {
-        currentInvoice.lineItems.push({ name: "General Consulting Services", price: 1000 });
+        currentInvoice.lineItems.push({ name: "Digital Consulting Services", desc: "Professional Retainer Services", price: 2500, qty: 1 });
       }
 
-      document.getElementById("modalClientHeader").innerText = `Client: ${c[1]} (${c[0]})`;
-      document.getElementById("previewInvNumber").innerText = `#INV-${Math.floor(1000 + Math.random() * 9000)}`;
-      document.getElementById("previewInvDate").innerText = new Date().toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' });
+      const invCode = "INV-" + Math.floor(100000 + Math.random() * 900000);
+      document.getElementById("modalClientHeader").innerText = `Generating bill for: ${c[1]} (${c[0]})`;
+      document.getElementById("previewInvNumber").innerText = `# ${invCode}`;
+      
+      const todayFormatted = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+      document.getElementById("previewInvDate").innerText = todayFormatted;
+      document.getElementById("previewDueDate").innerText = c[10] ? new Date(c[10]).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : todayFormatted;
+
       document.getElementById("previewCustName").innerText = c[1];
-      document.getElementById("previewCustPhone").innerText = c[2] ? `+91 ${c[2]}` : "—";
-      document.getElementById("previewCustEmail").innerText = c[3] || "—";
+      document.getElementById("previewCustAddress").innerHTML = `Phone: ${c[2] || '—'}<br>Email: ${c[3] || '—'}`;
 
       document.getElementById("invoiceModal").style.display = "flex";
       renderInvoicePreview();
@@ -770,7 +930,7 @@
     function addAdvanceReceipt() {
       const mode = document.getElementById("advMode").value;
       const amt = parseFloat(document.getElementById("advAmount").value) || 0;
-      const note = document.getElementById("advNote").value.trim() || "Advance Receipt";
+      const note = document.getElementById("advNote").value.trim() || "Advance Installment";
 
       if (amt <= 0) { showToast("Enter a valid advance amount."); return; }
 
@@ -787,23 +947,29 @@
     }
 
     function renderInvoicePreview() {
-      // Line Items
+      // Primary Line Items
       const lineBody = document.getElementById("previewLineItems");
       let subtotal = 0;
       let lHtml = "";
       currentInvoice.lineItems.forEach((item, idx) => {
-        subtotal += item.price;
+        const itemTotal = item.qty * item.price;
+        subtotal += itemTotal;
         lHtml += `
           <tr>
             <td style="text-align: center; color:#64748b;">${idx + 1}</td>
-            <td><strong>${item.name}</strong></td>
-            <td style="text-align: right; font-weight:700;">₹${item.price.toFixed(2)}</td>
+            <td>
+              <strong>${item.name}</strong>
+              <span class="item-sub-desc">${item.desc}</span>
+            </td>
+            <td style="text-align: center;">${item.qty.toFixed(2)}<br><span style="font-size:0.7rem; color:#94a3b8;">Nos</span></td>
+            <td style="text-align: right;">${item.price.toFixed(2)}</td>
+            <td style="text-align: right; font-weight:700;">${itemTotal.toFixed(2)}</td>
           </tr>
         `;
       });
       lineBody.innerHTML = lHtml;
 
-      // Advances Table
+      // Advance Receipts
       const advBox = document.getElementById("previewAdvanceBox");
       const advBody = document.getElementById("previewAdvanceItems");
       let totalPaid = 0;
@@ -815,8 +981,9 @@
           totalPaid += a.amount;
           aHtml += `
             <tr>
-              <td><strong>${a.note}</strong> <span style="font-size:0.75rem; color:#64748b;">(${a.mode})</span></td>
-              <td style="text-align: right; font-weight:700; color:#059669;">₹${a.amount.toFixed(2)}</td>
+              <td colspan="2"><strong>${a.note}</strong></td>
+              <td style="text-align: center; color:#64748b; font-size:0.75rem;">${a.mode}</td>
+              <td colspan="2" style="text-align: right; font-weight:700; color:#059669;">(-) ${a.amount.toFixed(2)}</td>
             </tr>
           `;
         });
@@ -825,35 +992,96 @@
         advBox.style.display = "none";
       }
 
-      // Calculations
+      // Financial Calculation matching format
       const taxRate = parseFloat(document.getElementById("invTaxRate").value) || 0;
-      const discountVal = parseFloat(document.getElementById("invDiscountRate").value) || 0;
+      const discountRate = parseFloat(document.getElementById("invDiscountRate").value) || 0;
 
-      const tax = subtotal * (taxRate / 100);
-      const total = Math.max(0, subtotal + tax - discountVal);
-      const balanceDue = Math.max(0, total - totalPaid);
+      const discountAmt = subtotal * (discountRate / 100);
+      const taxableAmount = Math.max(0, subtotal - discountAmt);
+      const taxAmt = taxableAmount * (taxRate / 100);
+      const grandTotal = taxableAmount + taxAmt;
+      const balanceDue = Math.max(0, grandTotal - totalPaid);
 
-      document.getElementById("prevSubtotal").innerText = `₹${subtotal.toFixed(2)}`;
-      document.getElementById("prevTax").innerText = `₹${tax.toFixed(2)}`;
-      document.getElementById("prevDiscount").innerText = `-₹${discountVal.toFixed(2)}`;
-      document.getElementById("prevTotal").innerText = `₹${total.toFixed(2)}`;
-      document.getElementById("prevPaid").innerText = `-₹${totalPaid.toFixed(2)}`;
+      document.getElementById("prevSubtotal").innerText = subtotal.toFixed(2);
+
+      const rowDisc = document.getElementById("rowDiscount");
+      if (discountRate > 0) {
+        rowDisc.style.display = "table-row";
+        document.getElementById("lblDiscount").innerText = `Discount(${discountRate}%)`;
+        document.getElementById("prevDiscount").innerText = `(-) ${discountAmt.toFixed(2)}`;
+      } else {
+        rowDisc.style.display = "none";
+      }
+
+      const rowTax = document.getElementById("rowTax");
+      if (taxRate > 0) {
+        rowTax.style.display = "table-row";
+        document.getElementById("lblTax").innerText = `Sales Tax (${taxRate}%)`;
+        document.getElementById("prevTax").innerText = taxAmt.toFixed(2);
+      } else {
+        rowTax.style.display = "none";
+      }
+
+      document.getElementById("prevTotal").innerText = `₹${grandTotal.toFixed(2)}`;
+
+      const rowPaid = document.getElementById("rowPaid");
+      if (totalPaid > 0) {
+        rowPaid.style.display = "table-row";
+        document.getElementById("prevPaid").innerText = `(-) ₹${totalPaid.toFixed(2)}`;
+      } else {
+        rowPaid.style.display = "none";
+      }
+
       document.getElementById("prevDue").innerText = `₹${balanceDue.toFixed(2)}`;
+      document.getElementById("topBalanceDue").innerText = `₹${balanceDue.toFixed(2)}`;
 
-      // Dynamic QR Code
+      // Dynamic UPI QR
       const upi = document.getElementById("invUpiId").value.trim();
       const qrBox = document.getElementById("invoiceQr");
       qrBox.innerHTML = "";
-      document.getElementById("qrUpiText").innerText = upi || "UPI ID not set";
 
       if (upi && balanceDue > 0) {
-        const qrString = `upi://pay?pa=${encodeURIComponent(upi)}&pn=Ofbuzz%20Technology&am=${balanceDue.toFixed(2)}&cu=INR`;
-        new QRCode(qrBox, { text: qrString, width: 75, height: 75 });
+        const qrPayload = `upi://pay?pa=${encodeURIComponent(upi)}&pn=Ofbuzz%20Technology&am=${balanceDue.toFixed(2)}&cu=INR`;
+        new QRCode(qrBox, { text: qrPayload, width: 75, height: 75 });
       }
     }
 
-    function printInvoice() {
-      window.print();
+    // DEDICATED PRINT WINDOW (100% PREVENTS BLANK PDFS)
+    function openDedicatedPrintWindow() {
+      const invoiceHTML = document.getElementById("printableInvoice").outerHTML;
+      const printWindow = window.open("", "_blank", "width=900,height=800");
+      
+      printWindow.document.open();
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Invoice - Ofbuzz Technology</title>
+          <link rel="preconnect" href="https://fonts.googleapis.com">
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+          <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+          <style>
+            * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+            body { background: #ffffff; color: #1e293b; padding: 36px 40px; }
+            ${document.querySelector('style').innerHTML}
+            .zylker-invoice { border: none !important; box-shadow: none !important; padding: 0 !important; }
+            @page { size: A4; margin: 15mm; }
+          </style>
+        </head>
+        <body>
+          ${invoiceHTML}
+          <script>
+            window.onload = function() {
+              setTimeout(function() {
+                window.print();
+                window.close();
+              }, 450);
+            };
+          <\/script>
+        </body>
+        </html>
+      `);
+      printWindow.document.close();
     }
 
     window.onload = syncAllData;
