@@ -228,7 +228,6 @@
       text-align: right;
     }
 
-    /* RED HEADER TABLE */
     .zylker-table {
       width: 100%;
       border-collapse: collapse;
@@ -261,7 +260,6 @@
       margin-top: 2px;
     }
 
-    /* SUMMARY TOTALS */
     .summary-section {
       width: 100%;
       display: flex;
@@ -304,7 +302,6 @@
       color: #0f172a !important;
     }
 
-    /* FOOTER NOTES & TERMS */
     .inv-bottom-notes {
       margin-top: 24px;
       padding-top: 14px;
@@ -345,7 +342,7 @@
         <img src="https://i.pinimg.com/736x/bd/d0/5c/bdd05c94afb66b5a72f5e17a7a879ab3.jpg" class="brand-logo" alt="Ofbuzz Logo" referrerpolicy="no-referrer">
         <div>
           <div class="brand-title">Ofbuzz Technology — Admin Studio</div>
-          <p style="font-size: 0.75rem; color: var(--text-muted);">Custom Billing, Task Engine & Smart Invoicing</p>
+          <p style="font-size: 0.75rem; color: var(--text-muted);">Custom Billing, Workforce & Invoice Studio</p>
         </div>
       </div>
       <button class="btn-primary" id="btnRefresh" onclick="syncAllData()">↻ Refresh Data</button>
@@ -363,7 +360,7 @@
       </div>
     </div>
 
-    <!-- CLIENT SETUP -->
+    <!-- 1. CLIENT SETUP -->
     <div class="section-card">
       <div class="section-head">
         <span id="formTitle">Register Client & Setup Multi-Tier Services</span>
@@ -417,7 +414,7 @@
       </div>
     </div>
 
-    <!-- CLIENTS TABLE -->
+    <!-- 2. CLIENTS TABLE -->
     <div class="section-card">
       <div class="section-head">
         <span>Active Clients Directory</span>
@@ -441,10 +438,64 @@
       </div>
     </div>
 
-    <!-- STAFF & DELEGATION -->
+    <!-- 3. ADD STAFF MEMBER (RESTORED) -->
     <div class="section-card">
       <div class="section-head">
-        <span>Staff Delegation & Task Review</span>
+        <span id="staffFormTitle">Add New Workforce / Staff Member</span>
+      </div>
+      <input type="hidden" id="staffEditId">
+      <div class="input-grid">
+        <div class="input-group">
+          <label>Staff ID</label>
+          <input type="text" id="stfId" placeholder="e.g. STF01">
+        </div>
+        <div class="input-group">
+          <label>Full Legal Name</label>
+          <input type="text" id="stfName" placeholder="Full Name">
+        </div>
+        <div class="input-group">
+          <label>Corporate Email Address</label>
+          <input type="email" id="stfEmail" placeholder="staff@ofbuzz.com">
+        </div>
+        <div class="input-group">
+          <label>Functional Role</label>
+          <input type="text" id="stfRole" placeholder="e.g. Senior Designer / Developer">
+        </div>
+      </div>
+      <div style="margin-top: 16px; display: flex; gap: 10px;">
+        <button class="btn-primary" id="btnSaveStaff" onclick="saveStaffRecord()">Commit Associate Record</button>
+        <button class="btn-del" id="btnCancelStaffEdit" style="display:none;" onclick="cancelStaffEdit()">Cancel</button>
+      </div>
+    </div>
+
+    <!-- 4. STAFF DIRECTORY TABLE (RESTORED) -->
+    <div class="section-card">
+      <div class="section-head">
+        <span>Workforce Directory</span>
+      </div>
+      <div class="table-box">
+        <table>
+          <thead>
+            <tr>
+              <th>Staff ID</th>
+              <th>Associate Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th style="text-align: right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="staffTableBody">
+            <tr><td colspan="6" style="text-align:center;">Loading staff...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 5. STAFF DELEGATION & TASK APPROVALS -->
+    <div class="section-card">
+      <div class="section-head">
+        <span>Task Delegation & Assignment Queue</span>
       </div>
       <div class="input-grid">
         <div class="input-group">
@@ -501,9 +552,7 @@
 
       <div class="modal-body">
         <div class="modal-grid">
-          <!-- ADJUSTMENT CONTROLS -->
           <div>
-            <!-- SMART BILLING CYCLE SELECTOR -->
             <div class="section-card" style="padding: 16px; margin-bottom: 16px; border-left: 4px solid var(--primary);">
               <h4 style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px;">Select Invoice Cycle</h4>
               <div class="input-group">
@@ -564,8 +613,6 @@
           <div>
             <div id="invoiceRenderWrapper">
               <div class="zylker-invoice" id="printableInvoice">
-                
-                <!-- TOP ROW: BRAND & INVOICE -->
                 <div class="inv-top-row">
                   <div>
                     <div class="inv-brand-wrapper">
@@ -588,7 +635,6 @@
                   </div>
                 </div>
 
-                <!-- DATES & BILL TO ROW -->
                 <div class="inv-dates-grid">
                   <div class="bill-to-box">
                     <span>Bill To</span>
@@ -612,7 +658,6 @@
                   </div>
                 </div>
 
-                <!-- PRIMARY ITEMS TABLE -->
                 <table class="zylker-table">
                   <thead>
                     <tr>
@@ -626,7 +671,6 @@
                   <tbody id="previewLineItems"></tbody>
                 </table>
 
-                <!-- ADVANCE RECEIPTS (IF ANY) -->
                 <div id="previewAdvanceBox" style="display: none; margin-top: 8px; margin-bottom: 10px;">
                   <table class="zylker-table" style="margin-bottom: 0;">
                     <thead>
@@ -640,7 +684,6 @@
                   </table>
                 </div>
 
-                <!-- FINANCIAL SUMMARY -->
                 <div class="summary-section">
                   <table class="summary-table">
                     <tr>
@@ -670,7 +713,6 @@
                   </table>
                 </div>
 
-                <!-- FOOTER NOTES & TERMS -->
                 <div class="inv-bottom-notes">
                   <div class="notes-block">
                     <h5>Notes</h5>
@@ -768,6 +810,7 @@
       }
       document.getElementById("monthlySales").innerText = mText || "No recorded sales yet";
 
+      // 1. Client Table
       const clientBody = document.getElementById("clientTableBody");
       let cHtml = "";
       (state.clients || []).forEach(c => {
@@ -793,13 +836,32 @@
       });
       clientBody.innerHTML = cHtml || '<tr><td colspan="6" style="text-align:center;">No clients enrolled yet.</td></tr>';
 
-      const staffSelect = document.getElementById("staffSelect");
+      // 2. Staff Directory Table (RESTORED)
+      const staffBody = document.getElementById("staffTableBody");
+      let sTableHtml = "";
       let sOptions = '<option value="">Choose Staff Profile</option>';
       (state.staff || []).forEach(s => {
+        sTableHtml += `
+          <tr>
+            <td><strong>${s[0]}</strong></td>
+            <td><strong>${s[1]}</strong></td>
+            <td>${s[2]}</td>
+            <td>${s[3] || "—"}</td>
+            <td><span class="status-badge">${s[4] || "Active"}</span></td>
+            <td style="text-align: right; white-space: nowrap;">
+              <button class="btn-edit" onclick="editStaffRecord('${s[0]}')">Edit</button>
+              <button class="btn-del" onclick="deleteStaffRecord('${s[0]}')">Delete</button>
+            </td>
+          </tr>
+        `;
         sOptions += `<option value="${s[0]}" data-email="${s[2]}" data-name="${s[1]}">${s[1]} (${s[0]}) — ${s[3]}</option>`;
       });
+      staffBody.innerHTML = sTableHtml || '<tr><td colspan="6" style="text-align:center;">No personnel profiles found.</td></tr>';
+
+      const staffSelect = document.getElementById("staffSelect");
       staffSelect.innerHTML = sOptions;
 
+      // 3. Task Approvals Table
       const taskBody = document.getElementById("taskApprovalBody");
       let tHtml = "";
       (state.tasks || []).forEach(t => {
@@ -818,6 +880,7 @@
       taskBody.innerHTML = tHtml || '<tr><td colspan="5" style="text-align:center;">No deliverables awaiting approval.</td></tr>';
     }
 
+    // CLIENT ACTIONS
     function saveClientRecord() {
       const id = document.getElementById("clientId").value;
       const client = {
@@ -895,6 +958,78 @@
       syncAllData();
     };
 
+    // STAFF MANAGEMENT ACTIONS (RESTORED)
+    function saveStaffRecord() {
+      const editId = document.getElementById("staffEditId").value;
+      const s = {
+        id: document.getElementById("stfId").value.trim(),
+        name: document.getElementById("stfName").value.trim(),
+        email: document.getElementById("stfEmail").value.trim(),
+        role: document.getElementById("stfRole").value.trim()
+      };
+
+      if (!s.id || !s.name) {
+        showToast("Both Staff ID and Name are required.");
+        return;
+      }
+
+      const action = editId ? "editStaff" : "addStaff";
+      showToast("Saving workforce profile...");
+
+      jsonp(API_ENDPOINT + `?action=${action}&data=${encodeURIComponent(JSON.stringify(s))}`, "onStaffSaved");
+    }
+
+    window.onStaffSaved = function(res) {
+      if (res && res.success) {
+        showToast("Staff profile committed successfully!");
+        cancelStaffEdit();
+        syncAllData();
+      } else {
+        showToast("Failed to save staff record.");
+      }
+    };
+
+    function editStaffRecord(id) {
+      const s = (state.staff || []).find(item => item[0] === id);
+      if (!s) return;
+
+      document.getElementById("staffEditId").value = s[0];
+      document.getElementById("stfId").value = s[0];
+      document.getElementById("stfId").readOnly = true;
+      document.getElementById("stfName").value = s[1] || "";
+      document.getElementById("stfEmail").value = s[2] || "";
+      document.getElementById("stfRole").value = s[3] || "";
+
+      document.getElementById("staffFormTitle").innerText = "Edit Workforce File: " + s[1];
+      document.getElementById("btnSaveStaff").innerText = "Update Associate File";
+      document.getElementById("btnCancelStaffEdit").style.display = "inline-block";
+      window.scrollTo({ top: 400, behavior: "smooth" });
+    }
+
+    function cancelStaffEdit() {
+      document.getElementById("staffEditId").value = "";
+      document.getElementById("stfId").value = "";
+      document.getElementById("stfId").readOnly = false;
+      document.getElementById("stfName").value = "";
+      document.getElementById("stfEmail").value = "";
+      document.getElementById("stfRole").value = "";
+
+      document.getElementById("staffFormTitle").innerText = "Add New Workforce / Staff Member";
+      document.getElementById("btnSaveStaff").innerText = "Commit Associate Record";
+      document.getElementById("btnCancelStaffEdit").style.display = "none";
+    }
+
+    function deleteStaffRecord(id) {
+      if (!confirm("Are you sure you want to purge workforce profile " + id + "?")) return;
+      jsonp(API_ENDPOINT + `?action=deleteStaff&staffId=${encodeURIComponent(id)}`, "onStaffDeleted");
+    }
+
+    window.onStaffDeleted = function(res) {
+      showToast("Staff profile purged.");
+      syncAllData();
+    };
+
+    // TASK ACTIONS
     function assignStaffTask() {
       const sel = document.getElementById("staffSelect");
       const staffId = sel.value;
@@ -929,6 +1064,7 @@
       syncAllData();
     };
 
+    // INVOICE BUILDER
     function openInvoiceModal(clientId) {
       const c = (state.clients || []).find(item => item[0] === clientId);
       if (!c) return;
@@ -1165,7 +1301,6 @@
       const grandTotal = taxableAmount + taxAmt;
       const balanceDue = Math.max(0, grandTotal - totalPaid);
 
-      // Save to financials cache for email dispatch
       currentInvoice.financials = {
         subtotal: subtotal.toFixed(2),
         total: grandTotal.toFixed(2),
