@@ -267,7 +267,7 @@
       </div>
     </header>
 
-    <!-- TOP OVERVIEW STRIP -->
+    <!-- TOP OVERVIEW STRIP (CALCULATED IN REAL-TIME BY JAVASCRIPT) -->
     <div class="kpi-grid">
       <div class="kpi-card">
         <div class="kpi-title">Today's Transactions</div>
@@ -381,7 +381,7 @@
       </div>
     </div>
 
-    <!-- PAYMENT & RECEIVABLES LEDGER WITH MANUAL PAYMENT ADJUSTMENT -->
+    <!-- PAYMENT & RECEIVABLES LEDGER (CLIENT-SIDE DYNAMIC CALCULATION) -->
     <div class="section-card">
       <div class="section-head">
         <span>Payment & Receivables Ledger</span>
@@ -392,7 +392,7 @@
             <tr>
               <th>Client Account</th>
               <th>Contact Details</th>
-              <th>Total Billed</th>
+              <th>Total Deal Billed</th>
               <th>Advance Received</th>
               <th>Pending Due</th>
               <th style="text-align: right;">Action</th>
@@ -580,7 +580,7 @@
     </div>
   </div>
 
-  <!-- PAYMENT ADJUSTMENT MODAL (CUSTOMER PAYMENT EDIT / UPDATE) -->
+  <!-- PAYMENT ADJUSTMENT MODAL (ADD OR DEDUCT / REFUND) -->
   <div class="modal-backdrop" id="paymentAdjustmentModal">
     <div class="modal-window" style="max-width: 480px;">
       <div class="modal-header">
@@ -599,16 +599,24 @@
         </div>
 
         <div class="input-group" style="margin-bottom: 12px;">
-          <label>Add Payment / Adjustment Amount (INR)</label>
-          <input type="number" id="adjAmount" placeholder="e.g. 5000 (Use negative for refund)">
+          <label>Adjustment Action</label>
+          <select id="adjActionType">
+            <option value="add">Option 1: Add Payment (+ Increase Received)</option>
+            <option value="deduct">Option 2: Deduct / Correction (- Refund or Mistake Correction)</option>
+          </select>
+        </div>
+
+        <div class="input-group" style="margin-bottom: 12px;">
+          <label>Amount (INR)</label>
+          <input type="number" id="adjAmount" placeholder="e.g. 2000" min="1">
         </div>
 
         <div class="input-group" style="margin-bottom: 16px;">
-          <label>Adjustment Remark / Note</label>
-          <input type="text" id="adjRemark" placeholder="e.g. Cash received in office / Settlement">
+          <label>Adjustment Remark / Reason</label>
+          <input type="text" id="adjRemark" placeholder="e.g. Cash settlement / Overcharge correction">
         </div>
 
-        <button class="btn-primary" id="btnSaveAdjustment" style="width: 100%;" onclick="savePaymentAdjustment()">Save Adjustment & Update Balances</button>
+        <button class="btn-primary" id="btnSaveAdjustment" style="width: 100%;" onclick="savePaymentAdjustment()">Save Adjustment & Recalculate</button>
       </div>
     </div>
   </div>
@@ -822,8 +830,7 @@
       clients: [],
       staff: [],
       tasks: [],
-      payments: [],
-      todaySales: 0
+      payments: []
     };
 
     let currentInvoice = {
@@ -949,12 +956,16 @@
       renderMetaAnalytics();
     }
 
-    // ACCURATE PAYMENT & RECEIVABLES LEDGER WITH "ADJUST PAYMENT" ACTION
+    // 100% CLIENT-SIDE DYNAMIC REVENUE, ADVANCE & DUE CALCULATIONS
     function renderPaymentLedger() {
       const tbody = document.getElementById("recoveryLedgerBody");
       let totalReceivedAll = 0;
       let totalPendingAll = 0;
       let rowsHtml = "";
+
+      const now = new Date();
+      const todayDateStr = now.toISOString().split("T")[0];
+      let calculatedTodaySales = 0;
 
       (state.clients || []).forEach(c => {
         const clientId = String(c[0] || "").trim();
@@ -962,11 +973,19 @@
         const phone = c[2] || "—";
         const email = c[3] || "—";
 
+        // Full deal contracted amount
         const oneTime = parseFloat(c[5]) || 0;
         const monthly = parseFloat(c[7]) || 0;
         const annual = parseFloat(c[9]) || 0;
         const clientBilled = oneTime + monthly + annual;
 
+        // Dynamic Today's transaction trigger (Strictly on billing date)
+        const billingDate = String(c[10] || "").substring(0, 10);
+        if (billingDate === todayDateStr) {
+          calculatedTodaySales += clientBilled;
+        }
+
+        // Summing all advance & adjustments received for this client
         let clientPaid = 0;
         (state.payments || []).forEach(p => {
           if (String(p[1] || "").trim() === clientId) {
@@ -982,7 +1001,7 @@
           <tr>
             <td><strong>${clientName}</strong><br><span style="font-size:0.75rem; color:#64748b;">${clientId}</span></td>
             <td>${phone}<br><span style="font-size:0.75rem; color:#64748b;">${email}</span></td>
-            <td>INR ${clientBilled.toFixed(2)}</td>
+            <td><strong>INR ${clientBilled.toFixed(2)}</strong></td>
             <td style="color:#059669; font-weight:700;">INR ${clientPaid.toFixed(2)}</td>
             <td style="color:${pendingDue > 0 ? '#ea580c' : '#64748b'}; font-weight:700;">INR ${pendingDue.toFixed(2)}</td>
             <td style="text-align: right; white-space: nowrap;">
@@ -994,11 +1013,14 @@
       });
 
       tbody.innerHTML = rowsHtml || '<tr><td colspan="6" style="text-align:center;">No accounts available in ledger.</td></tr>';
+      
+      // Update Real-Time Summary Counters
+      document.getElementById("todaySales").innerText = "INR " + calculatedTodaySales.toFixed(2);
       document.getElementById("kpiTotalPaid").innerText = "INR " + totalReceivedAll.toFixed(2);
       document.getElementById("kpiTotalPending").innerText = "INR " + totalPendingAll.toFixed(2);
     }
 
-    // PAYMENT ADJUSTMENT MODAL CONTROLS
+    // PAYMENT ADJUSTMENT MODAL CONTROLS (WITH ADD & DEDUCT MODES)
     function openPaymentAdjustmentModal(clientId) {
       const c = (state.clients || []).find(item => String(item[0]).trim() === String(clientId).trim());
       if (!c) return;
@@ -1019,6 +1041,7 @@
       document.getElementById("adjClientName").innerText = `${c[1]} (${c[0]})`;
       document.getElementById("adjBilledVal").innerText = `INR ${clientBilled.toFixed(2)}`;
       document.getElementById("adjCurrentPaidVal").innerText = `INR ${clientPaid.toFixed(2)}`;
+      document.getElementById("adjActionType").value = "add";
       document.getElementById("adjAmount").value = "";
       document.getElementById("adjRemark").value = "";
 
@@ -1032,10 +1055,11 @@
     function savePaymentAdjustment() {
       const clientId = document.getElementById("adjClientId").value;
       const amount = parseFloat(document.getElementById("adjAmount").value) || 0;
+      const type = document.getElementById("adjActionType").value;
       const remark = document.getElementById("adjRemark").value.trim();
 
-      if (amount === 0) {
-        showToast("Please enter an adjustment amount.");
+      if (amount <= 0) {
+        showToast("Please enter a valid amount greater than 0.");
         return;
       }
 
@@ -1045,9 +1069,9 @@
 
       window.onAdjustmentSaved = function(res) {
         btn.disabled = false;
-        btn.innerText = "Save Adjustment & Update Balances";
+        btn.innerText = "Save Adjustment & Recalculate";
         if (res && res.success) {
-          showToast("Payment adjusted successfully.");
+          showToast(type === "deduct" ? "Deduction/Correction recorded." : "Payment addition recorded.");
           closePaymentAdjustmentModal();
           syncAllData();
         } else {
@@ -1055,7 +1079,7 @@
         }
       };
 
-      jsonp(API_ENDPOINT + `?action=adjustClientPayment&clientId=${encodeURIComponent(clientId)}&amount=${encodeURIComponent(amount)}&remark=${encodeURIComponent(remark)}`, "onAdjustmentSaved");
+      jsonp(API_ENDPOINT + `?action=adjustClientPayment&clientId=${encodeURIComponent(clientId)}&amount=${encodeURIComponent(amount)}&type=${encodeURIComponent(type)}&remark=${encodeURIComponent(remark)}`, "onAdjustmentSaved");
     }
 
     function sendPaymentReminderMail(clientId, dueAmt) {
@@ -1247,9 +1271,7 @@
     }
 
     function renderAdminDashboard() {
-      document.getElementById("todaySales").innerText = "INR " + (state.todaySales || 0).toFixed(2);
-
-      // Client Table
+      // Client Directory Table
       const clientBody = document.getElementById("clientTableBody");
       let cHtml = "";
       (state.clients || []).forEach(c => {
@@ -1512,11 +1534,11 @@
       currentInvoice.advances = [];
 
       (state.payments || []).forEach(p => {
-        if (String(p[1] || "").trim() === String(c[0]).trim() && parseFloat(p[4]) > 0) {
+        if (String(p[1] || "").trim() === String(c[0]).trim() && parseFloat(p[4]) !== 0) {
           currentInvoice.advances.push({
             mode: p[6] ? (p[6].includes("[") ? p[6].split("[")[1].replace("]", "") : "Direct") : "Direct",
             amount: parseFloat(p[4]),
-            note: p[6] ? p[6].split("[")[0].trim() : "Advance Payment"
+            note: p[6] ? p[6].split("[")[0].trim() : "Payment"
           });
         }
       });
@@ -1631,7 +1653,7 @@
 
     window.onRolloverDone = function(res) {
       if (res && res.success) {
-        showToast("Billing cycle successfully rolled over to: " + res.nextBillingDate);
+        showToast("Billing cycle rolled over to: " + res.nextBillingDate);
         syncAllData();
       }
     };
