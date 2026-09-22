@@ -127,7 +127,15 @@
       border-radius: var(--radius); padding: 22px; margin-bottom: 24px;
       box-shadow: 0 4px 16px rgba(0,0,0,0.02);
     }
-    .section-head { font-size: 1rem; font-weight: 700; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+    .section-head { font-size: 1rem; font-weight: 700; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+
+    /* CATEGORY FILTER PILLS */
+    .category-filter-bar { display: flex; gap: 6px; flex-wrap: wrap; }
+    .cat-pill {
+      padding: 6px 12px; border: 1px solid var(--border); background: #f8fafc; font-size: 0.75rem;
+      font-weight: 700; color: #64748b; border-radius: 8px; cursor: pointer; transition: all 0.2s;
+    }
+    .cat-pill.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 
     .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
     .input-group { display: flex; flex-direction: column; gap: 6px; }
@@ -167,7 +175,7 @@
     .table-box { overflow-x: auto; margin-top: 12px; }
     table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
     th { text-align: left; padding: 12px 10px; background: #f1f5f9; color: var(--text-muted); font-weight: 700; text-transform: uppercase; font-size: 0.7rem; }
-    td { padding: 12px 10px; border-bottom: 1px solid var(--border); color: #334155; }
+    td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: #334155; }
     .status-badge { padding: 3px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; background: #e0f2fe; color: #0284c7; }
 
     /* MODALS */
@@ -461,10 +469,16 @@
       </div>
     </div>
 
-    <!-- 2. CLIENTS TABLE -->
+    <!-- 2. CLIENTS TABLE WITH CATEGORY FILTER BUTTONS -->
     <div class="section-card">
       <div class="section-head">
         <span>Active Clients Directory</span>
+        <div class="category-filter-bar">
+          <button class="cat-pill active" onclick="setClientCategoryFilter('all', this)">All Accounts</button>
+          <button class="cat-pill" onclick="setClientCategoryFilter('monthly', this)">Monthly Retainers</button>
+          <button class="cat-pill" onclick="setClientCategoryFilter('annual', this)">Annual AMC</button>
+          <button class="cat-pill" onclick="setClientCategoryFilter('onetime', this)">One-Time Projects</button>
+        </div>
       </div>
       <div class="table-box">
         <table>
@@ -897,6 +911,7 @@
     };
 
     let activeTimeFilter = "all";
+    let activeClientCategory = "all";
     let lineChartInstance = null;
     let mixChartInstance = null;
 
@@ -1011,7 +1026,14 @@
       renderMetaAnalytics();
     }
 
-    // LEDGER & AUTOMATIC DUE CALCULATIONS
+    function setClientCategoryFilter(cat, el) {
+      activeClientCategory = cat;
+      document.querySelectorAll(".cat-pill").forEach(btn => btn.classList.remove("active"));
+      if (el) el.classList.add("active");
+      renderAdminDashboard();
+    }
+
+    // PAYMENT LEDGER & AUTOMATIC DUE CALCULATIONS
     function renderPaymentLedger() {
       const tbody = document.getElementById("recoveryLedgerBody");
       let totalReceivedAll = 0;
@@ -1072,7 +1094,7 @@
       document.getElementById("kpiTotalPending").innerText = "INR " + totalPendingAll.toFixed(2);
     }
 
-    // MULTI-INSTALLMENT PASSBOOK VIEW
+    // CUSTOMER PASSBOOK VIEW
     function openCustomerProfileModal(clientId) {
       const c = (state.clients || []).find(item => String(item[0]).trim() === String(clientId).trim());
       if (!c) return;
@@ -1107,7 +1129,7 @@
       document.getElementById("profBilledAmt").innerText = `INR ${clientBilled.toFixed(2)}`;
       document.getElementById("profReceivedAmt").innerText = `INR ${clientPaid.toFixed(2)}`;
       document.getElementById("profPendingAmt").innerText = `INR ${pendingDue.toFixed(2)}`;
-      document.getElementById("profPaymentsHistoryBody").innerHTML = historyRows || '<tr><td colspan="4" style="text-align:center;">No installments recorded yet.</td></tr>';
+      document.getElementById("profPaymentsHistoryBody").innerHTML = historyRows || '<tr><td colspan="4" style="text-align:center;">No installment records found.</td></tr>';
 
       document.getElementById("customerProfileModal").style.display = "flex";
     }
@@ -1366,13 +1388,24 @@
     }
 
     function renderAdminDashboard() {
+      // Filter clients based on active category button
       const clientBody = document.getElementById("clientTableBody");
       let cHtml = "";
+      
       (state.clients || []).forEach(c => {
+        const otAmt = parseFloat(c[5]) || 0;
+        const moAmt = parseFloat(c[7]) || 0;
+        const anAmt = parseFloat(c[9]) || 0;
+
+        // Category filter check
+        if (activeClientCategory === "monthly" && moAmt <= 0) return;
+        if (activeClientCategory === "annual" && anAmt <= 0) return;
+        if (activeClientCategory === "onetime" && otAmt <= 0) return;
+
         let serv = [];
-        if (c[4]) serv.push(`One-Time: ${c[4]} (INR ${c[5]})`);
-        if (c[6]) serv.push(`Monthly: ${c[6]} (INR ${c[7]})`);
-        if (c[8]) serv.push(`Annual: ${c[8]} (INR ${c[9]})`);
+        if (c[4] && otAmt > 0) serv.push(`One-Time: ${c[4]} (INR ${otAmt})`);
+        if (c[6] && moAmt > 0) serv.push(`Monthly: ${c[6]} (INR ${moAmt})`);
+        if (c[8] && anAmt > 0) serv.push(`Annual: ${c[8]} (INR ${anAmt})`);
 
         cHtml += `
           <tr>
@@ -1389,8 +1422,9 @@
           </tr>
         `;
       });
-      clientBody.innerHTML = cHtml || '<tr><td colspan="6" style="text-align:center;">No clients enrolled yet.</td></tr>';
+      clientBody.innerHTML = cHtml || '<tr><td colspan="6" style="text-align:center;">No accounts found in this category.</td></tr>';
 
+      // Staff Directory Table
       const staffBody = document.getElementById("staffTableBody");
       let sTableHtml = "";
       let sOptions = '<option value="">Choose Staff Profile</option>';
@@ -1415,6 +1449,7 @@
       const staffSelect = document.getElementById("staffSelect");
       staffSelect.innerHTML = sOptions;
 
+      // Task Approvals Table
       const taskBody = document.getElementById("taskApprovalBody");
       let tHtml = "";
       (state.tasks || []).forEach(t => {
