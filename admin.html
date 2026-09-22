@@ -3,527 +3,738 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Administrative Console - Ofbuzz Technology</title>
-  <style>
-    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-    body { background-color: #f8f9fa; color: #212529; margin: 0; padding: 16px; }
-    .container { max-width: 1040px; margin: 0 auto; }
-    .header { background: #ffffff; padding: 16px; border-radius: 8px; display: flex; align-items: center; gap: 14px; border: 1px solid #e9ecef; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
-    .brand-logo { width: 48px; height: 48px; border-radius: 6px; object-fit: cover; flex-shrink: 0; }
-    .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 16px; }
-    .metric-card { background: #ffffff; padding: 16px; border-radius: 8px; border-left: 4px solid #0d6efd; border-top: 1px solid #e9ecef; border-right: 1px solid #e9ecef; border-bottom: 1px solid #e9ecef; }
-    .metric-title { font-size: 12px; color: #6c757d; font-weight: 600; }
-    .metric-value { font-size: 20px; font-weight: 700; margin-top: 4px; color: #111827; }
-    .panel-card { background: #ffffff; padding: 18px; border-radius: 8px; margin-bottom: 16px; border: 1px solid #e9ecef; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
-    .panel-heading { font-size: 15px; margin: 0 0 12px; border-bottom: 1px solid #f1f3f5; padding-bottom: 8px; font-weight: 700; color: #111827; }
-    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; }
-    label { font-size: 11px; color: #495057; font-weight: 600; }
-    input, textarea, button, select { width: 100%; padding: 8px 10px; border: 1px solid #ced4da; border-radius: 6px; font-size: 13px; margin-top: 4px; }
-    button { background: #0d6efd; color: #ffffff; border: none; cursor: pointer; font-weight: 600; transition: all 0.15s ease; }
-    button:hover { opacity: 0.92; transform: translateY(-1px); }
-    button:active { transform: translateY(1px); }
-    button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-    button.btn-action-edit { background: #ffc107; color: #000000; width: auto; padding: 4px 10px; font-size: 11px; margin-right: 4px; }
-    button.btn-action-delete { background: #dc3545; color: #ffffff; width: auto; padding: 4px 10px; font-size: 11px; }
-    button.btn-action-approve { background: #198754; color: #ffffff; width: auto; padding: 5px 12px; font-size: 12px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
-    th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid #e9ecef; vertical-align: middle; }
-    th { background: #f8f9fa; font-weight: 700; color: #495057; }
-    .table-container { overflow-x: auto; }
-    .badge { padding: 3px 6px; border-radius: 4px; font-size: 11px; font-weight: 600; }
-    .badge-pending { background: #cff4fc; color: #055160; }
+  <title>Admin Studio & Invoice Generator — Ofbuzz Technology</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
-    /* On-Screen Toast Notification */
-    .toast-box { position: fixed; top: 20px; right: 20px; padding: 12px 18px; border-radius: 8px; color: #fff; font-size: 13px; font-weight: 600; display: none; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,0.15); animation: slideIn 0.25s ease; }
-    .toast-success { background: #198754; }
-    .toast-error { background: #dc3545; }
-    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  <style>
+    :root {
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --primary-glow: rgba(99, 102, 241, 0.2);
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --accent: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+    body { background: var(--bg); color: var(--text); padding: 20px 16px 80px; }
+    .container { max-width: 1200px; margin: 0 auto; }
+
+    header {
+      display: flex; justify-content: space-between; align-items: center;
+      background: var(--surface); padding: 16px 24px; border-radius: var(--radius);
+      border: 1px solid var(--border); box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+      margin-bottom: 24px;
+    }
+    .brand-box { display: flex; align-items: center; gap: 12px; }
+    .brand-logo { width: 44px; height: 44px; border-radius: 10px; object-fit: cover; }
+    .brand-title { font-size: 1.15rem; font-weight: 800; color: var(--text); }
+
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .kpi-card { background: var(--surface); padding: 18px; border-radius: var(--radius); border: 1px solid var(--border); border-left: 4px solid var(--primary); }
+    .kpi-title { font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); }
+    .kpi-val { font-size: 1.5rem; font-weight: 800; margin-top: 6px; color: var(--text); }
+
+    .section-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 22px; margin-bottom: 24px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.02);
+    }
+    .section-head { font-size: 1rem; font-weight: 700; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+
+    .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+    .input-group { display: flex; flex-direction: column; gap: 6px; }
+    label { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); }
+    input, select, textarea {
+      padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px;
+      font-size: 0.85rem; outline: none; transition: all 0.2s; background: #fff;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
+
+    button {
+      padding: 10px 16px; border: none; border-radius: 8px; font-weight: 700;
+      font-size: 0.85rem; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-bill { background: rgba(99, 102, 241, 0.12); color: var(--primary); border: 1px solid rgba(99, 102, 241, 0.25); }
+    .btn-bill:hover { background: var(--primary); color: #fff; }
+    .btn-del { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+    .btn-del:hover { background: var(--danger); color: #fff; }
+    .btn-edit { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+    .btn-edit:hover { background: var(--warning); color: #000; }
+
+    .table-box { overflow-x: auto; margin-top: 12px; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    th { text-align: left; padding: 12px 10px; background: #f1f5f9; color: var(--text-muted); font-weight: 700; text-transform: uppercase; font-size: 0.7rem; }
+    td { padding: 12px 10px; border-bottom: 1px solid var(--border); color: #334155; }
+    .status-badge { padding: 3px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; background: #e0f2fe; color: #0284c7; }
+
+    /* INVOICE MODAL POPUP */
+    .modal-backdrop {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(8px);
+      z-index: 1000; display: none; align-items: center; justify-content: center; padding: 16px;
+    }
+    .modal-window {
+      background: #fff; width: 100%; max-width: 960px; max-height: 92vh;
+      border-radius: var(--radius); overflow-y: auto; box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+      display: flex; flex-direction: column;
+    }
+    .modal-header {
+      padding: 16px 24px; border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+      position: sticky; top: 0; background: #fff; z-index: 10;
+    }
+    .modal-body { padding: 24px; }
+    .modal-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 24px; }
+    @media (max-width: 820px) { .modal-grid { grid-template-columns: 1fr; } }
+
+    /* INVOICE PAPER STYLING */
+    .invoice-preview-card {
+      background: #fff; border: 1px solid #e2e8f0; border-radius: 12px;
+      padding: 24px; box-shadow: 0 8px 30px rgba(0,0,0,0.05); font-size: 0.8rem;
+    }
+    .inv-top { display: flex; justify-content: space-between; border-bottom: 2px solid #f1f5f9; padding-bottom: 14px; margin-bottom: 14px; }
+    .inv-table-preview th { background: #f8fafc; padding: 6px 8px; font-size: 0.7rem; }
+    .inv-table-preview td { padding: 8px; font-size: 0.78rem; border-bottom: 1px solid #f8fafc; }
+    .adv-table th { background: #ecfdf5; color: #047857; }
+    .summary-line { display: flex; justify-content: space-between; padding: 3px 0; }
+    .summary-total { font-weight: 800; font-size: 0.95rem; border-top: 1px dashed #cbd5e1; padding-top: 6px; margin-top: 4px; }
+    .summary-due { font-weight: 800; font-size: 1.05rem; color: var(--primary); border-top: 2px solid #0f172a; padding-top: 6px; margin-top: 4px; }
+
+    /* ON-SCREEN TOAST */
+    .toast { position: fixed; top: 20px; right: 20px; padding: 12px 20px; border-radius: 8px; background: #0f172a; color: #fff; font-size: 0.85rem; font-weight: 600; display: none; z-index: 2000; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+
+    /* HIGH-RES PRINT STYLES */
+    @media print {
+      body * { visibility: hidden; }
+      #printableInvoice, #printableInvoice * { visibility: visible; }
+      #printableInvoice {
+        position: fixed; left: 0; top: 0; width: 100%; height: 100%;
+        padding: 20px; border: none; box-shadow: none; background: #fff !important;
+      }
+      .modal-header, .no-print { display: none !important; }
+    }
   </style>
 </head>
 <body>
-  <div id="toast" class="toast-box"></div>
+
+  <div id="toast" class="toast"></div>
 
   <div class="container">
-    <div class="header">
-      <img src="https://i.pinimg.com/736x/bd/d0/5c/bdd05c94afb66b5a72f5e17a7a879ab3.jpg" class="brand-logo" alt="Ofbuzz Technology Identity" referrerpolicy="no-referrer">
-      <div>
-        <h1 style="font-size:17px; margin:0; font-weight:700;">Ofbuzz Technology</h1>
-        <div style="font-size:12px; color:#6c757d;">Administrative Operations Console</div>
+    <header>
+      <div class="brand-box">
+        <img src="https://i.pinimg.com/736x/bd/d0/5c/bdd05c94afb66b5a72f5e17a7a879ab3.jpg" class="brand-logo" alt="Ofbuzz Logo">
+        <div>
+          <div class="brand-title">Ofbuzz Technology — Admin Studio</div>
+          <p style="font-size: 0.75rem; color: var(--text-muted);">Custom Billing, Task Engine & Smart Invoicing</p>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="syncAllData()">↻ Refresh Data</button>
+    </header>
+
+    <!-- METRICS -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-title">Today's Transactions</div>
+        <div class="kpi-val" id="todaySales">₹0.00</div>
+      </div>
+      <div class="kpi-card" style="border-left-color: var(--accent);">
+        <div class="kpi-title">Monthly Revenue Pipeline</div>
+        <div class="kpi-val" id="monthlySales" style="font-size: 1.15rem; font-weight: 700;">Loading...</div>
       </div>
     </div>
 
-    <!-- Analytics Aggregate -->
-    <div class="metrics-grid">
-      <div class="metric-card">
-        <div class="metric-title">Transactions Processed Today</div>
-        <div class="metric-value" id="kpiDailyVolume">INR 0</div>
+    <!-- CLIENT SETUP -->
+    <div class="section-card">
+      <div class="section-head">
+        <span id="formTitle">Register Client & Setup Multi-Tier Services</span>
       </div>
-      <div class="metric-card" style="border-left-color:#198754;">
-        <div class="metric-title">Aggregated Monthly Performance</div>
-        <div class="metric-value" id="kpiMonthlyVolume" style="font-size:14px; font-weight:600; margin-top:6px;">Connecting...</div>
+      <input type="hidden" id="clientId">
+      <div class="input-grid">
+        <div class="input-group">
+          <label>Customer / Business Name</label>
+          <input type="text" id="custName" placeholder="Client Name">
+        </div>
+        <div class="input-group">
+          <label>Phone / WhatsApp</label>
+          <input type="text" id="custPhone" placeholder="Mobile Number">
+        </div>
+        <div class="input-group">
+          <label>Email Address</label>
+          <input type="email" id="custEmail" placeholder="client@domain.com">
+        </div>
+        <div class="input-group">
+          <label>Renewal / Due Date</label>
+          <input type="date" id="custDate">
+        </div>
+        <div class="input-group">
+          <label>1. One-Time Service</label>
+          <input type="text" id="oneTimeTitle" placeholder="e.g. Website Development">
+        </div>
+        <div class="input-group">
+          <label>One-Time Fee (₹)</label>
+          <input type="number" id="oneTimeAmt" placeholder="0">
+        </div>
+        <div class="input-group">
+          <label>2. Monthly Retainer Service</label>
+          <input type="text" id="monthlyTitle" placeholder="e.g. SEO & Meta Ads">
+        </div>
+        <div class="input-group">
+          <label>Monthly Fee (₹)</label>
+          <input type="number" id="monthlyAmt" placeholder="0">
+        </div>
+        <div class="input-group">
+          <label>3. Annual Support Service</label>
+          <input type="text" id="annualTitle" placeholder="e.g. Cloud Server & AMC">
+        </div>
+        <div class="input-group">
+          <label>Annual Fee (₹)</label>
+          <input type="number" id="annualAmt" placeholder="0">
+        </div>
+      </div>
+      <div style="margin-top: 16px; display: flex; gap: 10px;">
+        <button class="btn-primary" id="btnSaveClient" onclick="saveClientRecord()">Save & Update Client</button>
+        <button class="btn-del" id="btnCancelEdit" style="display:none;" onclick="cancelClientEdit()">Cancel</button>
       </div>
     </div>
 
-    <!-- Client Management Engine -->
-    <div class="panel-card">
-      <div class="panel-heading" id="clientFormHeader">Register Client & Configure Custom Billing Structure</div>
-      <input type="hidden" id="fieldClientId">
-      <div class="form-grid">
-        <div><label>Corporate Account Name</label><input type="text" id="clientName"></div>
-        <div><label>Contact Number</label><input type="text" id="clientPhone"></div>
-        <div><label>Corporate Email</label><input type="email" id="clientEmail"></div>
-        <div><label>Maturity Billing Date</label><input type="date" id="clientBillingDate"></div>
-        <div><label>One-Time Service Title</label><input type="text" id="serviceOneTimeTitle"></div>
-        <div><label>One-Time Amount (INR)</label><input type="number" id="serviceOneTimeAmount"></div>
-        <div><label>Monthly Service Title</label><input type="text" id="serviceMonthlyTitle"></div>
-        <div><label>Monthly Amount (INR)</label><input type="number" id="serviceMonthlyAmount"></div>
-        <div><label>Annual Service Title</label><input type="text" id="serviceAnnualTitle"></div>
-        <div><label>Annual Amount (INR)</label><input type="number" id="serviceAnnualAmount"></div>
+    <!-- CLIENTS TABLE -->
+    <div class="section-card">
+      <div class="section-head">
+        <span>Active Clients Directory</span>
       </div>
-      <div style="display:flex; gap:8px; margin-top:12px;">
-        <button id="btnSubmitClient" onclick="processClientSave()">Persist Client Record</button>
-        <button id="btnCancelClientEdit" onclick="abortClientEdit()" style="display:none; width:auto; background:#6c757d;">Cancel Revision</button>
-      </div>
-
-      <h3 style="font-size:14px; margin:20px 0 8px; font-weight:700;">Client Management Registry</h3>
-      <div class="table-container">
+      <div class="table-box">
         <table>
           <thead>
             <tr>
-              <th>Identifier</th>
-              <th>Account</th>
-              <th>Telephone</th>
-              <th>Email</th>
-              <th>Billing Model</th>
-              <th>Renewal Date</th>
-              <th>Operations</th>
+              <th>Client ID</th>
+              <th>Customer Name</th>
+              <th>Contact Info</th>
+              <th>Active Services</th>
+              <th>Billing Due</th>
+              <th style="text-align: right;">Actions</th>
             </tr>
           </thead>
           <tbody id="clientTableBody">
-            <tr><td colspan="7" style="text-align:center;">Synchronizing records...</td></tr>
+            <tr><td colspan="6" style="text-align:center;">Synchronizing records...</td></tr>
           </tbody>
         </table>
       </div>
     </div>
 
-    <!-- Workforce Management Engine -->
-    <div class="panel-card">
-      <div class="panel-heading" id="staffFormHeader">Add Personnel Record</div>
-      <input type="hidden" id="staffIsEditMode">
-      <div class="form-grid">
-        <div><label>Staff ID</label><input type="text" id="staffIdField" placeholder="Example: STF01"></div>
-        <div><label>Full Legal Name</label><input type="text" id="staffNameField"></div>
-        <div><label>Corporate Email Address</label><input type="email" id="staffEmailField"></div>
-        <div><label>Functional Title (Role)</label><input type="text" id="staffRoleField" placeholder="Example: Senior Architect"></div>
+    <!-- STAFF & DELEGATION -->
+    <div class="section-card">
+      <div class="section-head">
+        <span>Staff Delegation & Task Review</span>
       </div>
-      <div style="display:flex; gap:8px; margin-top:12px;">
-        <button id="btnSubmitStaff" onclick="processStaffSave()">Commit Associate Record</button>
-        <button id="btnCancelStaffEdit" onclick="abortStaffEdit()" style="display:none; width:auto; background:#6c757d;">Cancel Revision</button>
-      </div>
-
-      <h3 style="font-size:14px; margin:20px 0 8px; font-weight:700;">Workforce Directory</h3>
-      <div class="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>Staff ID</th>
-              <th>Associate Name</th>
-              <th>Email</th>
-              <th>Functional Role</th>
-              <th>Lifecycle Status</th>
-              <th>Operations</th>
-            </tr>
-          </thead>
-          <tbody id="staffTableBody">
-            <tr><td colspan="6" style="text-align:center;">Synchronizing directory...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Assignment Delegation Engine -->
-    <div class="panel-card">
-      <div class="panel-heading">Delegate Operational Assignment</div>
-      <div class="form-grid">
-        <div>
-          <label>Assignee Selection</label>
-          <select id="taskAssigneeSelect" onchange="synchronizeAssigneeDetails()">
+      <div class="input-grid">
+        <div class="input-group">
+          <label>Select Staff Member</label>
+          <select id="staffSelect">
             <option value="">Choose Staff Profile</option>
           </select>
         </div>
-        <div><label>Assignee Identifier</label><input type="text" id="taskStaffId" readonly style="background:#e9ecef;"></div>
-        <div><label>Assignee Notification Destination</label><input type="email" id="taskStaffEmail" readonly style="background:#e9ecef;"></div>
-        <div><label>Assignment Title</label><input type="text" id="taskTitle"></div>
+        <div class="input-group">
+          <label>Task Title</label>
+          <input type="text" id="taskTitle" placeholder="Assignment Title">
+        </div>
+        <div class="input-group" style="grid-column: span 2;">
+          <label>Assignment Instructions</label>
+          <input type="text" id="taskDesc" placeholder="Describe instructions and timeline...">
+        </div>
       </div>
-      <div style="margin-top:8px;">
-        <label>Operational Deliverable Specifications</label>
-        <textarea id="taskDescription" rows="2"></textarea>
-      </div>
-      <button id="btnSubmitTask" onclick="processTaskDelegation()" style="margin-top:12px;">Authorize Assignment & Dispatch Email Notification</button>
-    </div>
-
-    <!-- Verification Queue Engine -->
-    <div class="panel-card">
-      <div class="panel-heading">Pending Deliverable Verifications</div>
-      <div class="table-container">
+      <button class="btn-primary" style="margin-top: 12px;" onclick="assignStaffTask()">Assign Task & Send Notification Email</button>
+      
+      <div class="table-box" style="margin-top: 20px;">
+        <h4 style="font-size: 0.85rem; margin-bottom: 8px;">Pending Task Approvals</h4>
         <table>
           <thead>
             <tr>
-              <th>Deliverable Title</th>
-              <th>Operational Associate</th>
-              <th>Associate Observations</th>
-              <th>State</th>
-              <th>Review Operations</th>
+              <th>Task</th>
+              <th>Assigned Associate</th>
+              <th>Staff Remark</th>
+              <th>Status</th>
+              <th>Action</th>
             </tr>
           </thead>
-          <tbody id="verificationTableBody">
-            <tr><td colspan="5" style="text-align:center;">Polling verification queue...</td></tr>
+          <tbody id="taskApprovalBody">
+            <tr><td colspan="5" style="text-align:center;">No pending tasks for approval.</td></tr>
           </tbody>
         </table>
       </div>
     </div>
   </div>
 
-  <script>
-    var API_ENDPOINT = "https://script.google.com/macros/s/AKfycby9yiIo9euB9KTt0zBuwcF3x6pdaeJJ48mAwcTFC6xl53oH8eh0Agfwlr138t3D5KNPYQ/exec";
-    var administrativeCache = { clients: [], payments: [], tasks: [], staff: [], todaySales: 0, monthlySales: {} };
+  <!-- INVOICE GENERATOR MODAL -->
+  <div class="modal-backdrop" id="invoiceModal">
+    <div class="modal-window">
+      <div class="modal-header">
+        <div>
+          <h3 style="font-size: 1.1rem; font-weight: 800;">BillCraft Invoice Generator</h3>
+          <p style="font-size: 0.75rem; color: var(--text-muted);" id="modalClientHeader">Generating for Client</p>
+        </div>
+        <div style="display:flex; gap: 8px;">
+          <button class="btn-primary" onclick="printInvoice()">⚡ Print / Download PDF</button>
+          <button class="btn-del" onclick="closeInvoiceModal()">✕ Close</button>
+        </div>
+      </div>
 
-    function showToast(msg, isSuccess) {
-      var toast = document.getElementById("toast");
+      <div class="modal-body">
+        <div class="modal-grid">
+          <!-- ADJUSTMENT CONTROLS -->
+          <div class="no-print">
+            <div class="section-card" style="padding: 16px; margin-bottom: 16px;">
+              <h4 style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px;">1. Advance Payments (3 Options)</h4>
+              <div class="input-grid">
+                <div class="input-group">
+                  <label>Payment Method</label>
+                  <select id="advMode">
+                    <option value="UPI / QR Code">1. UPI / QR Scan</option>
+                    <option value="Bank Transfer / NEFT">2. Bank Transfer / NEFT</option>
+                    <option value="Cash / Cheque">3. Cash / Cheque</option>
+                  </select>
+                </div>
+                <div class="input-group">
+                  <label>Advance Amount (₹)</label>
+                  <input type="number" id="advAmount" placeholder="0">
+                </div>
+                <div class="input-group" style="grid-column: span 2;">
+                  <label>Reference Note / Txn ID</label>
+                  <input type="text" id="advNote" placeholder="e.g. 1st Token Advance (Txn #9283)">
+                </div>
+              </div>
+              <button class="btn-primary" style="margin-top: 10px; width: 100%; background: #10b981;" onclick="addAdvanceReceipt()">+ Add Advance Receipt</button>
+            </div>
+
+            <div class="section-card" style="padding: 16px;">
+              <h4 style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px;">2. Invoice Settings</h4>
+              <div class="input-grid">
+                <div class="input-group">
+                  <label>Tax Rate / GST (%)</label>
+                  <input type="number" id="invTaxRate" value="18" oninput="renderInvoicePreview()">
+                </div>
+                <div class="input-group">
+                  <label>Discount (%)</label>
+                  <input type="number" id="invDiscountRate" value="0" oninput="renderInvoicePreview()">
+                </div>
+                <div class="input-group" style="grid-column: span 2;">
+                  <label>UPI ID (For Dynamic QR Code)</label>
+                  <input type="text" id="invUpiId" value="satyamxpandey11@gmail.com" placeholder="username@upi" oninput="renderInvoicePreview()">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- LIVE PRINTABLE PREVIEW -->
+          <div>
+            <div class="invoice-preview-card" id="printableInvoice">
+              <div class="inv-top">
+                <div>
+                  <img src="https://i.pinimg.com/736x/bd/d0/5c/bdd05c94afb66b5a72f5e17a7a879ab3.jpg" style="max-height: 48px; border-radius: 6px; margin-bottom: 6px;" alt="Ofbuzz">
+                  <h3 style="font-size: 1.15rem; font-weight: 800; color: #0f172a;">Ofbuzz Technology</h3>
+                  <p style="font-size: 0.75rem; color: #64748b;">Tech & Creative Operations Agency</p>
+                </div>
+                <div style="text-align: right;">
+                  <span id="previewInvNumber" style="font-family:'JetBrains Mono',monospace; font-weight: 700; color: var(--primary);">#INV-001</span>
+                  <p id="previewInvDate" style="font-size: 0.75rem; color: #64748b; margin-top: 4px;"></p>
+                </div>
+              </div>
+
+              <div style="margin-bottom: 14px; background: #f8fafc; padding: 10px; border-radius: 8px;">
+                <span style="font-size: 0.65rem; text-transform: uppercase; color: #94a3b8; font-weight: 700;">Customer Details:</span><br>
+                <strong id="previewCustName" style="color: #0f172a; font-size: 0.9rem;">Customer Name</strong><br>
+                <span id="previewCustPhone" style="color: #64748b; font-size: 0.78rem;">Phone / Email</span>
+              </div>
+
+              <!-- SERVICE LINE ITEMS -->
+              <table class="inv-table-preview" style="width: 100%; border-collapse: collapse; margin-bottom: 12px;">
+                <thead>
+                  <tr>
+                    <th>Description</th>
+                    <th style="text-align: right;">Amount</th>
+                  </tr>
+                </thead>
+                <tbody id="previewLineItems"></tbody>
+              </table>
+
+              <!-- ADVANCE PAYMENTS SUMMARY -->
+              <div id="previewAdvanceBox" style="display: none; margin-bottom: 12px;">
+                <span style="font-size: 0.68rem; text-transform: uppercase; font-weight: 700; color: #047857;">Advance Receipts (Settled)</span>
+                <table class="inv-table-preview adv-table" style="width: 100%; border-collapse: collapse; margin-top: 4px;">
+                  <thead>
+                    <tr>
+                      <th>Installment & Method</th>
+                      <th style="text-align: right;">Paid</th>
+                    </tr>
+                  </thead>
+                  <tbody id="previewAdvanceItems"></tbody>
+                </table>
+              </div>
+
+              <!-- FINANCIAL TOTALS -->
+              <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 14px;">
+                <div style="text-align: center;">
+                  <div id="invoiceQr" style="width: 70px; height: 70px; margin: 0 auto;"></div>
+                  <span id="qrNote" style="font-size: 0.65rem; color: #64748b; display: block; margin-top: 4px; font-weight: 600;">Scan to Pay Due</span>
+                </div>
+                <div style="width: 200px; text-align: right;">
+                  <div class="summary-line"><span>Subtotal:</span><span id="prevSubtotal">₹0.00</span></div>
+                  <div class="summary-line"><span>Tax/GST:</span><span id="prevTax">₹0.00</span></div>
+                  <div class="summary-line"><span>Discount:</span><span id="prevDiscount">-₹0.00</span></div>
+                  <div class="summary-line summary-total"><span>Total:</span><span id="prevTotal">₹0.00</span></div>
+                  <div class="summary-line" style="color: #10b981; font-weight: 600;"><span>Advance Paid:</span><span id="prevPaid">-₹0.00</span></div>
+                  <div class="summary-line summary-due"><span>Balance Due:</span><span id="prevDue">₹0.00</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_ENDPOINT = "https://script.google.com/macros/s/AKfycby9yiIo9euB9KTt0zBuwcF3x6pdaeJJ48mAwcTFC6xl53oH8eh0Agfwlr138t3D5KNPYQ/exec";
+
+    let state = {
+      clients: [],
+      staff: [],
+      tasks: [],
+      todaySales: 0,
+      monthlySales: {}
+    };
+
+    let currentInvoice = {
+      client: null,
+      lineItems: [],
+      advances: []
+    };
+
+    function showToast(msg) {
+      const toast = document.getElementById("toast");
       toast.innerText = msg;
-      toast.className = "toast-box " + (isSuccess ? "toast-success" : "toast-error");
       toast.style.display = "block";
-      setTimeout(function() { toast.style.display = "none"; }, 3500);
+      setTimeout(() => { toast.style.display = "none"; }, 3000);
     }
 
     function jsonp(url, callbackName) {
-      var script = document.createElement("script");
+      const script = document.createElement("script");
       script.src = url + (url.indexOf("?") >= 0 ? "&" : "?") + "callback=" + callbackName;
       document.body.appendChild(script);
-      script.onload = function() { script.remove(); };
+      script.onload = () => script.remove();
     }
 
-    function renderDashboard(dataset) {
-      if (!dataset) return;
-      administrativeCache = dataset;
+    function syncAllData() {
+      jsonp(API_ENDPOINT + "?action=getAdminData", "onAdminSync");
+    }
 
-      document.getElementById("kpiDailyVolume").innerText = "INR " + (dataset.todaySales || 0);
-
-      var monthlyText = "";
-      for (var monthKey in dataset.monthlySales) {
-        monthlyText += monthKey + ": INR " + dataset.monthlySales[monthKey] + " | ";
+    window.onAdminSync = function(res) {
+      if (res && res.success && res.data) {
+        state = res.data;
+        renderAdminDashboard();
       }
-      document.getElementById("kpiMonthlyVolume").innerText = monthlyText || "No transactions recorded";
+    };
 
-      // Render Clients
-      var clientRows = "";
-      (dataset.clients || []).forEach(function(row) {
-        var billingBreakdown = [];
-        if (row[4]) billingBreakdown.push("One-Time: INR " + row[5]);
-        if (row[6]) billingBreakdown.push("Monthly: INR " + row[7]);
-        if (row[8]) billingBreakdown.push("Annual: INR " + row[9]);
+    function renderAdminDashboard() {
+      document.getElementById("todaySales").innerText = "₹" + (state.todaySales || 0).toFixed(2);
+      
+      let mText = "";
+      for (let m in state.monthlySales) {
+        mText += `${m}: ₹${state.monthlySales[m]} | `;
+      }
+      document.getElementById("monthlySales").innerText = mText || "No recorded sales yet";
 
-        clientRows += '<tr>';
-        clientRows += '  <td>' + row[0] + '</td>';
-        clientRows += '  <td><strong>' + row[1] + '</strong></td>';
-        clientRows += '  <td>' + (row[2] || "-") + '</td>';
-        clientRows += '  <td>' + (row[3] || "-") + '</td>';
-        clientRows += '  <td>' + (billingBreakdown.join("<br>") || "None") + '</td>';
-        clientRows += '  <td>' + (row[10] ? String(row[10]).substring(0, 10) : "-") + '</td>';
-        clientRows += '  <td style="white-space:nowrap;">';
-        clientRows += '    <button onclick="stageClientModification(\'' + row[0] + '\')" class="btn-action-edit">Edit</button>';
-        clientRows += '    <button onclick="commitClientDeletion(\'' + row[0] + '\')" class="btn-action-delete">Delete</button>';
-        clientRows += '  </td>';
-        clientRows += '</tr>';
+      // Clients Directory
+      const clientBody = document.getElementById("clientTableBody");
+      let cHtml = "";
+      (state.clients || []).forEach(c => {
+        let serv = [];
+        if (c[4]) serv.push(`One-Time: ${c[4]} (₹${c[5]})`);
+        if (c[6]) serv.push(`Monthly: ${c[6]} (₹${c[7]})`);
+        if (c[8]) serv.push(`Annual: ${c[8]} (₹${c[9]})`);
+
+        cHtml += `
+          <tr>
+            <td><strong>${c[0]}</strong></td>
+            <td><strong>${c[1]}</strong></td>
+            <td>${c[2]}<br><span style="font-size:0.75rem; color:#64748b;">${c[3]}</span></td>
+            <td>${serv.join("<br>") || "—"}</td>
+            <td>${c[10] ? c[10].substring(0,10) : "—"}</td>
+            <td style="text-align: right; white-space: nowrap;">
+              <button class="btn-bill" onclick="openInvoiceModal('${c[0]}')">⚡ Generate Bill</button>
+              <button class="btn-edit" onclick="editClientRecord('${c[0]}')">Edit</button>
+              <button class="btn-del" onclick="deleteClientRecord('${c[0]}')">Delete</button>
+            </td>
+          </tr>
+        `;
       });
-      document.getElementById("clientTableBody").innerHTML = clientRows || '<tr><td colspan="7" style="text-align:center;">No records available.</td></tr>';
+      clientBody.innerHTML = cHtml || '<tr><td colspan="6" style="text-align:center;">No clients enrolled yet.</td></tr>';
 
-      // Render Workforce
-      var staffRows = "";
-      var assigneeOptions = '<option value="">Choose Staff Profile</option>';
-      (dataset.staff || []).forEach(function(assoc) {
-        staffRows += '<tr>';
-        staffRows += '  <td>' + assoc[0] + '</td>';
-        staffRows += '  <td><strong>' + assoc[1] + '</strong></td>';
-        staffRows += '  <td>' + assoc[2] + '</td>';
-        staffRows += '  <td>' + (assoc[3] || "-") + '</td>';
-        staffRows += '  <td>' + assoc[4] + '</td>';
-        staffRows += '  <td style="white-space:nowrap;">';
-        staffRows += '    <button onclick="stageStaffModification(\'' + assoc[0] + '\')" class="btn-action-edit">Edit</button>';
-        staffRows += '    <button onclick="commitStaffDeletion(\'' + assoc[0] + '\')" class="btn-action-delete">Delete</button>';
-        staffRows += '  </td>';
-        staffRows += '</tr>';
-
-        assigneeOptions += '<option value="' + assoc[0] + '">' + assoc[1] + ' (' + assoc[0] + ')</option>';
+      // Staff dropdown
+      const staffSelect = document.getElementById("staffSelect");
+      let sOptions = '<option value="">Choose Staff Profile</option>';
+      (state.staff || []).forEach(s => {
+        sOptions += `<option value="${s[0]}" data-email="${s[2]}" data-name="${s[1]}">${s[1]} (${s[0]}) — ${s[3]}</option>`;
       });
-      document.getElementById("staffTableBody").innerHTML = staffRows || '<tr><td colspan="6" style="text-align:center;">No personnel records available.</td></tr>';
-      document.getElementById("taskAssigneeSelect").innerHTML = assigneeOptions;
+      staffSelect.innerHTML = sOptions;
 
-      // Render Verification Queue
-      var verificationRows = "";
-      (dataset.tasks || []).forEach(function(task) {
-        if (task[6] === "Pending Approval") {
-          verificationRows += '<tr>';
-          verificationRows += '  <td><strong>' + task[3] + '</strong></td>';
-          verificationRows += '  <td>' + task[2] + '</td>';
-          verificationRows += '  <td>' + (task[7] || "-") + '</td>';
-          verificationRows += '  <td><span class="badge badge-pending">' + task[6] + '</span></td>';
-          verificationRows += '  <td>';
-          verificationRows += '    <input type="text" id="adminVerificationRemark_' + task[0] + '" placeholder="Optional review remark" style="margin-bottom:4px; font-size:11px;">';
-          verificationRows += '    <button onclick="commitTaskVerification(\'' + task[0] + '\')" class="btn-action-approve">Authorize</button>';
-          verificationRows += '  </td>';
-          verificationRows += '</tr>';
+      // Pending Tasks
+      const taskBody = document.getElementById("taskApprovalBody");
+      let tHtml = "";
+      (state.tasks || []).forEach(t => {
+        if (t[6] === "Pending Approval") {
+          tHtml += `
+            <tr>
+              <td><strong>${t[3]}</strong></td>
+              <td>${t[2]}</td>
+              <td>${t[7] || "—"}</td>
+              <td><span class="status-badge" style="background:#fef3c7; color:#b45309;">${t[6]}</span></td>
+              <td><button class="btn-primary" style="background:#10b981; padding: 4px 10px;" onclick="approveTask('${t[0]}')">Approve</button></td>
+            </tr>
+          `;
         }
       });
-      document.getElementById("verificationTableBody").innerHTML = verificationRows || '<tr><td colspan="5" style="text-align:center;">No deliverables requiring verification.</td></tr>';
+      taskBody.innerHTML = tHtml || '<tr><td colspan="5" style="text-align:center;">No deliverables awaiting approval.</td></tr>';
     }
 
-    function synchronizeDashboard() {
-      window.onAdminDataReceived = function(res) {
-        if (res && res.success && res.data) {
-          renderDashboard(res.data);
-        }
+    function saveClientRecord() {
+      const id = document.getElementById("clientId").value;
+      const client = {
+        id: id,
+        name: document.getElementById("custName").value.trim(),
+        phone: document.getElementById("custPhone").value.trim(),
+        email: document.getElementById("custEmail").value.trim(),
+        nextBillingDate: document.getElementById("custDate").value,
+        oneTimeService: document.getElementById("oneTimeTitle").value.trim(),
+        oneTimeAmount: document.getElementById("oneTimeAmt").value,
+        monthlyService: document.getElementById("monthlyTitle").value.trim(),
+        monthlyAmount: document.getElementById("monthlyAmt").value,
+        annualService: document.getElementById("annualTitle").value.trim(),
+        annualAmount: document.getElementById("annualAmt").value
       };
-      jsonp(API_ENDPOINT + "?action=getAdminData", "onAdminDataReceived");
+
+      if (!client.name) { showToast("Client name is required."); return; }
+
+      const action = id ? "editClient" : "addClient";
+      showToast("Saving client record...");
+      
+      jsonp(API_ENDPOINT + `?action=${action}&data=${encodeURIComponent(JSON.stringify(client))}`, "onClientSaved");
     }
 
-    // Client Management
-    function processClientSave() {
-      var button = document.getElementById("btnSubmitClient");
-      var recordId = document.getElementById("fieldClientId").value;
-      var clientEntity = {
-        id: recordId,
-        name: document.getElementById("clientName").value.trim(),
-        phone: document.getElementById("clientPhone").value.trim(),
-        email: document.getElementById("clientEmail").value.trim(),
-        nextBillingDate: document.getElementById("clientBillingDate").value,
-        oneTimeService: document.getElementById("serviceOneTimeTitle").value,
-        oneTimeAmount: document.getElementById("serviceOneTimeAmount").value,
-        monthlyService: document.getElementById("serviceMonthlyTitle").value,
-        monthlyAmount: document.getElementById("serviceMonthlyAmount").value,
-        annualService: document.getElementById("serviceAnnualTitle").value,
-        annualAmount: document.getElementById("serviceAnnualAmount").value
-      };
+    window.onClientSaved = function() {
+      showToast("Client record saved successfully!");
+      cancelClientEdit();
+      syncAllData();
+    };
 
-      if (!clientEntity.name) {
-        showToast("Client Account Name is required.", false);
-        return;
-      }
+    function editClientRecord(id) {
+      const c = (state.clients || []).find(item => item[0] === id);
+      if (!c) return;
 
-      button.disabled = true;
-      button.innerText = "Persisting...";
+      document.getElementById("clientId").value = c[0];
+      document.getElementById("custName").value = c[1] || "";
+      document.getElementById("custPhone").value = c[2] || "";
+      document.getElementById("custEmail").value = c[3] || "";
+      document.getElementById("custDate").value = c[10] ? c[10].substring(0,10) : "";
+      document.getElementById("oneTimeTitle").value = c[4] || "";
+      document.getElementById("oneTimeAmt").value = c[5] || "";
+      document.getElementById("monthlyTitle").value = c[6] || "";
+      document.getElementById("monthlyAmt").value = c[7] || "";
+      document.getElementById("annualTitle").value = c[8] || "";
+      document.getElementById("annualAmt").value = c[9] || "";
 
-      // Optimistic Instant UI Update
-      if (!recordId) {
-        var tempId = "CLI-" + Date.now();
-        administrativeCache.clients.unshift([
-          tempId, clientEntity.name, clientEntity.phone, clientEntity.email,
-          clientEntity.oneTimeService, clientEntity.oneTimeAmount,
-          clientEntity.monthlyService, clientEntity.monthlyAmount,
-          clientEntity.annualService, clientEntity.annualAmount,
-          clientEntity.nextBillingDate, "Active"
-        ]);
-        renderDashboard(administrativeCache);
-      }
-
-      window.onClientSaved = function(res) {
-        button.disabled = false;
-        button.innerText = "Persist Client Record";
-        showToast(recordId ? "Client record updated successfully." : "Client enrolled successfully.", true);
-        abortClientEdit();
-        synchronizeDashboard();
-      };
-
-      var actionType = recordId ? "editClient" : "addClient";
-      jsonp(API_ENDPOINT + "?action=" + actionType + "&data=" + encodeURIComponent(JSON.stringify(clientEntity)), "onClientSaved");
-    }
-
-    function stageClientModification(id) {
-      var record = (administrativeCache.clients || []).find(function(c) { return c[0] == id; });
-      if (!record) return;
-
-      document.getElementById("fieldClientId").value = record[0];
-      document.getElementById("clientName").value = record[1] || "";
-      document.getElementById("clientPhone").value = record[2] || "";
-      document.getElementById("clientEmail").value = record[3] || "";
-      document.getElementById("clientBillingDate").value = record[10] ? String(record[10]).substring(0, 10) : "";
-      document.getElementById("serviceOneTimeTitle").value = record[4] || "";
-      document.getElementById("serviceOneTimeAmount").value = record[5] || "";
-      document.getElementById("serviceMonthlyTitle").value = record[6] || "";
-      document.getElementById("serviceMonthlyAmount").value = record[7] || "";
-      document.getElementById("serviceAnnualTitle").value = record[8] || "";
-      document.getElementById("serviceAnnualAmount").value = record[9] || "";
-
-      document.getElementById("clientFormHeader").innerText = "Revise Client Parameters (" + record[0] + ")";
-      document.getElementById("btnSubmitClient").innerText = "Commit Revisions";
-      document.getElementById("btnCancelClientEdit").style.display = "inline-block";
+      document.getElementById("formTitle").innerText = "Edit Client: " + c[1];
+      document.getElementById("btnCancelEdit").style.display = "inline-block";
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
-    function abortClientEdit() {
-      document.getElementById("fieldClientId").value = "";
-      document.getElementById("clientName").value = "";
-      document.getElementById("clientPhone").value = "";
-      document.getElementById("clientEmail").value = "";
-      document.getElementById("clientBillingDate").value = "";
-      document.getElementById("serviceOneTimeTitle").value = "";
-      document.getElementById("serviceOneTimeAmount").value = "";
-      document.getElementById("serviceMonthlyTitle").value = "";
-      document.getElementById("serviceMonthlyAmount").value = "";
-      document.getElementById("serviceAnnualTitle").value = "";
-      document.getElementById("serviceAnnualAmount").value = "";
-
-      document.getElementById("clientFormHeader").innerText = "Register Client & Configure Custom Billing Structure";
-      document.getElementById("btnSubmitClient").innerText = "Persist Client Record";
-      document.getElementById("btnCancelClientEdit").style.display = "none";
+    function cancelClientEdit() {
+      document.getElementById("clientId").value = "";
+      document.getElementById("custName").value = "";
+      document.getElementById("custPhone").value = "";
+      document.getElementById("custEmail").value = "";
+      document.getElementById("custDate").value = "";
+      document.getElementById("oneTimeTitle").value = "";
+      document.getElementById("oneTimeAmt").value = "";
+      document.getElementById("monthlyTitle").value = "";
+      document.getElementById("monthlyAmt").value = "";
+      document.getElementById("annualTitle").value = "";
+      document.getElementById("annualAmt").value = "";
+      document.getElementById("formTitle").innerText = "Register Client & Setup Multi-Tier Services";
+      document.getElementById("btnCancelEdit").style.display = "none";
     }
 
-    function commitClientDeletion(id) {
-      // Optimistic delete
-      administrativeCache.clients = administrativeCache.clients.filter(function(c) { return c[0] != id; });
-      renderDashboard(administrativeCache);
-
-      window.onClientDeleted = function(res) {
-        showToast("Client record purged.", true);
-        synchronizeDashboard();
-      };
-      jsonp(API_ENDPOINT + "?action=deleteClient&clientId=" + encodeURIComponent(id), "onClientDeleted");
+    function deleteClientRecord(id) {
+      if (!confirm("Are you sure you want to delete client " + id + "?")) return;
+      jsonp(API_ENDPOINT + `?action=deleteClient&clientId=${encodeURIComponent(id)}`, "onDeleted");
     }
 
-    // Workforce Management
-    function processStaffSave() {
-      var button = document.getElementById("btnSubmitStaff");
-      var isRevision = document.getElementById("staffIsEditMode").value === "true";
-      var staffEntity = {
-        id: document.getElementById("staffIdField").value.trim(),
-        name: document.getElementById("staffNameField").value.trim(),
-        email: document.getElementById("staffEmailField").value.trim(),
-        role: document.getElementById("staffRoleField").value.trim()
-      };
+    window.onDeleted = function() {
+      showToast("Client removed.");
+      syncAllData();
+    };
 
-      if (!staffEntity.id || !staffEntity.name) {
-        showToast("Both Staff ID and Full Name are mandatory.", false);
-        return;
-      }
-
-      button.disabled = true;
-      button.innerText = "Persisting...";
-
-      // Optimistic addition
-      if (!isRevision) {
-        administrativeCache.staff.push([staffEntity.id, staffEntity.name, staffEntity.email, staffEntity.role, "Active"]);
-        renderDashboard(administrativeCache);
-      }
-
-      window.onStaffSaved = function(res) {
-        button.disabled = false;
-        button.innerText = "Commit Associate Record";
-        showToast(isRevision ? "Personnel file revised." : "Personnel file added.", true);
-        abortStaffEdit();
-        synchronizeDashboard();
-      };
-
-      var actionType = isRevision ? "editStaff" : "addStaff";
-      jsonp(API_ENDPOINT + "?action=" + actionType + "&data=" + encodeURIComponent(JSON.stringify(staffEntity)), "onStaffSaved");
-    }
-
-    function stageStaffModification(id) {
-      var record = (administrativeCache.staff || []).find(function(s) { return s[0] == id; });
-      if (!record) return;
-
-      document.getElementById("staffIdField").value = record[0];
-      document.getElementById("staffIdField").readOnly = true;
-      document.getElementById("staffNameField").value = record[1];
-      document.getElementById("staffEmailField").value = record[2];
-      document.getElementById("staffRoleField").value = record[3] || "";
-
-      document.getElementById("staffIsEditMode").value = "true";
-      document.getElementById("staffFormHeader").innerText = "Revise Personnel File (" + record[0] + ")";
-      document.getElementById("btnSubmitStaff").innerText = "Commit File Revisions";
-      document.getElementById("btnCancelStaffEdit").style.display = "inline-block";
-    }
-
-    function abortStaffEdit() {
-      document.getElementById("staffIdField").value = "";
-      document.getElementById("staffIdField").readOnly = false;
-      document.getElementById("staffNameField").value = "";
-      document.getElementById("staffEmailField").value = "";
-      document.getElementById("staffRoleField").value = "";
-
-      document.getElementById("staffIsEditMode").value = "false";
-      document.getElementById("staffFormHeader").innerText = "Add Personnel Record";
-      document.getElementById("btnSubmitStaff").innerText = "Commit Associate Record";
-      document.getElementById("btnCancelStaffEdit").style.display = "none";
-    }
-
-    function commitStaffDeletion(id) {
-      administrativeCache.staff = administrativeCache.staff.filter(function(s) { return s[0] != id; });
-      renderDashboard(administrativeCache);
-
-      window.onStaffDeleted = function(res) {
-        showToast("Personnel profile purged.", true);
-        synchronizeDashboard();
-      };
-      jsonp(API_ENDPOINT + "?action=deleteStaff&staffId=" + encodeURIComponent(id), "onStaffDeleted");
-    }
-
-    function synchronizeAssigneeDetails() {
-      var selectedId = document.getElementById("taskAssigneeSelect").value;
-      var record = (administrativeCache.staff || []).find(function(s) { return s[0] == selectedId; });
-      if (record) {
-        document.getElementById("taskStaffId").value = record[0];
-        document.getElementById("taskStaffEmail").value = record[2];
-      } else {
-        document.getElementById("taskStaffId").value = "";
-        document.getElementById("taskStaffEmail").value = "";
-      }
-    }
-
-    function processTaskDelegation() {
-      var staffId = document.getElementById("taskStaffId").value;
-      var record = (administrativeCache.staff || []).find(function(s) { return s[0] == staffId; });
-      var taskEntity = {
+    // TASK ASSIGNMENT
+    function assignStaffTask() {
+      const sel = document.getElementById("staffSelect");
+      const staffId = sel.value;
+      const opt = sel.options[sel.selectedIndex];
+      const task = {
         staffId: staffId,
-        staffName: record ? record[1] : "",
-        staffEmail: document.getElementById("taskStaffEmail").value,
+        staffName: opt.getAttribute("data-name"),
+        staffEmail: opt.getAttribute("data-email"),
         title: document.getElementById("taskTitle").value.trim(),
-        description: document.getElementById("taskDescription").value.trim()
+        description: document.getElementById("taskDesc").value.trim()
       };
 
-      if (!taskEntity.staffId || !taskEntity.title) {
-        showToast("Designate an associate and task title.", false);
-        return;
+      if (!task.staffId || !task.title) { showToast("Select staff and enter task title."); return; }
+
+      showToast("Delegating task & dispatching mail...");
+      jsonp(API_ENDPOINT + `?action=assignTask&data=${encodeURIComponent(JSON.stringify(task))}`, "onTaskAssigned");
+    }
+
+    window.onTaskAssigned = function() {
+      showToast("Task assigned & Email notification sent!");
+      document.getElementById("taskTitle").value = "";
+      document.getElementById("taskDesc").value = "";
+      syncAllData();
+    };
+
+    function approveTask(id) {
+      jsonp(API_ENDPOINT + `?action=approveTask&taskId=${encodeURIComponent(id)}&remark=Approved via Admin`, "onTaskApproved");
+    }
+
+    window.onTaskApproved = function() {
+      showToast("Task approved and completed!");
+      syncAllData();
+    };
+
+    // INVOICE BUILDER & GENERATE BILL MODAL
+    function openInvoiceModal(clientId) {
+      const c = (state.clients || []).find(item => item[0] === clientId);
+      if (!c) return;
+
+      currentInvoice.client = c;
+      currentInvoice.advances = [];
+      currentInvoice.lineItems = [];
+
+      // Auto populate active services
+      if (c[4] && parseFloat(c[5]) > 0) currentInvoice.lineItems.push({ name: `One-Time: ${c[4]}`, price: parseFloat(c[5]) });
+      if (c[6] && parseFloat(c[7]) > 0) currentInvoice.lineItems.push({ name: `Monthly Retainer: ${c[6]}`, price: parseFloat(c[7]) });
+      if (c[8] && parseFloat(c[9]) > 0) currentInvoice.lineItems.push({ name: `Annual Contract: ${c[8]}`, price: parseFloat(c[9]) });
+
+      if (currentInvoice.lineItems.length === 0) {
+        currentInvoice.lineItems.push({ name: "General Consulting Services", price: 1000 });
       }
 
-      var button = document.getElementById("btnSubmitTask");
-      button.disabled = true;
-      button.innerText = "Authorizing...";
+      document.getElementById("modalClientHeader").innerText = `Generating bill for: ${c[1]} (${c[0]})`;
+      document.getElementById("previewInvNumber").innerText = `#INV-${Math.floor(1000 + Math.random() * 9000)}`;
+      document.getElementById("previewInvDate").innerText = new Date().toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' });
+      document.getElementById("previewCustName").innerText = c[1];
+      document.getElementById("previewCustPhone").innerText = `${c[2]} | ${c[3]}`;
 
-      window.onTaskDelegated = function(res) {
-        button.disabled = false;
-        button.innerText = "Authorize Assignment & Dispatch Email Notification";
-        showToast("Assignment authorized and notification dispatched.", true);
-        document.getElementById("taskTitle").value = "";
-        document.getElementById("taskDescription").value = "";
-        synchronizeDashboard();
-      };
-
-      jsonp(API_ENDPOINT + "?action=assignTask&data=" + encodeURIComponent(JSON.stringify(taskEntity)), "onTaskDelegated");
+      document.getElementById("invoiceModal").style.display = "flex";
+      renderInvoicePreview();
     }
 
-    function commitTaskVerification(taskId) {
-      var input = document.getElementById("adminVerificationRemark_" + taskId);
-      var remarkValue = input ? input.value : "";
-
-      window.onTaskApproved = function(res) {
-        showToast("Assignment authorized and closed.", true);
-        synchronizeDashboard();
-      };
-
-      jsonp(API_ENDPOINT + "?action=approveTask&taskId=" + encodeURIComponent(taskId) + "&remark=" + encodeURIComponent(remarkValue), "onTaskApproved");
+    function closeInvoiceModal() {
+      document.getElementById("invoiceModal").style.display = "none";
     }
 
-    window.onload = synchronizeDashboard;
+    function addAdvanceReceipt() {
+      const mode = document.getElementById("advMode").value;
+      const amt = parseFloat(document.getElementById("advAmount").value) || 0;
+      const note = document.getElementById("advNote").value.trim() || "Advance Installment";
+
+      if (amt <= 0) { showToast("Enter valid advance amount."); return; }
+
+      currentInvoice.advances.push({
+        mode: mode,
+        amount: amt,
+        note: note
+      });
+
+      document.getElementById("advAmount").value = "";
+      document.getElementById("advNote").value = "";
+      renderInvoicePreview();
+      showToast("Advance added!");
+    }
+
+    function renderInvoicePreview() {
+      // Render line items
+      const lineBody = document.getElementById("previewLineItems");
+      let subtotal = 0;
+      let lHtml = "";
+      currentInvoice.lineItems.forEach(item => {
+        subtotal += item.price;
+        lHtml += `<tr><td><strong>${item.name}</strong></td><td style="text-align:right;">₹${item.price.toFixed(2)}</td></tr>`;
+      });
+      lineBody.innerHTML = lHtml;
+
+      // Render advances
+      const advBox = document.getElementById("previewAdvanceBox");
+      const advBody = document.getElementById("previewAdvanceItems");
+      let totalPaid = 0;
+
+      if (currentInvoice.advances.length > 0) {
+        advBox.style.display = "block";
+        let aHtml = "";
+        currentInvoice.advances.forEach(a => {
+          totalPaid += a.amount;
+          aHtml += `<tr><td>${a.note} <span style="font-size:0.7rem; color:#64748b;">(${a.mode})</span></td><td style="text-align:right; font-weight:700; color:#10b981;">₹${a.amount.toFixed(2)}</td></tr>`;
+        });
+        advBody.innerHTML = aHtml;
+      } else {
+        advBox.style.display = "none";
+      }
+
+      // Calculations
+      const taxRate = parseFloat(document.getElementById("invTaxRate").value) || 0;
+      const discRate = parseFloat(document.getElementById("invDiscountRate").value) || 0;
+
+      const tax = subtotal * (taxRate / 100);
+      const discount = subtotal * (discRate / 100);
+      const total = Math.max(0, subtotal + tax - discount);
+      const balanceDue = Math.max(0, total - totalPaid);
+
+      document.getElementById("prevSubtotal").innerText = `₹${subtotal.toFixed(2)}`;
+      document.getElementById("prevTax").innerText = `₹${tax.toFixed(2)}`;
+      document.getElementById("prevDiscount").innerText = `-₹${discount.toFixed(2)}`;
+      document.getElementById("prevTotal").innerText = `₹${total.toFixed(2)}`;
+      document.getElementById("prevPaid").innerText = `-₹${totalPaid.toFixed(2)}`;
+      document.getElementById("prevDue").innerText = `₹${balanceDue.toFixed(2)}`;
+
+      // Generate Dynamic UPI QR
+      const upi = document.getElementById("invUpiId").value.trim();
+      const qrBox = document.getElementById("invoiceQr");
+      qrBox.innerHTML = "";
+
+      if (upi && balanceDue > 0) {
+        document.getElementById("qrNote").style.display = "block";
+        const qrString = `upi://pay?pa=${encodeURIComponent(upi)}&pn=Ofbuzz&am=${balanceDue.toFixed(2)}&cu=INR`;
+        new QRCode(qrBox, { text: qrString, width: 70, height: 70 });
+      } else {
+        document.getElementById("qrNote").style.display = "none";
+      }
+    }
+
+    function printInvoice() {
+      window.print();
+    }
+
+    window.onload = syncAllData;
   </script>
 </body>
 </html>
