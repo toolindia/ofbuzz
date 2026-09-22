@@ -252,6 +252,10 @@
     }
 
     function synchronizeDashboard() {
+      if (typeof google === "undefined" || !google.script || !google.script.run) {
+        setTimeout(synchronizeDashboard, 100);
+        return;
+      }
       google.script.run
         .withSuccessHandler(renderDashboard)
         .withFailureHandler(function(fault) {
@@ -285,21 +289,31 @@
       button.disabled = true;
       button.innerText = "Writing to persistent storage...";
 
-      var executionPath = recordId ? "editClient" : "addClient";
+      var successCallback = function() {
+        button.disabled = false;
+        button.innerText = "Persist Client Record";
+        alert(recordId ? "Client record updated successfully." : "Client enrolled successfully.");
+        abortClientEdit();
+        synchronizeDashboard();
+      };
 
-      google.script.run
-        .withSuccessHandler(function() {
-          button.disabled = false;
-          button.innerText = "Persist Client Record";
-          alert(recordId ? "Client record updated successfully." : "Client enrolled successfully.");
-          abortClientEdit();
-          synchronizeDashboard();
-        })
-        .withFailureHandler(function(fault) {
-          button.disabled = false;
-          button.innerText = "Persist Client Record";
-          alert("Storage fault: " + fault.message);
-        })[executionPath](clientEntity);
+      var failureCallback = function(fault) {
+        button.disabled = false;
+        button.innerText = "Persist Client Record";
+        alert("Storage fault: " + fault.message);
+      };
+
+      if (recordId) {
+        google.script.run
+          .withSuccessHandler(successCallback)
+          .withFailureHandler(failureCallback)
+          .editClient(clientEntity);
+      } else {
+        google.script.run
+          .withSuccessHandler(successCallback)
+          .withFailureHandler(failureCallback)
+          .addClient(clientEntity);
+      }
     }
 
     function stageClientModification(id) {
@@ -373,21 +387,31 @@
       button.disabled = true;
       button.innerText = "Persisting profile...";
 
-      var executionPath = isRevision ? "editStaff" : "addStaff";
+      var successCallback = function() {
+        button.disabled = false;
+        button.innerText = "Commit Associate Record";
+        alert(isRevision ? "Personnel file revised." : "Personnel file added.");
+        abortStaffEdit();
+        synchronizeDashboard();
+      };
 
-      google.script.run
-        .withSuccessHandler(function() {
-          button.disabled = false;
-          button.innerText = "Commit Associate Record";
-          alert(isRevision ? "Personnel file revised." : "Personnel file added.");
-          abortStaffEdit();
-          synchronizeDashboard();
-        })
-        .withFailureHandler(function(fault) {
-          button.disabled = false;
-          button.innerText = "Commit Associate Record";
-          alert("Personnel fault: " + fault.message);
-        })[executionPath](staffEntity);
+      var failureCallback = function(fault) {
+        button.disabled = false;
+        button.innerText = "Commit Associate Record";
+        alert("Personnel fault: " + fault.message);
+      };
+
+      if (isRevision) {
+        google.script.run
+          .withSuccessHandler(successCallback)
+          .withFailureHandler(failureCallback)
+          .editStaff(staffEntity);
+      } else {
+        google.script.run
+          .withSuccessHandler(successCallback)
+          .withFailureHandler(failureCallback)
+          .addStaff(staffEntity);
+      }
     }
 
     function stageStaffModification(id) {
@@ -496,7 +520,11 @@
         .approveTask(taskId, remarkValue);
     }
 
-    window.onload = synchronizeDashboard;
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", synchronizeDashboard);
+    } else {
+      synchronizeDashboard();
+    }
   </script>
 </body>
 </html>
