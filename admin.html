@@ -174,7 +174,17 @@
   </div>
 
   <script>
+    var API_ENDPOINT = "https://script.google.com/macros/s/AKfycby9yiIo9euB9KTt0zBuwcF3x6pdaeJJ48mAwcTFC6xl53oH8eh0Agfwlr138t3D5KNPYQ/exec";
     var administrativeCache = { clients: [], payments: [], tasks: [], staff: [], todaySales: 0, monthlySales: {} };
+
+    function apiCall(payload) {
+      return fetch(API_ENDPOINT, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify(payload)
+      });
+    }
 
     function renderDashboard(dataset) {
       if (!dataset) return;
@@ -252,16 +262,12 @@
     }
 
     function synchronizeDashboard() {
-      if (typeof google === "undefined" || !google.script || !google.script.run) {
-        setTimeout(synchronizeDashboard, 100);
-        return;
-      }
-      google.script.run
-        .withSuccessHandler(renderDashboard)
-        .withFailureHandler(function(fault) {
-          alert("Synchronization error: " + fault.message);
-        })
-        .getAdminData();
+      fetch(API_ENDPOINT + "?action=getAdminData")
+        .then(function(res) { return res.json(); })
+        .then(function(data) { renderDashboard(data); })
+        .catch(function(err) {
+          alert("Synchronization error: " + err.message);
+        });
     }
 
     function processClientSave() {
@@ -287,33 +293,23 @@
       }
 
       button.disabled = true;
-      button.innerText = "Writing to persistent storage...";
+      button.innerText = "Saving...";
 
-      var successCallback = function() {
-        button.disabled = false;
-        button.innerText = "Persist Client Record";
-        alert(recordId ? "Client record updated successfully." : "Client enrolled successfully.");
-        abortClientEdit();
-        synchronizeDashboard();
-      };
+      var actionType = recordId ? "editClient" : "addClient";
 
-      var failureCallback = function(fault) {
-        button.disabled = false;
-        button.innerText = "Persist Client Record";
-        alert("Storage fault: " + fault.message);
-      };
-
-      if (recordId) {
-        google.script.run
-          .withSuccessHandler(successCallback)
-          .withFailureHandler(failureCallback)
-          .editClient(clientEntity);
-      } else {
-        google.script.run
-          .withSuccessHandler(successCallback)
-          .withFailureHandler(failureCallback)
-          .addClient(clientEntity);
-      }
+      apiCall({ action: actionType, client: clientEntity })
+        .then(function() {
+          button.disabled = false;
+          button.innerText = "Persist Client Record";
+          alert(recordId ? "Client record updated successfully." : "Client enrolled successfully.");
+          abortClientEdit();
+          setTimeout(synchronizeDashboard, 1000);
+        })
+        .catch(function(err) {
+          button.disabled = false;
+          button.innerText = "Persist Client Record";
+          alert("Error: " + err.message);
+        });
     }
 
     function stageClientModification(id) {
@@ -358,15 +354,12 @@
 
     function commitClientDeletion(id) {
       if (!confirm("Are you certain you wish to purge client record " + id + "?")) return;
-      google.script.run
-        .withSuccessHandler(function() {
+      apiCall({ action: "deleteClient", clientId: id })
+        .then(function() {
           alert("Client record purged.");
-          synchronizeDashboard();
+          setTimeout(synchronizeDashboard, 1000);
         })
-        .withFailureHandler(function(fault) {
-          alert("Purge fault: " + fault.message);
-        })
-        .deleteClient(id);
+        .catch(function(err) { alert("Error: " + err.message); });
     }
 
     function processStaffSave() {
@@ -385,33 +378,23 @@
       }
 
       button.disabled = true;
-      button.innerText = "Persisting profile...";
+      button.innerText = "Saving...";
 
-      var successCallback = function() {
-        button.disabled = false;
-        button.innerText = "Commit Associate Record";
-        alert(isRevision ? "Personnel file revised." : "Personnel file added.");
-        abortStaffEdit();
-        synchronizeDashboard();
-      };
+      var actionType = isRevision ? "editStaff" : "addStaff";
 
-      var failureCallback = function(fault) {
-        button.disabled = false;
-        button.innerText = "Commit Associate Record";
-        alert("Personnel fault: " + fault.message);
-      };
-
-      if (isRevision) {
-        google.script.run
-          .withSuccessHandler(successCallback)
-          .withFailureHandler(failureCallback)
-          .editStaff(staffEntity);
-      } else {
-        google.script.run
-          .withSuccessHandler(successCallback)
-          .withFailureHandler(failureCallback)
-          .addStaff(staffEntity);
-      }
+      apiCall({ action: actionType, staff: staffEntity })
+        .then(function() {
+          button.disabled = false;
+          button.innerText = "Commit Associate Record";
+          alert(isRevision ? "Personnel file revised." : "Personnel file added.");
+          abortStaffEdit();
+          setTimeout(synchronizeDashboard, 1000);
+        })
+        .catch(function(err) {
+          button.disabled = false;
+          button.innerText = "Commit Associate Record";
+          alert("Error: " + err.message);
+        });
     }
 
     function stageStaffModification(id) {
@@ -445,15 +428,12 @@
 
     function commitStaffDeletion(id) {
       if (!confirm("Are you certain you wish to purge personnel record " + id + "?")) return;
-      google.script.run
-        .withSuccessHandler(function() {
+      apiCall({ action: "deleteStaff", staffId: id })
+        .then(function() {
           alert("Personnel profile purged.");
-          synchronizeDashboard();
+          setTimeout(synchronizeDashboard, 1000);
         })
-        .withFailureHandler(function(fault) {
-          alert("Purge fault: " + fault.message);
-        })
-        .deleteStaff(id);
+        .catch(function(err) { alert("Error: " + err.message); });
     }
 
     function synchronizeAssigneeDetails() {
@@ -486,45 +466,37 @@
 
       var button = document.getElementById("btnSubmitTask");
       button.disabled = true;
-      button.innerText = "Authorizing delegation...";
+      button.innerText = "Authorizing...";
 
-      google.script.run
-        .withSuccessHandler(function() {
+      apiCall({ action: "assignTask", task: taskEntity })
+        .then(function() {
           button.disabled = false;
           button.innerText = "Authorize Assignment & Dispatch Email Notification";
           alert("Assignment delegated and confirmation email dispatched.");
           document.getElementById("taskTitle").value = "";
           document.getElementById("taskDescription").value = "";
-          synchronizeDashboard();
+          setTimeout(synchronizeDashboard, 1000);
         })
-        .withFailureHandler(function(fault) {
+        .catch(function(err) {
           button.disabled = false;
           button.innerText = "Authorize Assignment & Dispatch Email Notification";
-          alert("Delegation fault: " + fault.message);
-        })
-        .assignTask(taskEntity);
+          alert("Error: " + err.message);
+        });
     }
 
     function commitTaskVerification(taskId) {
       var input = document.getElementById("adminVerificationRemark_" + taskId);
       var remarkValue = input ? input.value : "";
 
-      google.script.run
-        .withSuccessHandler(function() {
+      apiCall({ action: "approveTask", taskId: taskId, remark: remarkValue })
+        .then(function() {
           alert("Assignment approved and closed.");
-          synchronizeDashboard();
+          setTimeout(synchronizeDashboard, 1000);
         })
-        .withFailureHandler(function(fault) {
-          alert("Verification fault: " + fault.message);
-        })
-        .approveTask(taskId, remarkValue);
+        .catch(function(err) { alert("Error: " + err.message); });
     }
 
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", synchronizeDashboard);
-    } else {
-      synchronizeDashboard();
-    }
+    window.onload = synchronizeDashboard;
   </script>
 </body>
 </html>
