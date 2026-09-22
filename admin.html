@@ -44,7 +44,7 @@
       </div>
       <div class="kpi-card" style="border-left-color:#198754;">
         <div style="font-size:12px; color:#6c757d;">Monthly Revenue Trends</div>
-        <div id="msale" style="font-size:13px; margin-top:4px;">Loading...</div>
+        <div id="msale" style="font-size:13px; margin-top:4px;">No sales recorded</div>
       </div>
     </div>
 
@@ -145,9 +145,10 @@
 
   <script>
     var API = "<?= scriptUrl ?>";
-    var globalData = <?= initialData ?>;
+    var globalData = { clients: [], payments: [], tasks: [], staff: [], todaySales: 0, monthlySales: {} };
 
     function renderAll(d){
+      if (!d) return;
       globalData = d;
       document.getElementById("tsale").innerText = "INR " + (d.todaySales || 0);
       var mstr = "";
@@ -166,14 +167,14 @@
                  "  <td>" + (c[2]||"-") + "</td>" +
                  "  <td>" + (c[3]||"-") + "</td>" +
                  "  <td>" + (bDetails.join("<br>")||"None") + "</td>" +
-                 "  <td>" + (c[10]?c[10].substring(0,10):"-") + "</td>" +
+                 "  <td>" + (c[10]?String(c[10]).substring(0,10):"-") + "</td>" +
                  "  <td style='white-space:nowrap;'>" +
                  "    <button onclick='populateClientEdit(\"" + c[0] + "\")' class='warn' style='width:auto; padding:3px 8px; font-size:11px; margin-right:4px;'>Edit</button>" +
                  "    <button onclick='removeClient(\"" + c[0] + "\")' class='del' style='width:auto; padding:3px 8px; font-size:11px;'>Delete</button>" +
                  "  </td>" +
                  "</tr>";
       });
-      document.getElementById("clientTbl").innerHTML = cHtml || "<tr><td colspan='7'>No clients found.</td></tr>";
+      document.getElementById("clientTbl").innerHTML = cHtml || "<tr><td colspan='7' style='text-align:center;'>No clients found.</td></tr>";
 
       var sHtml = "";
       var sOptions = "<option value=''>Select Staff</option>";
@@ -191,7 +192,7 @@
                  "</tr>";
         sOptions += "<option value='" + s[0] + "'>" + s[1] + " (" + s[0] + ")</option>";
       });
-      document.getElementById("staffTbl").innerHTML = sHtml || "<tr><td colspan='6'>No staff members found.</td></tr>";
+      document.getElementById("staffTbl").innerHTML = sHtml || "<tr><td colspan='6' style='text-align:center;'>No staff members found.</td></tr>";
       document.getElementById("taskStaffSelect").innerHTML = sOptions;
 
       var aHtml = "";
@@ -208,11 +209,15 @@
                    "</tr>";
         }
       });
-      document.getElementById("apptbl").innerHTML = aHtml || "<tr><td colspan='4'>No tasks pending approval.</td></tr>";
+      document.getElementById("apptbl").innerHTML = aHtml || "<tr><td colspan='4' style='text-align:center;'>No tasks pending approval.</td></tr>";
     }
 
     function reloadAdmin(){
-      fetch(API + "?action=getAdminData").then(function(r){return r.json();}).then(renderAll);
+      if (typeof google !== "undefined" && google.script && google.script.run) {
+        google.script.run.withSuccessHandler(renderAll).getAdminData();
+      } else {
+        fetch(API + "?action=getAdminData").then(function(r){return r.json();}).then(renderAll);
+      }
     }
 
     function saveClient(){
@@ -249,7 +254,7 @@
       document.getElementById("cn").value = c[1] || "";
       document.getElementById("cp").value = c[2] || "";
       document.getElementById("ce").value = c[3] || "";
-      document.getElementById("cb").value = c[10] ? c[10].substring(0,10) : "";
+      document.getElementById("cb").value = c[10] ? String(c[10]).substring(0,10) : "";
       document.getElementById("co").value = c[4] || "";
       document.getElementById("coa").value = c[5] || "";
       document.getElementById("cm").value = c[6] || "";
@@ -377,7 +382,14 @@
         .then(function(r){return r.json();}).then(function(){ alert("Task approved."); reloadAdmin(); });
     }
 
-    window.onload = function(){ renderAll(globalData); };
+    window.onload = function(){
+      try {
+        var preloaded = <?!= initialData ?>;
+        renderAll(preloaded);
+      } catch(e) {
+        reloadAdmin();
+      }
+    };
   </script>
 </body>
 </html>
