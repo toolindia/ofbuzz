@@ -23,7 +23,7 @@
 <body>
   <div class="container">
     <div class="header">
-      <img src="https://i.pinimg.com/736x/bd/d0/5c/bdd05c94afb66b5a72f5e17a7a879ab3.jpg" class="logo" alt="Ofbuzz Technology Logo" referrerpolicy="no-referrer">
+      <img src="<?= logoUrl ?>" class="logo" alt="Ofbuzz Technology Logo" referrerpolicy="no-referrer">
       <h2 style="font-size:17px; margin:0;">Staff Workspace</h2>
     </div>
     <div>
@@ -31,9 +31,9 @@
       <input type="text" id="sid" placeholder="e.g. STF01">
       <label style="font-size:12px; margin-top:8px; display:block;">Full Name</label>
       <input type="text" id="sname" placeholder="Enter Full Name">
-      <button class="alt" onclick="markAtt()">Mark Daily Attendance</button>
+      <button class="alt" id="btnAtt" onclick="markAtt()">Mark Daily Attendance</button>
       <div id="attRes" style="font-size:13px; margin-top:6px;"></div>
-      <button onclick="fetchTasks()" style="margin-top:8px;">View My Tasks</button>
+      <button id="btnTask" onclick="fetchTasks()" style="margin-top:8px;">View My Tasks</button>
     </div>
     <div style="margin-top:16px; border-top:1px solid #e9ecef; padding-top:12px;">
       <h3 style="font-size:14px; margin:0 0 10px;">Assigned Tasks</h3>
@@ -42,29 +42,45 @@
   </div>
 
   <script>
-    var API = "<?= scriptUrl ?>";
-
-    function markAtt(){
+    function markAtt() {
       var id = document.getElementById("sid").value.trim();
       var name = document.getElementById("sname").value.trim();
-      if(!id || !name){ alert("Enter both Staff ID and Name."); return; }
-      fetch(API, { method:"POST", body:JSON.stringify({action:"markAttendance", staffId:id, staffName:name}) })
-        .then(function(r){return r.json();}).then(function(res){
-          var b = document.getElementById("attRes");
-          b.innerText = res.message;
-          b.style.color = res.success ? "#198754" : "#dc3545";
-        });
+      var btn = document.getElementById("btnAtt");
+      var resBox = document.getElementById("attRes");
+
+      if (!id || !name) { alert("Enter both Staff ID and Name."); return; }
+      btn.disabled = true; btn.innerText = "Marking...";
+
+      google.script.run
+        .withSuccessHandler(function(res) {
+          btn.disabled = false; btn.innerText = "Mark Daily Attendance";
+          resBox.innerText = res.message;
+          resBox.style.color = res.success ? "#198754" : "#dc3545";
+        })
+        .withFailureHandler(function(err) {
+          btn.disabled = false; btn.innerText = "Mark Daily Attendance";
+          alert("Error: " + err.message);
+        })
+        .markAttendance(id, name);
     }
 
-    function fetchTasks(){
+    function fetchTasks() {
       var id = document.getElementById("sid").value.trim();
-      if(!id){ alert("Enter Staff ID."); return; }
-      fetch(API + "?action=getStaffTasks&staffId=" + encodeURIComponent(id))
-        .then(function(r){return r.json();}).then(function(tasks){
+      var btn = document.getElementById("btnTask");
+      if (!id) { alert("Enter Staff ID."); return; }
+
+      btn.disabled = true; btn.innerText = "Loading...";
+
+      google.script.run
+        .withSuccessHandler(function(tasks) {
+          btn.disabled = false; btn.innerText = "View My Tasks";
           var box = document.getElementById("tlist");
-          if(!tasks || tasks.length === 0){ box.innerHTML = "<p style='font-size:13px; color:#6c757d;'>No tasks found.</p>"; return; }
+          if (!tasks || tasks.length === 0) {
+            box.innerHTML = "<p style='font-size:13px; color:#6c757d;'>No tasks found for ID: " + id + "</p>";
+            return;
+          }
           var h = "";
-          tasks.forEach(function(t){
+          tasks.forEach(function(t) {
             var cls = t.status === "Pending Approval" ? "badge-Pending" : (t.status === "Approved" ? "badge-Approved" : "badge-Assigned");
             h += "<div class='task-card'>" +
                  "  <div style='display:flex; justify-content:space-between;'>" +
@@ -72,7 +88,7 @@
                  "    <span class='badge " + cls + "'>" + t.status + "</span>" +
                  "  </div>" +
                  "  <p style='font-size:13px; color:#495057; margin:6px 0;'>" + t.description + "</p>";
-            if(t.status === "Assigned"){
+            if (t.status === "Assigned") {
               h += "<textarea id='rm_" + t.id + "' placeholder='Optional remarks...'></textarea>" +
                    "<button onclick='finishTask(\"" + t.id + "\")'>Mark Completed</button>";
             } else {
@@ -81,13 +97,25 @@
             h += "</div>";
           });
           box.innerHTML = h;
-        });
+        })
+        .withFailureHandler(function(err) {
+          btn.disabled = false; btn.innerText = "View My Tasks";
+          alert("Error loading tasks: " + err.message);
+        })
+        .getStaffTasks(id);
     }
 
-    function finishTask(tid){
+    function finishTask(tid) {
       var rem = document.getElementById("rm_" + tid).value;
-      fetch(API, { method:"POST", body:JSON.stringify({action:"submitTaskCompletion", taskId:tid, remark:rem}) })
-        .then(function(r){return r.json();}).then(function(){ alert("Submitted for approval."); fetchTasks(); });
+      google.script.run
+        .withSuccessHandler(function() {
+          alert("Task submitted for admin approval.");
+          fetchTasks();
+        })
+        .withFailureHandler(function(err) {
+          alert("Error: " + err.message);
+        })
+        .submitTaskCompletion(tid, rem);
     }
   </script>
 </body>
