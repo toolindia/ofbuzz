@@ -18,11 +18,11 @@
 <body>
   <div class="container">
     <div class="header">
-      <img src="https://i.pinimg.com/736x/bd/d0/5c/bdd05c94afb66b5a72f5e17a7a879ab3.jpg" class="logo" alt="Ofbuzz Technology Logo" referrerpolicy="no-referrer">
+      <img src="<?= logoUrl ?>" class="logo" alt="Ofbuzz Technology Logo" referrerpolicy="no-referrer">
       <h1>Ofbuzz Technology</h1>
       <p style="color:#6c757d; margin:0; font-size:13px;">Live Active Clients</p>
     </div>
-    <div id="list">Loading clients...</div>
+    <div id="list">Loading clients directly from Google Sheets...</div>
   </div>
 
   <script>
@@ -45,14 +45,14 @@
       box.innerHTML = h;
     }
 
-    try {
-      var clients = <?!= initialData ?>;
-      renderClients(clients);
-    } catch(err) {
-      if (typeof google !== "undefined" && google.script && google.script.run) {
-        google.script.run.withSuccessHandler(renderClients).getLiveClients();
-      }
-    }
+    window.onload = function() {
+      google.script.run
+        .withSuccessHandler(renderClients)
+        .withFailureHandler(function(err) {
+          document.getElementById("list").innerHTML = "<p style='color:#dc3545;'>Error loading clients: " + err.message + "</p>";
+        })
+        .getLiveClients();
+    };
   </script>
 </body>
 </html>
