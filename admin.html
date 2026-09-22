@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - Ofbuzz Technology</title>
+  <style>
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: #f8f9fa; color: #212529; margin: 0; padding: 16px; }
+    .container { max-width: 980px; margin: 0 auto; }
+    .header { background: #ffffff; padding: 16px; border-radius: 8px; display: flex; align-items: center; gap: 12px; border: 1px solid #e9ecef; margin-bottom: 16px; }
+    .logo { width: 48px; height: 48px; border-radius: 6px; }
+    .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 16px; }
+    .kpi-card { background: #ffffff; padding: 16px; border-radius: 8px; border-left: 4px solid #0d6efd; border-top: 1px solid #e9ecef; border-right: 1px solid #e9ecef; border-bottom: 1px solid #e9ecef; }
+    .kpi-title { font-size: 13px; color: #6c757d; }
+    .kpi-value { font-size: 20px; font-weight: 600; margin-top: 4px; }
+    .card { background: #ffffff; padding: 18px; border-radius: 8px; margin-bottom: 16px; border: 1px solid #e9ecef; }
+    h2 { font-size: 15px; margin: 0 0 12px 0; border-bottom: 1px solid #f1f3f5; padding-bottom: 8px; }
+    .grid-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; }
+    label { font-size: 12px; color: #495057; }
+    input, textarea, button { width: 100%; padding: 8px 10px; border: 1px solid #ced4da; border-radius: 4px; font-size: 13px; margin-top: 4px; }
+    button { background: #0d6efd; color: #ffffff; border: none; cursor: pointer; font-weight: 500; margin-top: 12px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+    th, td { text-align: left; padding: 8px; border-bottom: 1px solid #e9ecef; }
+    th { background: #f8f9fa; }
+    .table-responsive { overflow-x: auto; }
+    .badge { padding: 3px 6px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+    .badge-pending { background: #cff4fc; color: #055160; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="https://i.pinimg.com/736x/bd/d0/5c/bdd05c94afb66b5a72f5e17a7a879ab3.jpg" class="logo" alt="Ofbuzz Logo">
+      <div>
+        <h1 style="font-size: 17px; margin: 0;">Ofbuzz Technology</h1>
+        <div style="font-size: 12px; color: #6c757d;">Administrative Workspace</div>
+      </div>
+    </div>
+
+    <!-- Analytics Section -->
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="kpi-title">Today's Sales</div>
+        <div class="kpi-value" id="todaySales">INR 0</div>
+      </div>
+      <div class="kpi-card" style="border-left-color: #198754;">
+        <div class="kpi-title">Monthly Business Growth</div>
+        <div class="kpi-value" id="monthlyTrends" style="font-size: 14px; font-weight: normal; margin-top: 6px;">Loading...</div>
+      </div>
+    </div>
+
+    <!-- Client Registration & Custom Billing -->
+    <div class="card">
+      <h2>Register Client & Setup Custom Billing</h2>
+      <div class="grid-form">
+        <div><label>Customer Name</label><input type="text" id="cName"></div>
+        <div><label>Phone Number</label><input type="text" id="cPhone"></div>
+        <div><label>Email Address</label><input type="email" id="cEmail"></div>
+        <div><label>Next Billing Date</label><input type="date" id="cNextDate"></div>
+        <div><label>One-Time Service</label><input type="text" id="cOneName"></div>
+        <div><label>One-Time Amount (INR)</label><input type="number" id="cOneAmt"></div>
+        <div><label>Monthly Service</label><input type="text" id="cMonName"></div>
+        <div><label>Monthly Amount (INR)</label><input type="number" id="cMonAmt"></div>
+        <div><label>Annual Service</label><input type="text" id="cAnnName"></div>
+        <div><label>Annual Amount (INR)</label><input type="number" id="cAnnAmt"></div>
+      </div>
+      <button onclick="submitClient()">Save Client Billing Record</button>
+    </div>
+
+    <!-- Staff Task Assignment -->
+    <div class="card">
+      <h2>Assign Staff Task</h2>
+      <div class="grid-form">
+        <div><label>Staff ID</label><input type="text" id="tStaffId" placeholder="e.g. STF01"></div>
+        <div><label>Staff Name</label><input type="text" id="tStaffName"></div>
+        <div><label>Staff Email (For Notification)</label><input type="email" id="tStaffEmail"></div>
+        <div><label>Task Title</label><input type="text" id="tTitle"></div>
+      </div>
+      <div style="margin-top: 8px;">
+        <label>Task Description</label>
+        <textarea id="tDesc" rows="2"></textarea>
+      </div>
+      <button onclick="submitTask()">Assign Task & Send Email</button>
+    </div>
+
+    <!-- Task Review & Approval -->
+    <div class="card">
+      <h2>Pending Task Approvals</h2>
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Task</th>
+              <th>Assigned Staff</th>
+              <th>Staff Remark</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="approvalTable">
+            <tr><td colspan="5">Loading review list...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var API_URL = "https://script.google.com/macros/s/AKfycby9yiIo9euB9KTt0zBuwcF3x6pdaeJJ48mAwcTFC6xl53oH8eh0Agfwlr138t3D5KNPYQ/exec";
+
+    function renderDashboard(data) {
+      document.getElementById("todaySales").innerText = "INR " + (data.todaySales || 0);
+
+      var trendStr = "";
+      for (var month in data.monthlySales) {
+        trendStr += month + ": INR " + data.monthlySales[month] + " | ";
+      }
+      document.getElementById("monthlyTrends").innerText = trendStr || "No recorded sales";
+
+      var tBody = document.getElementById("approvalTable");
+      var html = "";
+      var tasks = data.tasks || [];
+
+      tasks.forEach(function(t) {
+        var id = t[0];
+        var staffName = t[2];
+        var title = t[3];
+        var status = t[6];
+        var sRemark = t[7];
+
+        if (status === "Pending Approval") {
+          html += '<tr>';
+          html += '  <td><strong>' + title + '</strong></td>';
+          html += '  <td>' + staffName + '</td>';
+          html += '  <td>' + (sRemark || '-') + '</td>';
+          html += '  <td><span class="badge badge-pending">' + status + '</span></td>';
+          html += '  <td>';
+          html += '    <input type="text" id="admRem_' + id + '" placeholder="Optional remark" style="margin-bottom:4px; font-size:12px;">';
+          html += '    <button onclick="approve(\'' + id + '\')" style="margin-top:0; padding:4px 8px; font-size:12px; background:#198754;">Approve</button>';
+          html += '  </td>';
+          html += '</tr>';
+        }
+      });
+
+      tBody.innerHTML = html || '<tr><td colspan="5">No pending task approvals.</td></tr>';
+    }
+
+    function refreshData() {
+      if (typeof google !== "undefined" && google.script && google.script.run) {
+        google.script.run.withSuccessHandler(renderDashboard).getAdminData();
+      } else {
+        fetch(API_URL + "?action=getAdminData")
+          .then(function(r) { return r.json(); })
+          .then(renderDashboard);
+      }
+    }
+
+    function submitClient() {
+      var client = {
+        name: document.getElementById("cName").value,
+        phone: document.getElementById("cPhone").value,
+        email: document.getElementById("cEmail").value,
+        nextBillingDate: document.getElementById("cNextDate").value,
+        oneTimeService: document.getElementById("cOneName").value,
+        oneTimeAmount: document.getElementById("cOneAmt").value,
+        monthlyService: document.getElementById("cMonName").value,
+        monthlyAmount: document.getElementById("cMonAmt").value,
+        annualService: document.getElementById("cAnnName").value,
+        annualAmount: document.getElementById("cAnnAmt").value
+      };
+
+      if (typeof google !== "undefined" && google.script && google.script.run) {
+        google.script.run.withSuccessHandler(function() {
+          alert("Client record created.");
+          refreshData();
+        }).addClient(client);
+      } else {
+        fetch(API_URL, {
+          method: "POST",
+          body: JSON.stringify({ action: "addClient", client: client })
+        }).then(function(r) { return r.json(); }).then(function() {
+          alert("Client record created.");
+          refreshData();
+        });
+      }
+    }
+
+    function submitTask() {
+      var task = {
+        staffId: document.getElementById("tStaffId").value,
+        staffName: document.getElementById("tStaffName").value,
+        staffEmail: document.getElementById("tStaffEmail").value,
+        title: document.getElementById("tTitle").value,
+        description: document.getElementById("tDesc").value
+      };
+
+      if (typeof google !== "undefined" && google.script && google.script.run) {
+        google.script.run.withSuccessHandler(function() {
+          alert("Task assigned and email sent.");
+          refreshData();
+        }).assignTask(task);
+      } else {
+        fetch(API_URL, {
+          method: "POST",
+          body: JSON.stringify({ action: "assignTask", task: task })
+        }).then(function(r) { return r.json(); }).then(function() {
+          alert("Task assigned and email sent.");
+          refreshData();
+        });
+      }
+    }
+
+    function approve(taskId) {
+      var rem = document.getElementById("admRem_" + taskId).value;
+      if (typeof google !== "undefined" && google.script && google.script.run) {
+        google.script.run.withSuccessHandler(function() {
+          alert("Task approved.");
+          refreshData();
+        }).approveTask(taskId, rem);
+      } else {
+        fetch(API_URL, {
+          method: "POST",
+          body: JSON.stringify({ action: "approveTask", taskId: taskId, remark: rem })
+        }).then(function(r) { return r.json(); }).then(function() {
+          alert("Task approved.");
+          refreshData();
+        });
+      }
+    }
+
+    window.onload = refreshData;
+  </script>
+</body>
+</html>
