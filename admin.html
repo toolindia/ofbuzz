@@ -28,6 +28,29 @@
     body { background: var(--bg); color: var(--text); padding: 20px 16px 80px; }
     .container { max-width: 1200px; margin: 0 auto; }
 
+    /* AUTHENTICATION LOCK SCREEN */
+    #authOverlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: #0f172a; z-index: 9999; display: flex;
+      align-items: center; justify-content: center; padding: 20px;
+    }
+    .auth-card {
+      background: #ffffff; width: 100%; max-width: 380px; border-radius: 16px;
+      padding: 32px 28px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); text-align: center;
+    }
+    .auth-logo { width: 64px; height: 64px; border-radius: 12px; object-fit: cover; margin-bottom: 12px; }
+    .auth-title { font-size: 1.25rem; font-weight: 800; color: #0f172a; margin-bottom: 4px; }
+    .auth-sub { font-size: 0.8rem; color: #64748b; margin-bottom: 20px; }
+    .auth-input {
+      width: 100%; padding: 12px; font-size: 1.2rem; text-align: center;
+      letter-spacing: 6px; border: 2px solid #e2e8f0; border-radius: 10px;
+      outline: none; margin-bottom: 16px; transition: all 0.2s; font-family: 'JetBrains Mono', monospace;
+    }
+    .auth-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(242, 92, 59, 0.2); }
+    .auth-btn { width: 100%; padding: 12px; font-size: 0.95rem; font-weight: 700; border-radius: 10px; background: var(--primary); color: #fff; border: none; cursor: pointer; }
+    .auth-btn:hover { background: var(--primary-dark); }
+    .auth-error { color: var(--danger); font-size: 0.8rem; margin-top: 10px; font-weight: 600; display: none; }
+
     header {
       display: flex; justify-content: space-between; align-items: center;
       background: var(--surface); padding: 16px 24px; border-radius: var(--radius);
@@ -74,6 +97,8 @@
     .btn-edit:hover { background: #d97706; color: #fff; }
     .btn-mail { background: #0284c7; color: #fff; }
     .btn-mail:hover { background: #0369a1; }
+    .btn-logout { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); }
+    .btn-logout:hover { background: var(--danger); color: #fff; }
 
     .table-box { overflow-x: auto; margin-top: 12px; }
     table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
@@ -334,9 +359,22 @@
 </head>
 <body>
 
+  <!-- AUTHENTICATION OVERLAY (PIN: 1312) -->
+  <div id="authOverlay">
+    <div class="auth-card">
+      <img src="https://i.pinimg.com/736x/bd/d0/5c/bdd05c94afb66b5a72f5e17a7a879ab3.jpg" class="auth-logo" alt="Ofbuzz Logo" referrerpolicy="no-referrer">
+      <h2 class="auth-title">Ofbuzz Technology</h2>
+      <p class="auth-sub">Enter Secure Access PIN to enter Admin Console</p>
+      
+      <input type="password" id="adminPinInput" class="auth-input" maxlength="4" placeholder="••••" autofocus onkeypress="handlePinKeyPress(event)">
+      <button class="auth-btn" onclick="validateAdminPin()">Unlock Console</button>
+      <div id="authErrorMsg" class="auth-error">Incorrect PIN. Access Denied.</div>
+    </div>
+  </div>
+
   <div id="toast" class="toast"></div>
 
-  <div class="container">
+  <div class="container" id="mainDashboard" style="display: none;">
     <header>
       <div class="brand-box">
         <img src="https://i.pinimg.com/736x/bd/d0/5c/bdd05c94afb66b5a72f5e17a7a879ab3.jpg" class="brand-logo" alt="Ofbuzz Logo" referrerpolicy="no-referrer">
@@ -345,7 +383,10 @@
           <p style="font-size: 0.75rem; color: var(--text-muted);">Custom Billing, Workforce & Invoice Studio</p>
         </div>
       </div>
-      <button class="btn-primary" id="btnRefresh" onclick="syncAllData()">↻ Refresh Data</button>
+      <div style="display: flex; gap: 8px; align-items: center;">
+        <button class="btn-primary" id="btnRefresh" onclick="syncAllData()">↻ Refresh Data</button>
+        <button class="btn-logout" onclick="lockAdminSession()">🔒 Logout</button>
+      </div>
     </header>
 
     <!-- METRICS -->
@@ -438,7 +479,7 @@
       </div>
     </div>
 
-    <!-- 3. ADD STAFF MEMBER (RESTORED) -->
+    <!-- 3. ADD STAFF MEMBER -->
     <div class="section-card">
       <div class="section-head">
         <span id="staffFormTitle">Add New Workforce / Staff Member</span>
@@ -468,7 +509,7 @@
       </div>
     </div>
 
-    <!-- 4. STAFF DIRECTORY TABLE (RESTORED) -->
+    <!-- 4. STAFF DIRECTORY TABLE -->
     <div class="section-card">
       <div class="section-head">
         <span>Workforce Directory</span>
@@ -739,6 +780,7 @@
   <script>
     const API_ENDPOINT = "https://script.google.com/macros/s/AKfycby9yiIo9euB9KTt0zBuwcF3x6pdaeJJ48mAwcTFC6xl53oH8eh0Agfwlr138t3D5KNPYQ/exec";
     const BRAND_LOGO_URL = "https://i.pinimg.com/736x/bd/d0/5c/bdd05c94afb66b5a72f5e17a7a879ab3.jpg";
+    const SECURE_PIN = "1312";
 
     let state = {
       clients: [],
@@ -755,6 +797,51 @@
       calculatedNextDue: "",
       financials: {}
     };
+
+    // AUTHENTICATION LOGIC
+    function validateAdminPin() {
+      const input = document.getElementById("adminPinInput");
+      const errorMsg = document.getElementById("authErrorMsg");
+      
+      if (input.value.trim() === SECURE_PIN) {
+        sessionStorage.setItem("ofbuzz_admin_auth", "true");
+        document.getElementById("authOverlay").style.display = "none";
+        document.getElementById("mainDashboard").style.display = "block";
+        errorMsg.style.display = "none";
+        syncAllData();
+      } else {
+        errorMsg.style.display = "block";
+        input.value = "";
+        input.focus();
+      }
+    }
+
+    function handlePinKeyPress(e) {
+      if (e.key === "Enter") {
+        validateAdminPin();
+      }
+    }
+
+    function lockAdminSession() {
+      sessionStorage.removeItem("ofbuzz_admin_auth");
+      document.getElementById("authOverlay").style.display = "flex";
+      document.getElementById("mainDashboard").style.display = "none";
+      document.getElementById("adminPinInput").value = "";
+      document.getElementById("authErrorMsg").style.display = "none";
+      document.getElementById("adminPinInput").focus();
+    }
+
+    function checkAuthOnLoad() {
+      if (sessionStorage.getItem("ofbuzz_admin_auth") === "true") {
+        document.getElementById("authOverlay").style.display = "none";
+        document.getElementById("mainDashboard").style.display = "block";
+        syncAllData();
+      } else {
+        document.getElementById("authOverlay").style.display = "flex";
+        document.getElementById("mainDashboard").style.display = "none";
+        document.getElementById("adminPinInput").focus();
+      }
+    }
 
     function showToast(msg) {
       const toast = document.getElementById("toast");
@@ -836,7 +923,7 @@
       });
       clientBody.innerHTML = cHtml || '<tr><td colspan="6" style="text-align:center;">No clients enrolled yet.</td></tr>';
 
-      // 2. Staff Directory Table (RESTORED)
+      // 2. Staff Directory Table
       const staffBody = document.getElementById("staffTableBody");
       let sTableHtml = "";
       let sOptions = '<option value="">Choose Staff Profile</option>';
@@ -958,7 +1045,7 @@
       syncAllData();
     };
 
-    // STAFF MANAGEMENT ACTIONS (RESTORED)
+    // STAFF ACTIONS
     function saveStaffRecord() {
       const editId = document.getElementById("staffEditId").value;
       const s = {
@@ -1452,7 +1539,8 @@
       printWindow.document.close();
     }
 
-    window.onload = syncAllData;
+    // Page Load check with PIN overlay
+    window.onload = checkAuthOnLoad;
   </script>
 </body>
 </html>
