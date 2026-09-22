@@ -3,17 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Studio & Invoice Generator — Ofbuzz Technology</title>
+  <title>Admin Studio & Meta Analytics — Ofbuzz Technology</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- Chart.js for Meta Ads Style Analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
     :root {
       --primary: #f25c3b;
       --primary-dark: #d94827;
+      --meta-blue: #1877f2;
+      --meta-gradient: linear-gradient(135deg, #1877f2 0%, #0056b3 100%);
       --bg: #f8fafc;
       --surface: #ffffff;
       --border: #e2e8f0;
@@ -26,9 +30,9 @@
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
     body { background: var(--bg); color: var(--text); padding: 20px 16px 80px; }
-    .container { max-width: 1200px; margin: 0 auto; }
+    .container { max-width: 1240px; margin: 0 auto; }
 
-    /* AUTHENTICATION LOCK SCREEN */
+    /* AUTHENTICATION OVERLAY */
     #authOverlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: #0f172a; z-index: 9999; display: flex;
@@ -61,10 +65,54 @@
     .brand-logo { width: 44px; height: 44px; border-radius: 8px; object-fit: cover; }
     .brand-title { font-size: 1.15rem; font-weight: 800; color: var(--text); }
 
-    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 24px; }
-    .kpi-card { background: var(--surface); padding: 18px; border-radius: var(--radius); border: 1px solid var(--border); border-left: 4px solid var(--primary); }
-    .kpi-title { font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); }
-    .kpi-val { font-size: 1.5rem; font-weight: 800; margin-top: 6px; color: var(--text); }
+    /* META ADS STYLE ANALYTICS HEADER & FILTER BAR */
+    .meta-analytics-header {
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;
+      gap: 12px; margin-bottom: 18px;
+    }
+    .meta-live-badge {
+      display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 700;
+      color: #059669; background: #ecfdf5; padding: 4px 10px; border-radius: 20px; border: 1px solid #d1fae5;
+    }
+    .meta-pulse-dot { width: 7px; height: 7px; border-radius: 50%; background: #059669; box-shadow: 0 0 0 2px rgba(16,185,129,0.3); animation: pulse 1.8s infinite; }
+    @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.3); } 100% { opacity: 1; transform: scale(1); } }
+
+    .time-filter-group { display: flex; gap: 4px; background: #f1f5f9; padding: 4px; border-radius: 10px; }
+    .time-pill {
+      padding: 6px 14px; border: none; background: transparent; font-size: 0.78rem;
+      font-weight: 700; color: #64748b; border-radius: 8px; cursor: pointer; transition: all 0.2s;
+    }
+    .time-pill.active { background: #ffffff; color: var(--text); box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+
+    /* META METRIC TILES GRID (6 TILES) */
+    .meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 20px; }
+    .meta-tile {
+      background: var(--surface); padding: 16px 18px; border-radius: var(--radius);
+      border: 1px solid var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+      position: relative; overflow: hidden;
+    }
+    .meta-tile-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .meta-tile-label { font-size: 0.72rem; text-transform: uppercase; font-weight: 800; color: var(--text-muted); letter-spacing: 0.04em; }
+    .meta-tile-pill { font-size: 0.68rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
+    .pill-green { background: #d1fae5; color: #065f46; }
+    .pill-orange { background: #ffedd5; color: #9a3412; }
+    .pill-blue { background: #e0f2fe; color: #0369a1; }
+    .meta-tile-val { font-size: 1.45rem; font-weight: 800; color: var(--text); letter-spacing: -0.02em; }
+    .meta-tile-sub { font-size: 0.72rem; color: #94a3b8; margin-top: 4px; }
+
+    /* CHARTS CONTAINER */
+    .charts-grid { display: grid; grid-template-columns: 2fr 1.1fr; gap: 18px; margin-bottom: 24px; }
+    @media (max-width: 900px) { .charts-grid { grid-template-columns: 1fr; } }
+    .chart-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+    }
+    .chart-card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+    .chart-title { font-size: 0.9rem; font-weight: 800; color: var(--text); }
+
+    .collection-meter-box { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border); }
+    .meter-bar-track { width: 100%; height: 8px; background: #e2e8f0; border-radius: 6px; overflow: hidden; margin: 6px 0; }
+    .meter-bar-fill { height: 100%; background: #10b981; border-radius: 6px; width: 0%; transition: width 0.6s ease; }
 
     .section-card {
       background: var(--surface); border: 1px solid var(--border);
@@ -129,7 +177,7 @@
     /* TOAST */
     .toast { position: fixed; top: 20px; right: 20px; padding: 12px 20px; border-radius: 8px; background: #0f172a; color: #fff; font-size: 0.85rem; font-weight: 600; display: none; z-index: 2000; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
 
-    /* EXACT INVOICE SHEET (MATCHING PROVIDED DESIGN SPECIFICATION) */
+    /* EXACT INVOICE SHEET (MATCHING DESIGN SPECIFICATION) */
     .zylker-invoice {
       background: #ffffff;
       color: #1e293b;
@@ -380,7 +428,7 @@
         <img src="https://i.pinimg.com/736x/bd/d0/5c/bdd05c94afb66b5a72f5e17a7a879ab3.jpg" class="brand-logo" alt="Ofbuzz Logo" referrerpolicy="no-referrer">
         <div>
           <div class="brand-title">Ofbuzz Technology — Admin Studio</div>
-          <p style="font-size: 0.75rem; color: var(--text-muted);">Custom Billing, Workforce & Invoice Studio</p>
+          <p style="font-size: 0.75rem; color: var(--text-muted);">Corporate Operations & Meta Business Analytics</p>
         </div>
       </div>
       <div style="display: flex; gap: 8px; align-items: center;">
@@ -389,15 +437,107 @@
       </div>
     </header>
 
-    <!-- METRICS -->
-    <div class="kpi-grid">
-      <div class="kpi-card">
-        <div class="kpi-title">Today's Transactions</div>
-        <div class="kpi-val" id="todaySales">₹0.00</div>
+    <!-- META ADS STYLE ANALYTICS SUITE -->
+    <div class="meta-analytics-header">
+      <div class="meta-live-badge">
+        <span class="meta-pulse-dot"></span>
+        Live Business Insights & Revenue Stream
       </div>
-      <div class="kpi-card" style="border-left-color: var(--accent);">
-        <div class="kpi-title">Monthly Revenue Pipeline</div>
-        <div class="kpi-val" id="monthlySales" style="font-size: 1.15rem; font-weight: 700;">Loading...</div>
+      <div class="time-filter-group">
+        <button class="time-pill" onclick="setTimeFilter('today', this)">Today</button>
+        <button class="time-pill" onclick="setTimeFilter('7d', this)">7D</button>
+        <button class="time-pill" onclick="setTimeFilter('30d', this)">30D</button>
+        <button class="time-pill" onclick="setTimeFilter('month', this)">This Month</button>
+        <button class="time-pill active" onclick="setTimeFilter('all', this)">All Time</button>
+      </div>
+    </div>
+
+    <!-- 6 META PERFORMANCE TILES -->
+    <div class="meta-grid">
+      <div class="meta-tile">
+        <div class="meta-tile-top">
+          <span class="meta-tile-label">Gross Revenue</span>
+          <span class="meta-tile-pill pill-green">Pipeline</span>
+        </div>
+        <div class="meta-tile-val" id="metaKpiGross">₹0</div>
+        <div class="meta-tile-sub">Total contracted value</div>
+      </div>
+
+      <div class="meta-tile">
+        <div class="meta-tile-top">
+          <span class="meta-tile-label">MRR (Monthly)</span>
+          <span class="meta-tile-pill pill-blue">Recurring</span>
+        </div>
+        <div class="meta-tile-val" id="metaKpiMrr">₹0</div>
+        <div class="meta-tile-sub">Active retainer velocity</div>
+      </div>
+
+      <div class="meta-tile">
+        <div class="meta-tile-top">
+          <span class="meta-tile-label">Collections</span>
+          <span class="meta-tile-pill pill-green">Realized</span>
+        </div>
+        <div class="meta-tile-val" id="metaKpiPaid" style="color: #059669;">₹0</div>
+        <div class="meta-tile-sub">Cash received in bank</div>
+      </div>
+
+      <div class="meta-tile">
+        <div class="meta-tile-top">
+          <span class="meta-tile-label">Outstanding Due</span>
+          <span class="meta-tile-pill pill-orange">Pending</span>
+        </div>
+        <div class="meta-tile-val" id="metaKpiDue" style="color: #ea580c;">₹0</div>
+        <div class="meta-tile-sub">Receivables to collect</div>
+      </div>
+
+      <div class="meta-tile">
+        <div class="meta-tile-top">
+          <span class="meta-tile-label">Enterprise Accounts</span>
+          <span class="meta-tile-pill pill-blue">Active</span>
+        </div>
+        <div class="meta-tile-val" id="metaKpiClients">0</div>
+        <div class="meta-tile-sub" id="metaKpiClientsSub">Total client roster</div>
+      </div>
+
+      <div class="meta-tile">
+        <div class="meta-tile-top">
+          <span class="meta-tile-label">Fulfillment Rate</span>
+          <span class="meta-tile-pill pill-green">Delivery</span>
+        </div>
+        <div class="meta-tile-val" id="metaKpiFulfillment">0%</div>
+        <div class="meta-tile-sub" id="metaKpiFulfillmentSub">0 of 0 tasks complete</div>
+      </div>
+    </div>
+
+    <!-- META ADS STYLE CHARTS (TIMELINE & TIER MIX) -->
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-card-head">
+          <div class="chart-title">Revenue & Cashflow Timeline</div>
+          <span style="font-size:0.75rem; color:#64748b;" id="chartTimelineLabel">Historical Trend</span>
+        </div>
+        <div style="height: 230px; position: relative;">
+          <canvas id="revenueLineChart"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-card-head">
+          <div class="chart-title">Service Revenue Mix</div>
+          <span style="font-size:0.75rem; color:#64748b;">Tier Split</span>
+        </div>
+        <div style="height: 160px; position: relative;">
+          <canvas id="serviceMixChart"></canvas>
+        </div>
+        <div class="collection-meter-box">
+          <div style="display:flex; justify-content:space-between; font-size:0.75rem; font-weight:700;">
+            <span style="color:#64748b;">Collection Efficiency</span>
+            <span id="collectionPercentText" style="color:#059669;">0%</span>
+          </div>
+          <div class="meter-bar-track">
+            <div class="meter-bar-fill" id="collectionProgressBar"></div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -798,6 +938,10 @@
       financials: {}
     };
 
+    let activeTimeFilter = "all";
+    let lineChartInstance = null;
+    let mixChartInstance = null;
+
     // AUTHENTICATION LOGIC
     function validateAdminPin() {
       const input = document.getElementById("adminPinInput");
@@ -882,11 +1026,209 @@
       if (res && res.success && res.data) {
         state = res.data;
         renderAdminDashboard();
-        showToast("Data refreshed successfully!");
+        renderMetaAnalytics();
+        showToast("Dashboard synchronized!");
       } else {
         showToast("Error retrieving records.");
       }
     };
+
+    // TIME FILTER SELECTION (META STYLE)
+    function setTimeFilter(filter, el) {
+      activeTimeFilter = filter;
+      document.querySelectorAll(".time-pill").forEach(btn => btn.classList.remove("active"));
+      if (el) el.classList.add("active");
+      renderMetaAnalytics();
+    }
+
+    // META ADS STYLE ANALYTICS COMPUTATION & CHARTS
+    function renderMetaAnalytics() {
+      const now = new Date();
+      let filterStartDate = null;
+
+      if (activeTimeFilter === "today") {
+        filterStartDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      } else if (activeTimeFilter === "7d") {
+        filterStartDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      } else if (activeTimeFilter === "30d") {
+        filterStartDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      } else if (activeTimeFilter === "month") {
+        filterStartDate = new Date(now.getFullYear(), now.getMonth(), 1);
+      }
+
+      // 1. Filtered Payments & Totals
+      let totalCollected = 0;
+      const timelineBuckets = {};
+
+      (state.payments || []).forEach(p => {
+        const pDateStr = String(p[5] || "").substring(0, 10);
+        const pDate = new Date(pDateStr);
+        const amt = parseFloat(p[4]) || 0;
+
+        if (!filterStartDate || pDate >= filterStartDate) {
+          totalCollected += amt;
+          const bucketKey = pDateStr.length >= 7 ? pDateStr : "Current";
+          timelineBuckets[bucketKey] = (timelineBuckets[bucketKey] || 0) + amt;
+        }
+      });
+
+      // 2. Client Breakdown
+      let totalGross = 0;
+      let totalMrr = 0;
+      let oneTimeSum = 0;
+      let monthlySum = 0;
+      let annualSum = 0;
+      let activeAccounts = 0;
+
+      (state.clients || []).forEach(c => {
+        const cDate = c[12] ? new Date(c[12]) : null;
+        if (!filterStartDate || (cDate && cDate >= filterStartDate)) {
+          const ot = parseFloat(c[5]) || 0;
+          const mo = parseFloat(c[7]) || 0;
+          const an = parseFloat(c[9]) || 0;
+
+          oneTimeSum += ot;
+          monthlySum += mo;
+          annualSum += an;
+
+          totalGross += (ot + mo + an);
+          totalMrr += mo;
+          activeAccounts++;
+        }
+      });
+
+      const outstandingDue = Math.max(0, totalGross - totalCollected);
+
+      // 3. Tasks Fulfillment
+      let tasksTotal = (state.tasks || []).length;
+      let tasksDone = (state.tasks || []).filter(t => t[6] === "Approved").length;
+      let fulfillmentPct = tasksTotal > 0 ? Math.round((tasksDone / tasksTotal) * 100) : 100;
+
+      // Update Top Meta Tiles
+      document.getElementById("metaKpiGross").innerText = "₹" + totalGross.toLocaleString("en-IN");
+      document.getElementById("metaKpiMrr").innerText = "₹" + totalMrr.toLocaleString("en-IN");
+      document.getElementById("metaKpiPaid").innerText = "₹" + totalCollected.toLocaleString("en-IN");
+      document.getElementById("metaKpiDue").innerText = "₹" + outstandingDue.toLocaleString("en-IN");
+      document.getElementById("metaKpiClients").innerText = activeAccounts;
+      document.getElementById("metaKpiClientsSub").innerText = activeAccounts + " active accounts in scope";
+      document.getElementById("metaKpiFulfillment").innerText = fulfillmentPct + "%";
+      document.getElementById("metaKpiFulfillmentSub").innerText = tasksDone + " of " + tasksTotal + " deliverables closed";
+
+      // Collection Progress Bar
+      let collectionEff = totalGross > 0 ? Math.min(100, Math.round((totalCollected / totalGross) * 100)) : 100;
+      document.getElementById("collectionPercentText").innerText = collectionEff + "%";
+      document.getElementById("collectionProgressBar").style.width = collectionEff + "%";
+
+      // 4. Render Chart.js (Line Timeline)
+      renderTimelineChart(timelineBuckets);
+
+      // 5. Render Chart.js (Service Mix Doughnut)
+      renderServiceMixChart(oneTimeSum, monthlySum, annualSum);
+    }
+
+    function renderTimelineChart(buckets) {
+      const ctx = document.getElementById("revenueLineChart").getContext("2d");
+      let labels = Object.keys(buckets).sort();
+      let data = labels.map(k => buckets[k]);
+
+      if (labels.length === 0) {
+        labels = ["Current Period"];
+        data = [0];
+      }
+
+      if (lineChartInstance) lineChartInstance.destroy();
+
+      const gradient = ctx.createLinearGradient(0, 0, 0, 200);
+      gradient.addColorStop(0, "rgba(24, 119, 242, 0.35)");
+      gradient.addColorStop(1, "rgba(24, 119, 242, 0.0)");
+
+      lineChartInstance = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: labels,
+          datasets: [{
+            label: "Collections (INR)",
+            data: data,
+            borderColor: "#1877f2",
+            borderWidth: 2.5,
+            fill: true,
+            backgroundColor: gradient,
+            tension: 0.35,
+            pointBackgroundColor: "#1877f2",
+            pointRadius: 4,
+            pointHoverRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function(ctx) {
+                  return " Revenue: ₹" + ctx.parsed.y.toLocaleString("en-IN");
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { font: { size: 11 } }
+            },
+            y: {
+              grid: { color: "#f1f5f9" },
+              ticks: {
+                callback: function(val) { return "₹" + val; },
+                font: { size: 11 }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function renderServiceMixChart(oneTime, monthly, annual) {
+      const ctx = document.getElementById("serviceMixChart").getContext("2d");
+      const hasData = (oneTime + monthly + annual) > 0;
+      const dataValues = hasData ? [oneTime, monthly, annual] : [1, 1, 1];
+      const backgroundColors = hasData ? ["#f25c3b", "#1877f2", "#10b981"] : ["#e2e8f0", "#e2e8f0", "#e2e8f0"];
+
+      if (mixChartInstance) mixChartInstance.destroy();
+
+      mixChartInstance = new Chart(ctx, {
+        type: "doughnut",
+        data: {
+          labels: ["One-Time Setup", "Monthly Retainer", "Annual AMC"],
+          datasets: [{
+            data: dataValues,
+            backgroundColor: backgroundColors,
+            borderWidth: 2,
+            borderColor: "#ffffff"
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: "70%",
+          plugins: {
+            legend: {
+              position: "right",
+              labels: { boxWidth: 10, font: { size: 10 } }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(ctx) {
+                  const val = hasData ? "₹" + ctx.raw.toLocaleString("en-IN") : "No data";
+                  return " " + ctx.label + ": " + val;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
 
     function renderAdminDashboard() {
       document.getElementById("todaySales").innerText = "₹" + (state.todaySales || 0).toFixed(2);
@@ -1539,7 +1881,6 @@
       printWindow.document.close();
     }
 
-    // Page Load check with PIN overlay
     window.onload = checkAuthOnLoad;
   </script>
 </body>
