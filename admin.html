@@ -65,6 +65,7 @@
     }
     .btn-primary { background: var(--primary); color: #fff; }
     .btn-primary:hover { background: var(--primary-dark); }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
     .btn-bill { background: rgba(242, 92, 59, 0.12); color: var(--primary); border: 1px solid rgba(242, 92, 59, 0.25); }
     .btn-bill:hover { background: var(--primary); color: #fff; }
     .btn-del { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
@@ -345,7 +346,7 @@
           <p style="font-size: 0.75rem; color: var(--text-muted);">Custom Billing, Task Engine & Smart Invoicing</p>
         </div>
       </div>
-      <button class="btn-primary" onclick="syncAllData()">↻ Refresh Data</button>
+      <button class="btn-primary" id="btnRefresh" onclick="syncAllData()">↻ Refresh Data</button>
     </header>
 
     <!-- METRICS -->
@@ -702,19 +703,40 @@
 
     function jsonp(url, callbackName) {
       const script = document.createElement("script");
-      script.src = url + (url.indexOf("?") >= 0 ? "&" : "?") + "callback=" + callbackName;
+      const connector = url.indexOf("?") >= 0 ? "&" : "?";
+      // Anti-caching timestamp (_t) guarantees fresh network fetch
+      script.src = url + connector + "callback=" + callbackName + "&_t=" + Date.now();
       document.body.appendChild(script);
       script.onload = () => script.remove();
+      script.onerror = () => {
+        script.remove();
+        showToast("Network request failed. Please check connectivity.");
+      };
     }
 
     function syncAllData() {
+      const btn = document.getElementById("btnRefresh");
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = "Refreshing...";
+      }
+      showToast("Fetching latest data...");
       jsonp(API_ENDPOINT + "?action=getAdminData", "onAdminSync");
     }
 
     window.onAdminSync = function(res) {
+      const btn = document.getElementById("btnRefresh");
+      if (btn) {
+        btn.disabled = false;
+        btn.innerText = "↻ Refresh Data";
+      }
+
       if (res && res.success && res.data) {
         state = res.data;
         renderAdminDashboard();
+        showToast("Data refreshed successfully!");
+      } else {
+        showToast("Error retrieving records.");
       }
     };
 
@@ -888,7 +910,7 @@
       syncAllData();
     };
 
-    // INVOICE BUILDER & GENERATE BILL MODAL
+    // INVOICE BUILDER & GENERATE BILL MODAL WITH ACCURATE DATES
     function openInvoiceModal(clientId) {
       const c = (state.clients || []).find(item => item[0] === clientId);
       if (!c) return;
@@ -909,9 +931,26 @@
       document.getElementById("modalClientHeader").innerText = `Generating bill for: ${c[1]} (${c[0]})`;
       document.getElementById("previewInvNumber").innerText = `# ${invCode}`;
       
-      const todayFormatted = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+      // CURRENT TIME FOR ACCURACY (23 Sep 2026)
+      const now = new Date();
+      const todayFormatted = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
       document.getElementById("previewInvDate").innerText = todayFormatted;
-      document.getElementById("previewDueDate").innerText = c[10] ? new Date(c[10]).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : todayFormatted;
+
+      // PREVENT PREVIOUS DATE ERROR (Due Date can NEVER be before Invoice Date)
+      let finalDueDateObj = now;
+      if (c[10]) {
+        const rawSaved = new Date(c[10]);
+        // Set time to midnight for true date comparison
+        const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const savedMidnight = new Date(rawSaved.getFullYear(), rawSaved.getMonth(), rawSaved.getDate());
+
+        if (!isNaN(savedMidnight.getTime()) && savedMidnight >= todayMidnight) {
+          finalDueDateObj = rawSaved;
+        }
+      }
+
+      const dueFormatted = finalDueDateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+      document.getElementById("previewDueDate").innerText = dueFormatted;
 
       document.getElementById("previewCustName").innerText = c[1];
       document.getElementById("previewCustAddress").innerHTML = `Phone: ${c[2] || '—'}<br>Email: ${c[3] || '—'}`;
@@ -1096,7 +1135,6 @@
               flex-direction: column;
               justify-content: space-between;
             }
-            /* EMBEDDED STYLES FROM MAIN */
             ${document.querySelector('style').innerHTML}
             .inv-bottom-notes { margin-top: auto !important; padding-top: 12px !important; }
             .inv-dates-grid { margin-bottom: 16px !important; }
@@ -1110,18 +1148,15 @@
           </div>
 
           <script>
-            // AUTO SCALE SCRIPT TO GUARANTEE 1 PAGE ONLY
             function fitToOnePageAndPrint() {
               const container = document.getElementById("scaleContainer");
               const logo = document.getElementById("mainOfbuzzLogo");
               
-              // Ensure logo is loaded
               if (logo && !logo.complete) {
                 logo.onload = fitToOnePageAndPrint;
                 return;
               }
 
-              // 297mm in standard 96dpi screen pixels is roughly 1122px
               const maxHeightPx = 1122 - 40; 
               const currentHeight = container.scrollHeight;
 
