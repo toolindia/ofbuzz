@@ -52,7 +52,11 @@
       container.innerHTML = compiledHtml;
     }
 
-    window.onload = function() {
+    function initPage() {
+      if (typeof google === "undefined" || !google.script || !google.script.run) {
+        setTimeout(initPage, 100);
+        return;
+      }
       google.script.run
         .withSuccessHandler(renderDirectory)
         .withFailureHandler(function(fault) {
@@ -60,7 +64,13 @@
             '<div class="notification-pane" style="color:#dc3545;">Database connectivity error: ' + fault.message + '</div>';
         })
         .getLiveClients();
-    };
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", initPage);
+    } else {
+      initPage();
+    }
   </script>
 </body>
 </html>
