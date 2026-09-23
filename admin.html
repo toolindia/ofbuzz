@@ -698,7 +698,7 @@
     </div>
   </div>
 
-  <!-- INVOICE GENERATOR MODAL WITH LARGE QR & ofbuzz@ptyes -->
+  <!-- INVOICE GENERATOR MODAL -->
   <div class="modal-backdrop" id="invoiceModal">
     <div class="modal-window">
       <div class="modal-header">
@@ -752,7 +752,7 @@
 
             <!-- INSTALLMENT RECORDING -->
             <div class="section-card" style="padding: 16px; margin-bottom: 16px;">
-              <h4 style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px;">Record Installment / Advance (e.g. 500 out of 1000)</h4>
+              <h4 style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px;">Record Installment / Advance</h4>
               <div class="input-grid">
                 <div class="input-group">
                   <label>Payment Method</label>
@@ -909,7 +909,6 @@
                     <p>Please make payment before the due date.</p>
                   </div>
 
-                  <!-- LARGER QR CODE CONTAINER -->
                   <div class="qr-container-box">
                     <div id="invoiceQr" style="width: 125px; height: 125px; margin: 0 auto;"></div>
                     <span style="font-size: 0.7rem; color: #64748b; font-weight: 700; display: block; margin-top: 6px;">Instant UPI Scan</span>
@@ -1245,8 +1244,10 @@
       jsonp(API_ENDPOINT + `?action=adjustClientPayment&clientId=${encodeURIComponent(clientId)}&amount=${encodeURIComponent(amount)}&type=${encodeURIComponent(type)}&remark=${encodeURIComponent(remark)}`, "onAdjustmentSaved");
     }
 
+    // FIXED DELETE & CANCEL HANDLERS WITH PROPER CALLBACKS
     function cancelClientService(clientId) {
       if (!confirm("Are you sure you want to cancel/deactivate service for client " + clientId + "?")) return;
+      showToast("Cancelling service...");
       jsonp(API_ENDPOINT + `?action=deactivateClient&clientId=${encodeURIComponent(clientId)}`, "onServiceCancelled");
     }
 
@@ -1256,6 +1257,21 @@
         syncAllData();
       } else {
         showToast("Failed to cancel service.");
+      }
+    };
+
+    function deleteClientRecord(id) {
+      if (!confirm("Are you sure you want to delete client " + id + "?")) return;
+      showToast("Deleting client record...");
+      jsonp(API_ENDPOINT + `?action=deleteClient&clientId=${encodeURIComponent(id)}`, "onClientDeleted");
+    }
+
+    window.onClientDeleted = function(res) {
+      if (res && res.success) {
+        showToast("Client record removed.");
+        syncAllData();
+      } else {
+        showToast("Failed to delete client.");
       }
     };
 
@@ -1605,16 +1621,6 @@
       document.getElementById("formTitle").innerText = "Register Client & Setup Multi-Tier Services";
       document.getElementById("btnCancelEdit").style.display = "none";
     }
-
-    function deleteClientRecord(id) {
-      if (!confirm("Are you sure you want to delete client " + id + "?")) return;
-      jsonp(API_ENDPOINT + `?action=deleteClient&clientId=${encodeURIComponent(id)}`, "onDeleted");
-    }
-
-    window.onDeleted = function() {
-      showToast("Client removed.");
-      syncAllData();
-    };
 
     function saveStaffRecord() {
       const editId = document.getElementById("staffEditId").value;
@@ -2145,7 +2151,6 @@
                 return;
               }
 
-              // Re-generate QR in print window to ensure it renders correctly on download/print
               const qrContainer = document.getElementById("invoiceQr");
               if (qrContainer) {
                 qrContainer.innerHTML = "";
