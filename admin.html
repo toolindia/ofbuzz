@@ -204,6 +204,15 @@
 
     .toast { position: fixed; top: 20px; right: 20px; padding: 12px 20px; border-radius: 8px; background: #0f172a; color: #fff; font-size: 0.85rem; font-weight: 600; display: none; z-index: 2000; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
 
+    /* CUSTOM IN-SCREEN CONFIRMATION MODAL */
+    .confirm-modal-box {
+      background: #ffffff; padding: 24px; border-radius: 12px; max-width: 380px; width: 100%;
+      text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2); border: 1px solid var(--border);
+    }
+    .confirm-modal-box h4 { font-size: 1.1rem; color: #0f172a; margin-bottom: 8px; font-weight: 800; }
+    .confirm-modal-box p { font-size: 0.85rem; color: #64748b; margin-bottom: 20px; line-height: 1.4; }
+    .confirm-btns { display: flex; gap: 10px; justify-content: center; }
+
     /* INVOICE PREVIEW STYLES */
     .zylker-invoice {
       background: #ffffff; color: #1e293b; padding: 40px 38px; border-radius: 4px;
@@ -264,6 +273,18 @@
   </div>
 
   <div id="toast" class="toast"></div>
+
+  <!-- CUSTOM CONFIRMATION DIALOG MODAL -->
+  <div class="modal-backdrop" id="customConfirmModal">
+    <div class="confirm-modal-box">
+      <h4 id="confirmTitle">Confirm Action</h4>
+      <p id="confirmDesc">Are you sure you want to proceed?</p>
+      <div class="confirm-btns">
+        <button class="btn-del" id="confirmYesBtn" style="padding: 8px 20px;">Yes, Proceed</button>
+        <button class="btn-primary" onclick="closeCustomConfirm()" style="background:#64748b; padding: 8px 20px;">Cancel</button>
+      </div>
+    </div>
+  </div>
 
   <div class="container" id="mainDashboard" style="display: none;">
     <header>
@@ -1000,6 +1021,28 @@
       setTimeout(() => { toast.style.display = "none"; }, 3500);
     }
 
+    // CUSTOM IN-SCREEN CONFIRMATION POPUP LOGIC
+    function showCustomConfirm(title, desc, onYesCallback) {
+      document.getElementById("confirmTitle").innerText = title;
+      document.getElementById("confirmDesc").innerText = desc;
+      const yesBtn = document.getElementById("confirmYesBtn");
+      
+      // Clone button to remove old event listeners
+      const newBtn = yesBtn.cloneNode(true);
+      yesBtn.parentNode.replaceChild(newBtn, yesBtn);
+
+      newBtn.onclick = function() {
+        closeCustomConfirm();
+        onYesCallback();
+      };
+
+      document.getElementById("customConfirmModal").style.display = "flex";
+    }
+
+    function closeCustomConfirm() {
+      document.getElementById("customConfirmModal").style.display = "none";
+    }
+
     function jsonp(url, callbackName) {
       const script = document.createElement("script");
       const connector = url.indexOf("?") >= 0 ? "&" : "?";
@@ -1242,36 +1285,43 @@
       jsonp(API_ENDPOINT + `?action=adjustClientPayment&clientId=${encodeURIComponent(clientId)}&amount=${encodeURIComponent(amount)}&type=${encodeURIComponent(type)}&remark=${encodeURIComponent(remark)}`, "onAdjustmentSaved");
     }
 
+    // USING CUSTOM IN-SCREEN CONFIRM MODAL INSTEAD OF NATIVE CONFIRM()
     function cancelClientService(clientId) {
-      if (!confirm("Are you sure you want to cancel/deactivate service for client " + clientId + "?")) return;
-      showToast("Processing cancellation...");
-      
-      window.onServiceCancelled = function(res) {
-        if (res && res.success) {
-          showToast("Client service successfully cancelled.");
-          syncAllData();
-        } else {
-          showToast("Failed to cancel service.");
+      showCustomConfirm(
+        "Cancel Service",
+        "Are you sure you want to cancel/deactivate service for client " + clientId + "?",
+        function() {
+          showToast("Processing cancellation...");
+          window.onServiceCancelled = function(res) {
+            if (res && res.success) {
+              showToast("Client service successfully cancelled.");
+              syncAllData();
+            } else {
+              showToast("Failed to cancel service.");
+            }
+          };
+          jsonp(API_ENDPOINT + `?action=deactivateClient&clientId=${encodeURIComponent(clientId)}`, "onServiceCancelled");
         }
-      };
-      
-      jsonp(API_ENDPOINT + `?action=deactivateClient&clientId=${encodeURIComponent(clientId)}`, "onServiceCancelled");
+      );
     }
 
     function deleteClientRecord(id) {
-      if (!confirm("Are you sure you want to delete client " + id + "?")) return;
-      showToast("Deleting client record...");
-      
-      window.onClientDeleted = function(res) {
-        if (res && res.success) {
-          showToast("Client record removed.");
-          syncAllData();
-        } else {
-          showToast("Failed to delete client.");
+      showCustomConfirm(
+        "Delete Client Record",
+        "Are you sure you want to delete client " + id + "?",
+        function() {
+          showToast("Deleting client record...");
+          window.onClientDeleted = function(res) {
+            if (res && res.success) {
+              showToast("Client record removed.");
+              syncAllData();
+            } else {
+              showToast("Failed to delete client.");
+            }
+          };
+          jsonp(API_ENDPOINT + `?action=deleteClient&clientId=${encodeURIComponent(id)}`, "onClientDeleted");
         }
-      };
-
-      jsonp(API_ENDPOINT + `?action=deleteClient&clientId=${encodeURIComponent(id)}`, "onClientDeleted");
+      );
     }
 
     function sendPaymentReminderMail(clientId, dueAmt) {
@@ -1681,8 +1731,13 @@
     }
 
     function deleteStaffRecord(id) {
-      if (!confirm("Are you sure you want to purge workforce profile " + id + "?")) return;
-      jsonp(API_ENDPOINT + `?action=deleteStaff&staffId=${encodeURIComponent(id)}`, "onStaffDeleted");
+      showCustomConfirm(
+        "Purge Workforce Profile",
+        "Are you sure you want to purge workforce profile " + id + "?",
+        function() {
+          jsonp(API_ENDPOINT + `?action=deleteStaff&staffId=${encodeURIComponent(id)}`, "onStaffDeleted");
+        }
+      );
     }
 
     window.onStaffDeleted = function(res) {
