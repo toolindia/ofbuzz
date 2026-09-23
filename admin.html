@@ -1,2176 +1,2012 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Studio & Operations — Ofbuzz Technology</title>
-  
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <title>Ofbuzz Technology | Global Digital Growth & Enterprise Technology Firm</title>
+    
+    <!-- Geo & Localized SEO Meta Tags -->
+    <meta name="description" content="Ofbuzz Technology is a global enterprise growth & web development firm serving Jewellery, Luxury Fashion, Real Estate & CA firms in Delhi NCR, Noida, Gurugram, Gujarat, Rajasthan, Bengaluru, New York, New Jersey, Sydney, and London.">
+    <meta name="keywords" content="Digital Marketing Agency Delhi, Web Development New York, SEO Services London, Jewellery Marketing Sydney, Real Estate Marketing New Jersey, Performance Marketing Agency, Ofbuzz Technology">
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+    <meta name="geo.region" content="IN-DL;IN-UP;IN-HR;IN-GJ;IN-RJ;IN-KA;US-NY;US-NJ;AU-NSW;GB-LND">
+    <meta name="geo.placename" content="Delhi, Noida, Gurugram, Gujarat, Rajasthan, Bengaluru, New York, New Jersey, Sydney, London">
+    <meta name="geo.position" content="28.6258;77.2882">
+    <meta name="ICBM" content="28.6258, 77.2882">
+    <link rel="canonical" href="https://www.ofbuzztechnology.in/">
 
-  <style>
-    :root {
-      --primary: #f25c3b;
-      --primary-dark: #d94827;
-      --meta-blue: #1877f2;
-      --bg: #f8fafc;
-      --surface: #ffffff;
-      --border: #e2e8f0;
-      --text: #0f172a;
-      --text-muted: #64748b;
-      --accent: #10b981;
-      --danger: #ef4444;
-      --radius: 12px;
-    }
+    <!-- Open Graph / Social Media -->
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="en_US">
+    <meta property="og:site_name" content="Ofbuzz Technology">
+    <meta property="og:url" content="https://www.ofbuzztechnology.in/">
+    <meta property="og:title" content="Ofbuzz Technology | Global Enterprise Growth Partner">
+    <meta property="og:description" content="Scale your enterprise globally across Delhi, New York, London & Sydney with high-performance web systems, targeted ads, and search dominance.">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=1200">
+    <meta property="og:image:alt" content="Ofbuzz Technology Dashboard">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Ofbuzz Technology | Global Enterprise Growth Partner">
+    <meta name="twitter:description" content="Enterprise digital growth firm architecting high-converting web applications and revenue campaigns worldwide.">
+    <meta name="twitter:image" content="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=1200">
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
-    body { background: var(--bg); color: var(--text); padding: 20px 16px 80px; }
-    .container { max-width: 1240px; margin: 0 auto; }
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
 
-    /* AUTHENTICATION OVERLAY */
-    #authOverlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: #0f172a; z-index: 9999; display: flex;
-      align-items: center; justify-content: center; padding: 20px;
-    }
-    .auth-card {
-      background: #ffffff; width: 100%; max-width: 380px; border-radius: 16px;
-      padding: 32px 28px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); text-align: center;
-    }
-    .auth-logo { width: 64px; height: 64px; border-radius: 12px; object-fit: cover; margin-bottom: 12px; }
-    .auth-title { font-size: 1.25rem; font-weight: 800; color: #0f172a; margin-bottom: 4px; }
-    .auth-sub { font-size: 0.8rem; color: #64748b; margin-bottom: 20px; }
-    .auth-input {
-      width: 100%; padding: 12px; font-size: 1.2rem; text-align: center;
-      letter-spacing: 6px; border: 2px solid #e2e8f0; border-radius: 10px;
-      outline: none; margin-bottom: 16px; transition: all 0.2s; font-family: 'JetBrains Mono', monospace;
-    }
-    .auth-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(242, 92, 59, 0.2); }
-    .auth-btn { width: 100%; padding: 12px; font-size: 0.95rem; font-weight: 700; border-radius: 10px; background: var(--primary); color: #fff; border: none; cursor: pointer; }
-    .auth-btn:hover { background: var(--primary-dark); }
-    .auth-error { color: var(--danger); font-size: 0.8rem; margin-top: 10px; font-weight: 600; display: none; }
+    <!-- FontAwesome for Social Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    header {
-      display: flex; justify-content: space-between; align-items: center;
-      background: var(--surface); padding: 16px 24px; border-radius: var(--radius);
-      border: 1px solid var(--border); box-shadow: 0 4px 20px rgba(0,0,0,0.03);
-      margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
-    }
-    .brand-box { display: flex; align-items: center; gap: 12px; }
-    .brand-logo { width: 44px; height: 44px; border-radius: 8px; object-fit: cover; }
-    .brand-title { font-size: 1.15rem; font-weight: 800; color: var(--text); }
+    <style>
+        :root {
+            --primary: #050B17;
+            --primary-card: #0c1527;
+            --primary-light: #152238;
+            --secondary: #2563EB;
+            --secondary-glow: rgba(37, 99, 235, 0.4);
+            --accent-cyan: #06B6D4;
+            --accent-gold: #D97706;
+            --accent-green: #10B981;
+            --bg-white: #FFFFFF;
+            --bg-light: #F8FAFC;
+            --text-dark: #0F172A;
+            --text-muted: #64748B;
+            --border-light: #E2E8F0;
+            --border-glass: rgba(255, 255, 255, 0.12);
+            --card-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.07);
+            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+            --ease-elastic: cubic-bezier(0.34, 1.56, 0.64, 1);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+        }
 
-    /* TOP STATS STRIP */
-    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 24px; }
-    .kpi-card { background: var(--surface); padding: 18px; border-radius: var(--radius); border: 1px solid var(--border); border-left: 4px solid var(--primary); }
-    .kpi-title { font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); }
-    .kpi-val { font-size: 1.5rem; font-weight: 800; margin-top: 6px; color: var(--text); }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-    /* ON-DEMAND META ANALYTICS DRAWER */
-    #analyticsPanel {
-      display: none;
-      background: #ffffff;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 24px;
-      margin-bottom: 24px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.04);
-    }
-    .meta-analytics-header {
-      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;
-      gap: 12px; margin-bottom: 18px;
-    }
-    .meta-live-badge {
-      display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 700;
-      color: #059669; background: #ecfdf5; padding: 4px 10px; border-radius: 20px; border: 1px solid #d1fae5;
-    }
-    .time-filter-group { display: flex; gap: 4px; background: #f1f5f9; padding: 4px; border-radius: 10px; }
-    .time-pill {
-      padding: 6px 14px; border: none; background: transparent; font-size: 0.78rem;
-      font-weight: 700; color: #64748b; border-radius: 8px; cursor: pointer; transition: all 0.2s;
-    }
-    .time-pill.active { background: #ffffff; color: var(--text); box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+        /* Seamless Google Sites Integration */
+        html, body {
+            width: 100vw;
+            min-height: 100%;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow-x: hidden;
+            position: relative;
+            background-color: var(--bg-white);
+        }
 
-    .meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 20px; }
-    .meta-tile {
-      background: var(--bg); padding: 16px 18px; border-radius: var(--radius);
-      border: 1px solid var(--border);
-    }
-    .meta-tile-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-    .meta-tile-label { font-size: 0.72rem; text-transform: uppercase; font-weight: 800; color: var(--text-muted); }
-    .meta-tile-pill { font-size: 0.68rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
-    .pill-green { background: #d1fae5; color: #065f46; }
-    .pill-orange { background: #ffedd5; color: #9a3412; }
-    .pill-blue { background: #e0f2fe; color: #0369a1; }
-    .meta-tile-val { font-size: 1.45rem; font-weight: 800; color: var(--text); }
-    .meta-tile-sub { font-size: 0.72rem; color: #94a3b8; margin-top: 4px; }
+        html {
+            scroll-behavior: smooth;
+            font-size: 16px;
+        }
 
-    .charts-grid { display: grid; grid-template-columns: 2fr 1.1fr; gap: 18px; margin-bottom: 20px; }
-    @media (max-width: 900px) { .charts-grid { grid-template-columns: 1fr; } }
-    .chart-card {
-      background: #ffffff; border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 20px;
-    }
-    .chart-card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
-    .chart-title { font-size: 0.9rem; font-weight: 800; color: var(--text); }
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--text-dark);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            padding-bottom: calc(76px + var(--safe-bottom)) !important;
+        }
 
-    .collection-meter-box { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border); }
-    .meter-bar-track { width: 100%; height: 8px; background: #e2e8f0; border-radius: 6px; overflow: hidden; margin: 6px 0; }
-    .meter-bar-fill { height: 100%; background: #10b981; border-radius: 6px; width: 0%; transition: width 0.6s ease; }
+        @media (min-width: 769px) {
+            body { 
+                padding-bottom: 0 !important; 
+            }
+        }
 
-    /* PANELS & TABLES */
-    .section-card {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 22px; margin-bottom: 24px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.02);
-    }
-    .section-head { font-size: 1rem; font-weight: 700; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        /* Top Progress Bar */
+        .scroll-progress-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            z-index: 99999;
+            background: rgba(0,0,0,0.05);
+        }
 
-    /* CATEGORY FILTER PILLS */
-    .category-filter-bar { display: flex; gap: 6px; flex-wrap: wrap; }
-    .cat-pill {
-      padding: 6px 12px; border: 1px solid var(--border); background: #f8fafc; font-size: 0.75rem;
-      font-weight: 700; color: #64748b; border-radius: 8px; cursor: pointer; transition: all 0.2s;
-    }
-    .cat-pill.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+        .scroll-progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #2563EB, #06B6D4, #4F46E5, #D97706);
+            box-shadow: 0 0 16px rgba(37, 99, 235, 0.8);
+            transition: width 0.1s linear;
+        }
 
-    .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
-    .input-group { display: flex; flex-direction: column; gap: 6px; }
-    label { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); }
-    input, select, textarea {
-      padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px;
-      font-size: 0.85rem; outline: none; transition: all 0.2s; background: #fff;
-    }
-    input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(242, 92, 59, 0.15); }
+        h1, h2, h3, h4 {
+            color: var(--primary);
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            word-break: break-word;
+        }
 
-    button {
-      padding: 10px 16px; border: none; border-radius: 8px; font-weight: 700;
-      font-size: 0.85rem; cursor: pointer; transition: all 0.2s;
-    }
-    .btn-primary { background: var(--primary); color: #fff; }
-    .btn-primary:hover { background: var(--primary-dark); }
-    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
-    .btn-bill { background: rgba(242, 92, 59, 0.12); color: var(--primary); border: 1px solid rgba(242, 92, 59, 0.25); }
-    .btn-bill:hover { background: var(--primary); color: #fff; }
-    .btn-profile { background: rgba(16, 185, 129, 0.12); color: #059669; border: 1px solid rgba(16, 185, 129, 0.25); }
-    .btn-profile:hover { background: #059669; color: #fff; }
-    .btn-del { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
-    .btn-del:hover { background: var(--danger); color: #fff; }
-    .btn-cancel-service { background: rgba(239, 68, 68, 0.12); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.25); }
-    .btn-cancel-service:hover { background: #dc2626; color: #fff; }
-    .btn-edit { background: rgba(245, 158, 11, 0.1); color: #d97706; }
-    .btn-edit:hover { background: #d97706; color: #fff; }
-    .btn-adjust { background: rgba(24, 119, 242, 0.1); color: #1877f2; border: 1px solid rgba(24, 119, 242, 0.25); }
-    .btn-adjust:hover { background: #1877f2; color: #fff; }
-    .btn-mail { background: #0284c7; color: #fff; }
-    .btn-mail:hover { background: #0369a1; }
-    .btn-reminder { background: rgba(234, 88, 12, 0.12); color: #ea580c; border: 1px solid rgba(234, 88, 12, 0.3); }
-    .btn-reminder:hover { background: #ea580c; color: #fff; }
-    .btn-analytics { background: #1e293b; color: #fff; }
-    .btn-analytics:hover { background: #0f172a; }
-    .btn-staff-mgmt { background: #0ea5e9; color: #fff; }
-    .btn-staff-mgmt:hover { background: #0284c7; }
-    .btn-logout { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); }
-    .btn-logout:hover { background: var(--danger); color: #fff; }
+        a {
+            text-decoration: none;
+            transition: all 0.3s var(--ease-out-expo);
+        }
 
-    .table-box { overflow-x: auto; margin-top: 12px; }
-    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-    th { text-align: left; padding: 12px 10px; background: #f1f5f9; color: var(--text-muted); font-weight: 700; text-transform: uppercase; font-size: 0.7rem; }
-    td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: #334155; }
-    .status-badge { padding: 3px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; background: #e0f2fe; color: #0284c7; }
+        /* Seamless Edge-to-Edge Container */
+        .container {
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 0 16px;
+            position: relative;
+            z-index: 2;
+        }
 
-    /* MODALS */
-    .modal-backdrop {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(6px);
-      z-index: 1000; display: none; align-items: center; justify-content: center; padding: 16px;
-    }
-    .modal-window {
-      background: #f1f5f9; width: 100%; max-width: 1100px; max-height: 94vh;
-      border-radius: var(--radius); overflow-y: auto; box-shadow: 0 25px 60px rgba(0,0,0,0.3);
-      display: flex; flex-direction: column;
-    }
-    .modal-header {
-      padding: 16px 24px; border-bottom: 1px solid var(--border);
-      display: flex; justify-content: space-between; align-items: center;
-      position: sticky; top: 0; background: #fff; z-index: 10;
-    }
-    .modal-body { padding: 24px; }
-    .modal-grid { display: grid; grid-template-columns: 360px 1fr; gap: 24px; align-items: start; }
-    @media (max-width: 960px) { .modal-grid { grid-template-columns: 1fr; } }
+        @media (min-width: 768px) {
+            .container {
+                padding: 0 24px;
+            }
+        }
 
-    .toast { position: fixed; top: 20px; right: 20px; padding: 12px 20px; border-radius: 8px; background: #0f172a; color: #fff; font-size: 0.85rem; font-weight: 600; display: none; z-index: 2000; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        @media (min-width: 1280px) {
+            .container {
+                padding: 0 36px;
+            }
+        }
 
-    /* INVOICE PREVIEW STYLES */
-    .zylker-invoice {
-      background: #ffffff; color: #1e293b; padding: 40px 38px; border-radius: 4px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; font-size: 0.86rem; line-height: 1.45;
+        .section-padding {
+            padding: 60px 0;
+            position: relative;
+        }
+
+        .section-header {
+            text-align: center;
+            max-width: 900px;
+            margin: 0 auto 36px;
+        }
+
+        .section-header h2 {
+            font-size: clamp(26px, 4vw, 46px);
+            line-height: 1.2;
+            margin-bottom: 14px;
+        }
+
+        .section-header p {
+            color: var(--text-muted);
+            font-size: clamp(15px, 1.8vw, 18px);
+            font-weight: 400;
+        }
+
+        /* Animation & Physics */
+        .sm-fade-up {
+            opacity: 0;
+            transform: translateY(30px) scale(0.99);
+            transition: opacity 0.75s var(--ease-out-expo), transform 0.75s var(--ease-out-expo);
+            will-change: opacity, transform;
+        }
+
+        .sm-fade-up.sm-active {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        .sm-cascade > * {
+            opacity: 0;
+            transform: translateY(28px);
+            transition: opacity 0.6s var(--ease-out-expo), transform 0.6s var(--ease-out-expo);
+        }
+
+        .sm-cascade.sm-active > *:nth-child(1) { transition-delay: 0.04s; opacity: 1; transform: translateY(0); }
+        .sm-cascade.sm-active > *:nth-child(2) { transition-delay: 0.10s; opacity: 1; transform: translateY(0); }
+        .sm-cascade.sm-active > *:nth-child(3) { transition-delay: 0.16s; opacity: 1; transform: translateY(0); }
+        .sm-cascade.sm-active > *:nth-child(4) { transition-delay: 0.22s; opacity: 1; transform: translateY(0); }
+        .sm-cascade.sm-active > *:nth-child(5) { transition-delay: 0.28s; opacity: 1; transform: translateY(0); }
+        .sm-cascade.sm-active > *:nth-child(6) { transition-delay: 0.34s; opacity: 1; transform: translateY(0); }
+
+        /* Floating Parallax Orbs */
+        .parallax-orb {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            filter: blur(55px);
+            z-index: 1;
+            opacity: 0.55;
+            will-change: transform;
+        }
+
+        .orb-blue {
+            width: 420px;
+            height: 420px;
+            background: radial-gradient(circle, rgba(37, 99, 235, 0.22) 0%, rgba(37, 99, 235, 0) 70%);
+        }
+
+        .orb-cyan {
+            width: 360px;
+            height: 360px;
+            background: radial-gradient(circle, rgba(6, 182, 212, 0.2) 0%, rgba(6, 182, 212, 0) 70%);
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.08) 0%, rgba(6, 182, 212, 0.08) 100%);
+            border: 1px solid rgba(37, 99, 235, 0.25);
+            color: var(--secondary);
+            font-size: 11px;
+            font-weight: 800;
+            padding: 6px 16px;
+            border-radius: 100px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 18px rgba(37, 99, 235, 0.08);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .badge::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(60deg, transparent, rgba(255,255,255,0.7), transparent);
+            transform: rotate(30deg);
+            animation: shineBadge 4s infinite linear;
+        }
+
+        @keyframes shineBadge {
+            0% { transform: translate(-100%, -100%) rotate(30deg); }
+            100% { transform: translate(100%, 100%) rotate(30deg); }
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px 28px;
+            font-size: 15px;
+            font-weight: 700;
+            border-radius: 14px;
+            gap: 10px;
+            cursor: pointer;
+            border: none;
+            min-height: 52px;
+            transition: all 0.3s var(--ease-out-expo);
+            position: relative;
+            user-select: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2563EB 0%, #3B82F6 100%);
+            color: #FFFFFF;
+            box-shadow: 0 12px 28px -6px rgba(37, 99, 235, 0.45);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px) scale(1.01);
+            box-shadow: 0 20px 35px -5px rgba(37, 99, 235, 0.55);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .btn-outline {
+            border: 1.5px solid rgba(15, 23, 42, 0.15);
+            color: var(--primary);
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-outline:hover {
+            background: var(--bg-white);
+            border-color: var(--secondary);
+            color: var(--secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 22px -5px rgba(0, 0, 0, 0.08);
+        }
+
+        .btn-hover-navy {
+            border: 1.5px solid rgba(255, 255, 255, 0.22);
+            color: var(--bg-white);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .btn-hover-navy:hover {
+            background: #FFFFFF !important;
+            color: #0F172A !important;
+            border-color: #FFFFFF !important;
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-whatsapp {
+            border: 1px solid rgba(16, 185, 129, 0.35);
+            background: rgba(16, 185, 129, 0.08);
+            color: var(--accent-green);
+        }
+
+        .btn-whatsapp:hover {
+            background: var(--accent-green);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Hero Section */
+        .hero {
+            background: radial-gradient(130% 130% at 50% 0%, #FFFFFF 20%, #EEF4FF 70%, #DFE8FF 100%);
+            padding: 50px 0 50px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            margin-top: 0;
+        }
+
+        .hero-inner {
+            max-width: 1050px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 3;
+        }
+
+        .hero h1 {
+            font-size: clamp(32px, 5.5vw, 68px);
+            line-height: 1.12;
+            margin-bottom: 20px;
+            font-weight: 800;
+        }
+
+        .hero h1 span {
+            background: linear-gradient(135deg, #2563EB 0%, #6366F1 50%, #06B6D4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+        }
+
+        .hero p {
+            font-size: clamp(15px, 2vw, 19px);
+            color: var(--text-muted);
+            max-width: 900px;
+            margin: 0 auto 36px;
+            line-height: 1.65;
+        }
+
+        .hero .btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .hero-media-container {
+            perspective: 1200px;
+            margin-top: 40px;
+            width: 100%;
+        }
+
+        .hero-media-showcase {
+            width: 100%;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 30px 60px -15px rgba(15, 23, 42, 0.18);
+            border: 1px solid var(--border-light);
+            background: #000;
+            transform-style: preserve-3d;
+            transition: transform 0.5s var(--ease-out-expo);
+        }
+
+        .hero-media-showcase img {
+            width: 100%;
+            height: clamp(240px, 45vw, 500px);
+            object-fit: cover;
+            display: block;
+        }
+
+        /* Location Strip */
+        .location-seo-strip {
+            background: #F1F5F9;
+            padding: 18px 0;
+            border-bottom: 1px solid var(--border-light);
+            font-size: 13px;
+            color: var(--text-muted);
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .location-tags {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .location-chip {
+            background: var(--bg-white);
+            padding: 6px 14px;
+            border-radius: 30px;
+            border: 1px solid rgba(0,0,0,0.06);
+            font-weight: 700;
+            font-size: 12px;
+            color: var(--secondary);
+            transition: all 0.25s ease;
+            display: inline-block;
+        }
+
+        .location-chip:hover {
+            background: var(--secondary);
+            color: var(--bg-white);
+            transform: translateY(-2px);
+        }
+
+        /* Trusted Marquee */
+        .trusted-wrap {
+            background: var(--bg-white);
+            padding: 35px 0;
+            overflow: hidden;
+            border-top: 1px solid var(--border-light);
+            border-bottom: 1px solid var(--border-light);
+            position: relative;
+        }
+
+        .trusted-heading {
+            text-align: center;
+            color: var(--primary);
+            font-size: 12px;
+            font-weight: 800;
+            margin-bottom: 22px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .trusted-heading span {
+            color: var(--secondary);
+        }
+
+        .trusted-marquee {
+            white-space: nowrap;
+            overflow: hidden;
+            position: relative;
+            width: 100%;
+            mask-image: linear-gradient(90deg, transparent 0%, #000 5%, #000 95%, transparent 100%);
+            -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 5%, #000 95%, transparent 100%);
+        }
+
+        .trusted-track {
+            display: inline-flex;
+            gap: 14px;
+            animation: scrollMarquee 70s linear infinite;
+            white-space: nowrap;
+            will-change: transform;
+        }
+
+        .trusted-track:hover {
+            animation-play-state: paused;
+        }
+
+        .trusted-item-box {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-light);
+            border: 1px solid var(--border-light);
+            padding: 12px 22px;
+            border-radius: 12px;
+            color: var(--primary);
+            font-size: 13px;
+            font-weight: 700;
+            transition: all 0.25s ease;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .trusted-item-box:hover {
+            background: var(--bg-white);
+            border-color: var(--secondary);
+            color: var(--secondary);
+            transform: translateY(-2px);
+        }
+
+        @keyframes scrollMarquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* About Section */
+        .about-statement {
+            background: var(--bg-light);
+            text-align: center;
+        }
+
+        .about-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .about-inner blockquote {
+            font-size: clamp(18px, 2.8vw, 28px);
+            font-weight: 700;
+            color: var(--primary);
+            line-height: 1.45;
+            margin-bottom: 28px;
+            letter-spacing: -0.02em;
+        }
+
+        .tags-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .tag-item {
+            background: var(--bg-white);
+            border: 1px solid var(--border-light);
+            padding: 9px 18px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-dark);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+            transition: all 0.25s ease;
+        }
+
+        .tag-item:hover {
+            border-color: var(--secondary);
+            color: var(--secondary);
+            transform: translateY(-2px);
+        }
+
+        /* Services Grid Fullscreen Width */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+            perspective: 1200px;
+            width: 100%;
+        }
+
+        .service-card {
+            background: var(--bg-white);
+            border: 1px solid var(--border-light);
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: transform 0.35s var(--ease-out-expo), box-shadow 0.35s ease, border-color 0.35s;
+            position: relative;
+        }
+
+        .service-card-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            transition: transform 0.5s var(--ease-out-expo);
+        }
+
+        .service-card-body {
+            padding: 24px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            flex-grow: 1;
+        }
+
+        .service-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 25px 50px -10px rgba(15, 23, 42, 0.12);
+            border-color: rgba(37, 99, 235, 0.35);
+        }
+
+        .service-card:hover .service-card-image {
+            transform: scale(1.05);
+        }
+
+        .service-num {
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--secondary);
+            margin-bottom: 12px;
+            background: rgba(37, 99, 235, 0.08);
+            padding: 5px 12px;
+            border-radius: 6px;
+        }
+
+        .service-card h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .service-card p {
+            color: var(--text-muted);
+            font-size: 14.5px;
+            line-height: 1.6;
+        }
+
+        /* Industries Section */
+        .industries {
+            background: var(--bg-light);
+        }
+
+        .industry-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            width: 100%;
+        }
+
+        .industry-card {
+            background: var(--bg-white);
+            border: 1px solid var(--border-light);
+            padding: 24px 16px;
+            border-radius: 16px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 14.5px;
+            color: var(--primary);
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+        }
+
+        .industry-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--secondary);
+            color: var(--secondary);
+        }
+
+        /* Stats Banner */
+        .stats-banner {
+            background: linear-gradient(135deg, #050B17 0%, #111C33 100%);
+            color: var(--bg-white);
+            padding: 65px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stats-banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, rgba(37, 99, 235, 0.15), transparent 70%);
+            pointer-events: none;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            text-align: center;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+            width: 100%;
+        }
+
+        .stat-item {
+            padding: 16px 12px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(8px);
+        }
+
+        .stat-item h3 {
+            color: var(--bg-white);
+            font-size: clamp(26px, 3.6vw, 48px);
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 6px;
+            background: linear-gradient(135deg, #FFFFFF 0%, #A5B4FC 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            white-space: nowrap;
+        }
+
+        .stat-item p {
+            color: #94A3B8;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        /* Process Steps */
+        .process-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            width: 100%;
+        }
+
+        .step-card {
+            background: var(--bg-white);
+            padding: 30px 24px;
+            border-radius: 18px;
+            border: 1px solid var(--border-light);
+            border-top: 4px solid var(--secondary);
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+        }
+
+        .step-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .step-card h4 {
+            font-size: 19px;
+            margin-bottom: 10px;
+        }
+
+        .step-card p {
+            color: var(--text-muted);
+            font-size: 14.5px;
+        }
+
+        /* The 8 Program */
+        .the-8-section {
+            background: radial-gradient(120% 120% at 50% 100%, #152238 0%, #050B17 100%);
+            color: var(--bg-white);
+            text-align: center;
+            position: relative;
+        }
+
+        .the-8-section h2, .the-8-section p {
+            color: var(--bg-white);
+        }
+
+        .the-8-container {
+            max-width: 950px;
+            margin: 0 auto;
+        }
+
+        .the-8-title {
+            font-size: clamp(28px, 4vw, 48px);
+            margin-bottom: 16px;
+        }
+
+        .the-8-desc {
+            font-size: clamp(15px, 1.8vw, 18px);
+            opacity: 0.9;
+            margin-bottom: 35px;
+            line-height: 1.65;
+        }
+
+        .exclusivity-wrapper {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 35px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(12px);
+            padding: 28px 36px;
+            border-radius: 20px;
+        }
+
+        .exclusivity-box {
+            text-align: left;
+        }
+
+        .exclusivity-box .num {
+            font-size: clamp(28px, 3.5vw, 36px);
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 800;
+            color: var(--accent-cyan);
+            display: block;
+        }
+
+        .exclusivity-box .lbl {
+            font-size: 12px;
+            font-weight: 700;
+            color: #94A3B8;
+            text-transform: uppercase;
+        }
+
+        /* Ecosystem Section */
+        .ecosystem {
+            background: #050B17;
+            color: var(--bg-white);
+        }
+
+        .ecosystem h2, .ecosystem p {
+            color: var(--bg-white);
+        }
+
+        .tools-layout {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 14px;
+            margin-bottom: 36px;
+            width: 100%;
+        }
+
+        .tool-button {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 16px 12px;
+            border-radius: 14px;
+            text-align: center;
+            color: var(--bg-white);
+            font-size: 13.5px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 52px;
+            transition: all 0.25s ease;
+        }
+
+        .tool-button:hover {
+            background: var(--bg-white);
+            color: var(--primary);
+            transform: translateY(-3px);
+        }
+
+        .tool-button.tool-whatsapp {
+            border-color: rgba(16, 185, 129, 0.45);
+            color: #10B981;
+        }
+
+        .tool-button.tool-whatsapp:hover {
+            background: #10B981;
+            color: white;
+        }
+
+        /* FAQ */
+        .faq-layout {
+            max-width: 950px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            width: 100%;
+        }
+
+        .faq-item {
+            background: var(--bg-white);
+            border: 1px solid var(--border-light);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--card-shadow);
+            transition: all 0.25s ease;
+        }
+
+        .faq-item:hover {
+            border-color: var(--secondary);
+            transform: translateY(-2px);
+        }
+
+        .faq-item h3 {
+            font-size: 17px;
+            margin-bottom: 8px;
+        }
+
+        .faq-item p {
+            color: var(--text-muted);
+            font-size: 14.5px;
+        }
+
+        /* Footer Fullscreen Grid */
+        .footer-corporate {
+            background: #030712 !important; 
+            color: #94A3B8;
+            padding: 65px 0 35px;
+            font-size: 13.5px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            width: 100%;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1.1fr 1.1fr 1.3fr;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: start;
+            width: 100%;
+        }
+
+        .footer-col h3 {
+            color: #FFFFFF !important;
+            margin-bottom: 16px;
+            font-size: 26px;
+            font-weight: 800;
+        }
+
+        .footer-col h4 {
+            color: #FFFFFF !important;
+            font-size: 11.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 18px;
+            font-weight: 800;
+        }
+
+        .footer-col p {
+            line-height: 1.6;
+            margin-bottom: 16px;
+            color: #94A3B8;
+        }
+
+        .footer-col a {
+            display: block;
+            color: #94A3B8;
+            margin-bottom: 10px;
+            font-weight: 500;
+            padding: 3px 0;
+        }
+
+        .footer-col a:hover {
+            color: #FFFFFF !important;
+            transform: translateX(4px);
+        }
+
+        .footer-socials {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 18px;
+        }
+
+        .footer-socials a {
+            color: #94A3B8;
+            font-weight: 700;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.06);
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0;
+            padding: 0;
+        }
+
+        .footer-socials a:hover {
+            background: var(--secondary);
+            color: #FFFFFF !important;
+            transform: translateY(-2px);
+        }
+
+        .btn-call-direct {
+            background-color: var(--secondary) !important;
+            color: #FFFFFF !important;
+            font-weight: 700;
+            padding: 12px 22px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 10px;
+            text-decoration: none;
+            min-height: 46px;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding-top: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            color: #64748B;
+            font-size: 12.5px;
+            width: 100%;
+        }
+
+        .footer-bottom-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .footer-bottom-links a {
+            color: #64748B;
+        }
+
+        .footer-bottom-links a:hover {
+            color: #94A3B8;
+        }
+
+        /* Top-Aligned Modal Overlay */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            background-color: rgba(5, 11, 23, 0.88);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            z-index: 2147483647;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s var(--ease-out-expo), visibility 0.3s ease;
+            padding: 16px 12px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            position: relative;
+            background: #ffffff;
+            width: 100%;
+            max-width: 650px;
+            height: 84vh;
+            height: 84dvh;
+            max-height: 760px;
+            margin-top: 10px;
+            border-radius: 20px;
+            box-shadow: 0 30px 60px -10px rgba(0, 0, 0, 0.55);
+            overflow: hidden;
+            transform: translateY(-25px) scale(0.97);
+            transition: transform 0.35s var(--ease-elastic);
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0) scale(1);
+        }
+
+        .modal-close-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 40px;
+            height: 40px;
+            background-color: var(--primary);
+            color: #FFFFFF;
+            border: none;
+            border-radius: 50%;
+            font-size: 22px;
+            line-height: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 20;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+
+        .modal-close-btn:hover {
+            background-color: var(--secondary);
+            transform: scale(1.05);
+        }
+
+        .modal-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Mobile Bottom Floating Dock */
+        .mobile-dock {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(5, 11, 23, 0.94);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
+            padding: 8px 12px calc(8px + var(--safe-bottom));
+            z-index: 99998;
+            box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        .mobile-dock-content {
+            display: flex;
+            gap: 8px;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        .mobile-dock-btn {
+            flex: 1;
+            padding: 12px 8px;
+            font-size: 12.5px;
+            font-weight: 700;
+            border-radius: 12px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            cursor: pointer;
+            min-height: 46px;
+        }
+
+        .mobile-dock-btn.btn-strategy {
+            background: linear-gradient(135deg, #2563EB, #3B82F6);
+            color: #ffffff;
+            box-shadow: 0 3px 12px rgba(37, 99, 235, 0.35);
+        }
+
+        .mobile-dock-btn.btn-wa {
+            background: #10B981;
+            color: #ffffff;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 992px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 14px;
+            }
+            .footer-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 28px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .mobile-dock { display: block; }
+            .section-padding { padding: 45px 0; }
+            .hero { padding: 40px 0 35px; }
+            .exclusivity-wrapper { 
+                flex-direction: column; 
+                gap: 16px; 
+                padding: 20px; 
+            }
+            .exclusivity-box[style] { 
+                border-left: none !important; 
+                padding-left: 0 !important; 
+                border-top: 1px solid rgba(255,255,255,0.12); 
+                padding-top: 14px; 
+            }
+            .hero .btn-group .btn { 
+                width: 100%; 
+            }
+            .modal-content { 
+                height: 90vh; 
+                height: 90dvh; 
+                max-height: 100%;
+                margin-top: 5px; 
+                border-radius: 16px; 
+            }
+            .tools-layout { 
+                grid-template-columns: repeat(2, 1fr); 
+            }
+            .industry-list { 
+                grid-template-columns: repeat(2, 1fr); 
+            }
+        }
+
+        @media (max-width: 576px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            .stat-item h3 {
+                font-size: 26px;
+            }
+            .footer-grid {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+            .services-grid {
+                grid-template-columns: 1fr;
+            }
+            .industry-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+
+    <!-- Comprehensive Structured SEO Schema (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://www.ofbuzztechnology.in/#website",
+          "url": "https://www.ofbuzztechnology.in/",
+          "name": "Ofbuzz Technology",
+          "description": "Global Digital Growth & Enterprise Technology Firm",
+          "inLanguage": "en-US",
+          "publisher": {
+            "@id": "https://www.ofbuzztechnology.in/#organization"
+          }
+        },
+        {
+          "@type": "Organization",
+          "@id": "https://www.ofbuzztechnology.in/#organization",
+          "name": "Ofbuzz Technology",
+          "alternateName": ["Ofbuzz", "Ofbuzz Tech", "Ofbuzz Studio"],
+          "url": "https://www.ofbuzztechnology.in/",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=200",
+            "caption": "Ofbuzz Technology Logo"
+          },
+          "image": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=1200",
+          "description": "Ofbuzz Technology is an enterprise digital growth firm providing custom software web systems, digital marketing, and studio production across Delhi NCR, Noida, Gurugram, Gujarat, Rajasthan, Bengaluru, New York, New Jersey, Sydney, and London.",
+          "telephone": "+91-7827201014",
+          "email": "hello@ofbuzztechnology.in",
+          "sameAs": [
+            "https://www.linkedin.com/company/ofbuzztechnology",
+            "https://www.youtube.com/@ofbuzztechnology",
+            "https://www.instagram.com/ofbuzztechnology"
+          ],
+          "contactPoint": [
+            {
+              "@type": "ContactPoint",
+              "telephone": "+91-7827201014",
+              "contactType": "customer service",
+              "areaServed": ["IN", "US", "AU", "GB"],
+              "availableLanguage": ["English", "Hindi"]
+            }
+          ]
+        },
+        {
+          "@type": "ProfessionalService",
+          "@id": "https://www.ofbuzztechnology.in/#localbusiness",
+          "name": "Ofbuzz Technology",
+          "url": "https://www.ofbuzztechnology.in/",
+          "image": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=400",
+          "telephone": "+91-7827201014",
+          "email": "hello@ofbuzztechnology.in",
+          "priceRange": "$$",
+          "paymentAccepted": "Cash, Credit Card, Bank Transfer, UPI",
+          "currenciesAccepted": "INR, USD, GBP, AUD",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Pandav Nagar",
+            "addressLocality": "New Delhi",
+            "addressRegion": "Delhi",
+            "postalCode": "110092",
+            "addressCountry": "IN"
+          },
+          "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": 28.6258,
+            "longitude": 77.2882
+          },
+          "areaServed": [
+            { "@type": "Place", "name": "Delhi NCR" },
+            { "@type": "Place", "name": "Noida" },
+            { "@type": "Place", "name": "Gurugram" },
+            { "@type": "Place", "name": "Gujarat" },
+            { "@type": "Place", "name": "Rajasthan" },
+            { "@type": "Place", "name": "Bengaluru" },
+            { "@type": "Place", "name": "New York" },
+            { "@type": "Place", "name": "New Jersey" },
+            { "@type": "Place", "name": "Sydney" },
+            { "@type": "Place", "name": "London" }
+          ],
+          "hasOfferCatalog": {
+            "@type": "OfferCatalog",
+            "name": "Enterprise Growth Solutions",
+            "itemListElement": [
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "Jewellery Marketing",
+                  "description": "Specialized digital marketing strategies and social media growth for fine jewellery brands and bullion retailers.",
+                  "url": "https://www.ofbuzztechnology.in/choose/marketing-for-jewellery"
+                }
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "Real Estate Marketing",
+                  "description": "High-converting lead generation and digital campaigns tailored for real estate developers and property consultants.",
+                  "url": "https://www.ofbuzztechnology.in/choose/marketing-for-real-estate"
+                }
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "Ofbuzz Studio Photo & Video Production",
+                  "description": "High-end studio photography, product shoots, and viral ad videos managed directly by Ofbuzz Studio.",
+                  "url": "https://www.ofbuzztechnology.in/choose/ofbuzz-studio-photography-videography"
+                }
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "Web Systems & Custom Tools",
+                  "description": "Bespoke web development, calculators, and automated web tools built to scale enterprise operations.",
+                  "url": "https://www.ofbuzztechnology.in/choose/web-tools"
+                }
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "E-Commerce Services",
+                  "description": "Complete e-commerce store setup, optimization, and scaling partner solutions for retail brands globally.",
+                  "url": "https://www.ofbuzztechnology.in/choose/e-commerce-partner"
+                }
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "Marketing For CA & Financial Firms",
+                  "description": "Targeted client lead generation funnels designed for Chartered Accountants, CPAs, and advisory firms.",
+                  "url": "https://www.ofbuzztechnology.in/choose/marketing-for-ca-firms"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "@type": "FAQPage",
+          "@id": "https://www.ofbuzztechnology.in/#faq",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Which cities and states does Ofbuzz Technology serve?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "We run dedicated growth campaigns and localized SEO for brands across Delhi NCR, Noida, Gurugram, Gujarat, Rajasthan, Bengaluru, New York, New Jersey, Sydney, and London."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Why choose a specialized digital growth partner?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "High-ticket industries such as Fine Jewellery and Real Estate demand hyper-targeted sales funnels and high trust signals. Our specialized knowledge drives faster ROI and lowers cost-per-lead globally."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How fast can paid advertising deliver results?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Meta and Google ad campaigns generate verified leads within 7 to 14 days of launch. SEO ranking expansions typically consolidate within 3 to 6 months."
+              }
+            }
+          ]
+        }
+      ]
     }
-    .inv-top-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
-    .inv-brand-wrapper { display: flex; align-items: center; gap: 14px; }
-    .inv-logo-img { width: 56px; height: 56px; border-radius: 10px; object-fit: cover; }
-    .inv-brand-text { font-size: 1.6rem; font-weight: 800; color: #0f172a; letter-spacing: -0.03em; }
-    .inv-brand-meta { font-size: 0.8rem; color: #475569; margin-top: 4px; line-height: 1.35; }
-    .inv-title-col { text-align: right; }
-    .inv-title-main { font-size: 2.1rem; font-weight: 400; color: #f25c3b; letter-spacing: -0.02em; line-height: 1; }
-    .inv-hash-num { font-size: 0.95rem; font-weight: 700; color: #1e293b; margin-top: 6px; font-family: 'JetBrains Mono', monospace; }
-    .inv-balance-top-tag { margin-top: 10px; }
-    .inv-balance-top-tag span { display: block; font-size: 0.78rem; font-weight: 700; color: #475569; }
-    .inv-balance-top-tag strong { display: block; font-size: 1.4rem; font-weight: 800; color: #0f172a; letter-spacing: -0.02em; margin-top: 2px; }
-    .inv-dates-grid { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px; padding-top: 4px; }
-    .bill-to-box span { display: block; font-size: 0.78rem; color: #64748b; font-weight: 600; margin-bottom: 2px; }
-    .bill-to-box strong { display: block; font-size: 0.98rem; color: #0f172a; font-weight: 800; }
-    .bill-to-box p { font-size: 0.8rem; color: #475569; line-height: 1.35; margin-top: 2px; }
-    .date-meta-box { text-align: right; font-size: 0.82rem; }
-    .date-meta-row { display: flex; justify-content: flex-end; gap: 20px; margin-bottom: 4px; }
-    .date-meta-row span.lbl { color: #475569; font-weight: 500; }
-    .date-meta-row span.val { color: #0f172a; font-weight: 700; min-width: 95px; text-align: right; }
-    .zylker-table { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
-    .zylker-table th { background: #f25c3b; color: #ffffff; padding: 9px 12px; font-size: 0.78rem; font-weight: 700; text-align: left; }
-    .zylker-table th:last-child { text-align: right; }
-    .zylker-table td { padding: 10px 12px; border-bottom: 1px solid #e2e8f0; font-size: 0.83rem; vertical-align: top; }
-    .zylker-table td:last-child { text-align: right; }
-    .item-sub-desc { display: block; font-size: 0.74rem; color: #64748b; margin-top: 2px; }
-    .summary-section { width: 100%; display: flex; justify-content: flex-end; margin-top: 6px; }
-    .summary-table { width: 320px; border-collapse: collapse; font-size: 0.84rem; }
-    .summary-table td { padding: 4px 6px; }
-    .summary-table td.label { text-align: right; color: #475569; font-weight: 500; }
-    .summary-table td.value { text-align: right; color: #0f172a; font-weight: 700; width: 110px; }
-    .summary-table tr.grand-total td { font-size: 0.92rem; font-weight: 800; color: #0f172a; padding-top: 6px; }
-    .balance-due-strip { background: #fff8f6; border-radius: 4px; }
-    .balance-due-strip td { padding: 8px 6px !important; font-size: 0.98rem !important; font-weight: 800 !important; color: #0f172a !important; }
-    .inv-bottom-notes { margin-top: 24px; padding-top: 14px; border-top: 1px solid #f1f5f9; display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: flex-end; }
-    .notes-block h5 { font-size: 0.82rem; font-weight: 800; color: #0f172a; margin-bottom: 2px; }
-    .notes-block p { font-size: 0.76rem; color: #64748b; line-height: 1.35; margin-bottom: 10px; }
-    .qr-container-box { text-align: center; background: #fafbfc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 12px; }
-  </style>
+    </script>
 </head>
 <body>
 
-  <!-- AUTHENTICATION OVERLAY -->
-  <div id="authOverlay">
-    <div class="auth-card">
-      <img src="https://i.pinimg.com/736x/bd/d0/5c/bdd05c94afb66b5a72f5e17a7a879ab3.jpg" class="auth-logo" alt="Ofbuzz Logo" referrerpolicy="no-referrer">
-      <h2 class="auth-title">Ofbuzz Technology</h2>
-      <p class="auth-sub">Enter Secure Access PIN to unlock Admin Console</p>
-      
-      <input type="password" id="adminPinInput" class="auth-input" maxlength="4" placeholder="••••" autofocus onkeypress="handlePinKeyPress(event)">
-      <button class="auth-btn" onclick="validateAdminPin()">Unlock Console</button>
-      <div id="authErrorMsg" class="auth-error">Incorrect PIN. Access Denied.</div>
-    </div>
-  </div>
-
-  <div id="toast" class="toast"></div>
-
-  <div class="container" id="mainDashboard" style="display: none;">
-    <header>
-      <div class="brand-box">
-        <img src="https://i.pinimg.com/736x/bd/d0/5c/bdd05c94afb66b5a72f5e17a7a879ab3.jpg" class="brand-logo" alt="Ofbuzz Logo" referrerpolicy="no-referrer">
-        <div>
-          <div class="brand-title">Ofbuzz Technology — Admin Studio</div>
-          <p style="font-size: 0.75rem; color: var(--text-muted);">Operations & Billing Ledger</p>
-        </div>
-      </div>
-      <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-        <button class="btn-staff-mgmt" onclick="openStaffModal()">Staff Management</button>
-        <button class="btn-analytics" id="btnToggleAnalytics" onclick="toggleAnalyticsDrawer()">Analytics View</button>
-        <button class="btn-primary" id="btnRefresh" onclick="syncAllData()">Refresh Data</button>
-        <button class="btn-logout" onclick="lockAdminSession()">Logout</button>
-      </div>
-    </header>
-
-    <!-- TOP OVERVIEW STRIP -->
-    <div class="kpi-grid">
-      <div class="kpi-card">
-        <div class="kpi-title">Today's Transactions</div>
-        <div class="kpi-val" id="todaySales">INR 0.00</div>
-      </div>
-      <div class="kpi-card" style="border-left-color: #10b981;">
-        <div class="kpi-title">Total Cash Received</div>
-        <div class="kpi-val" id="kpiTotalPaid" style="color: #10b981;">INR 0.00</div>
-      </div>
-      <div class="kpi-card" style="border-left-color: #ea580c;">
-        <div class="kpi-title">Total Pending Balance</div>
-        <div class="kpi-val" id="kpiTotalPending" style="color: #ea580c;">INR 0.00</div>
-      </div>
+    <!-- Kinetic Scroll Progress Bar -->
+    <div class="scroll-progress-container">
+        <div class="scroll-progress-bar" id="progressBar"></div>
     </div>
 
-    <!-- ON-DEMAND META ANALYTICS DRAWER -->
-    <div id="analyticsPanel">
-      <div class="meta-analytics-header">
-        <div class="meta-live-badge">
-          Live Business Insights & Revenue Stream
+    <!-- Popup Modal Form (Top-Aligned) -->
+    <div class="modal-overlay" id="formModal">
+        <div class="modal-content">
+            <button class="modal-close-btn" id="closeModalBtn" aria-label="Close Form">&times;</button>
+            <iframe class="modal-iframe" src="https://satyamxpandey.github.io/ofbuzzquery/" title="Business Inquiry Form" loading="lazy"></iframe>
         </div>
-        <div class="time-filter-group">
-          <button class="time-pill" onclick="setTimeFilter('today', this)">Today</button>
-          <button class="time-pill" onclick="setTimeFilter('7d', this)">7D</button>
-          <button class="time-pill" onclick="setTimeFilter('30d', this)">30D</button>
-          <button class="time-pill" onclick="setTimeFilter('month', this)">This Month</button>
-          <button class="time-pill active" onclick="setTimeFilter('all', this)">All Time</button>
-        </div>
-      </div>
-
-      <div class="meta-grid">
-        <div class="meta-tile">
-          <div class="meta-tile-top">
-            <span class="meta-tile-label">Gross Revenue</span>
-            <span class="meta-tile-pill pill-green">Pipeline</span>
-          </div>
-          <div class="meta-tile-val" id="metaKpiGross">INR 0</div>
-          <div class="meta-tile-sub">Total contracted value</div>
-        </div>
-        <div class="meta-tile">
-          <div class="meta-tile-top">
-            <span class="meta-tile-label">MRR (Monthly)</span>
-            <span class="meta-tile-pill pill-blue">Recurring</span>
-          </div>
-          <div class="meta-tile-val" id="metaKpiMrr">INR 0</div>
-          <div class="meta-tile-sub">Active retainer velocity</div>
-        </div>
-        <div class="meta-tile">
-          <div class="meta-tile-top">
-            <span class="meta-tile-label">Collections</span>
-            <span class="meta-tile-pill pill-green">Realized</span>
-          </div>
-          <div class="meta-tile-val" id="metaKpiPaid" style="color: #059669;">INR 0</div>
-          <div class="meta-tile-sub">Cash received in bank</div>
-        </div>
-        <div class="meta-tile">
-          <div class="meta-tile-top">
-            <span class="meta-tile-label">Outstanding Due</span>
-            <span class="meta-tile-pill pill-orange">Pending</span>
-          </div>
-          <div class="meta-tile-val" id="metaKpiDue" style="color: #ea580c;">INR 0</div>
-          <div class="meta-tile-sub">Receivables to collect</div>
-        </div>
-        <div class="meta-tile">
-          <div class="meta-tile-top">
-            <span class="meta-tile-label">Enterprise Accounts</span>
-            <span class="meta-tile-pill pill-blue">Active</span>
-          </div>
-          <div class="meta-tile-val" id="metaKpiClients">0</div>
-          <div class="meta-tile-sub" id="metaKpiClientsSub">0 active accounts in scope</div>
-        </div>
-        <div class="meta-tile">
-          <div class="meta-tile-top">
-            <span class="meta-tile-label">Fulfillment Rate</span>
-            <span class="meta-tile-pill pill-green">Delivery</span>
-          </div>
-          <div class="meta-tile-val" id="metaKpiFulfillment">0%</div>
-          <div class="meta-tile-sub" id="metaKpiFulfillmentSub">0 of 0 tasks complete</div>
-        </div>
-      </div>
-
-      <div class="charts-grid">
-        <div class="chart-card">
-          <div class="chart-card-head">
-            <div class="chart-title">Revenue & Cashflow Timeline</div>
-            <span style="font-size:0.75rem; color:#64748b;">Historical Trend</span>
-          </div>
-          <div style="height: 230px; position: relative;">
-            <canvas id="revenueLineChart"></canvas>
-          </div>
-        </div>
-
-        <div class="chart-card">
-          <div class="chart-card-head">
-            <div class="chart-title">Service Revenue Mix</div>
-            <span style="font-size:0.75rem; color:#64748b;">Tier Split</span>
-          </div>
-          <div style="height: 160px; position: relative;">
-            <canvas id="serviceMixChart"></canvas>
-          </div>
-          <div class="collection-meter-box">
-            <div style="display:flex; justify-content:space-between; font-size:0.75rem; font-weight:700;">
-              <span style="color:#64748b;">Collection Efficiency</span>
-              <span id="collectionPercentText" style="color:#059669;">0%</span>
-            </div>
-            <div class="meter-bar-track">
-              <div class="meter-bar-fill" id="collectionProgressBar"></div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
 
-    <!-- PAYMENT & RECEIVABLES LEDGER -->
-    <div class="section-card">
-      <div class="section-head">
-        <span>Payment & Receivables Ledger</span>
-      </div>
-      <div class="table-box">
-        <table>
-          <thead>
-            <tr>
-              <th>Client Account</th>
-              <th>Contact Details</th>
-              <th>Total Deal Billed</th>
-              <th>Advance Received</th>
-              <th>Pending Due</th>
-              <th style="text-align: right;">Action</th>
-            </tr>
-          </thead>
-          <tbody id="recoveryLedgerBody">
-            <tr><td colspan="6" style="text-align:center;">Calculating ledger balances...</td></tr>
-          </tbody>
-        </table>
-      </div>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="parallax-orb orb-blue" id="orb1" style="top: 2%; left: 5%;"></div>
+        <div class="parallax-orb orb-cyan" id="orb2" style="bottom: 5%; right: 5%;"></div>
+        
+        <div class="container hero-inner sm-fade-up">
+            <span class="badge">Enterprise Digital Growth Firm</span>
+            <h1>Architecting High-Growth <span>Market Leaders</span></h1>
+            <p>We empower Fine Jewellery, Luxury Fashion, Real Estate, and Financial enterprises across Delhi, Noida, Gurugram, Gujarat, Rajasthan, Bengaluru, New York, New Jersey, Sydney & London with high-converting web applications and revenue-driven ad strategies.</p>
+            
+            <div class="btn-group">
+                <button onclick="openFormModal()" class="btn btn-primary">Book Strategy Call</button>
+                <button onclick="openFormModal()" class="btn btn-outline">Submit Business Inquiry</button>
+                <a href="https://chat.whatsapp.com/KShccjQGtulFjnocl0LK4A" target="_blank" rel="noopener" class="btn btn-outline btn-whatsapp">Join WhatsApp Group</a>
+                <a href="https://www.ofbuzztechnology.in/choose/the-8" target="_blank" rel="noopener" class="btn btn-outline">Explore The 8</a>
+                <a href="https://www.ofbuzztechnology.in/operations" target="_blank" rel="noopener" class="btn btn-outline" style="border-color: rgba(37,99,235,0.4); color: var(--secondary);"><i class="fas fa-user-shield" style="margin-right: 6px;"></i> Staff Portal</a>
+            </div>
+
+            <!-- 3D Hero Showcase -->
+            <div class="hero-media-container sm-fade-up">
+                <div class="hero-media-showcase tilt-card">
+                    <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=1400" alt="Ofbuzz Technology Enterprise Growth Dashboard" loading="lazy">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Global & Regional SEO Strip -->
+    <div class="location-seo-strip">
+        <div class="container">
+            <strong>Serving Premium Brands Globally & Nationally:</strong>
+            <div class="location-tags">
+                <span class="location-chip">Delhi NCR</span>
+                <span class="location-chip">Noida</span>
+                <span class="location-chip">Gurugram</span>
+                <span class="location-chip">Gujarat</span>
+                <span class="location-chip">Rajasthan</span>
+                <span class="location-chip">Bengaluru</span>
+                <span class="location-chip">New York</span>
+                <span class="location-chip">New Jersey</span>
+                <span class="location-chip">Sydney</span>
+                <span class="location-chip">London</span>
+            </div>
+        </div>
     </div>
 
-    <!-- 1. CLIENT SETUP -->
-    <div class="section-card">
-      <div class="section-head">
-        <span id="formTitle">Register Client & Setup Multi-Tier Services</span>
-      </div>
-      <input type="hidden" id="clientId">
-      <div class="input-grid">
-        <div class="input-group">
-          <label>Customer / Business Name</label>
-          <input type="text" id="custName" placeholder="Client Name">
+    <!-- Box-Styled Trusted Brands Marquee with All Portfolio Brands Added -->
+    <div class="trusted-wrap sm-fade-up">
+        <div class="trusted-heading">
+            Trusted by <span>100+ Industry Leaders Globally</span>
         </div>
-        <div class="input-group">
-          <label>Phone / WhatsApp</label>
-          <input type="text" id="custPhone" placeholder="Mobile Number">
+
+        <div class="trusted-marquee">
+            <div class="trusted-track">
+                <!-- SET 1 -->
+                <div class="trusted-item-box">Getwise POS</div>
+                <div class="trusted-item-box">Vachya</div>
+                <div class="trusted-item-box">Vachya Jewels USA</div>
+                <div class="trusted-item-box">Rosce Jewellers</div>
+                <div class="trusted-item-box">Manohar Lal Jewellers</div>
+                <div class="trusted-item-box">Sonir by Adarsh</div>
+                <div class="trusted-item-box">Royal Estate Developers</div>
+                <div class="trusted-item-box">Malhotra Properties</div>
+                <div class="trusted-item-box">Jindal Properties</div>
+                <div class="trusted-item-box">Indoroute Global LLP</div>
+                <div class="trusted-item-box">Krishna Jewellers</div>
+                <div class="trusted-item-box">NS Trending Unisex Salon</div>
+                <div class="trusted-item-box">Loona Hospital</div>
+                <div class="trusted-item-box">Kashi Hospital</div>
+                <div class="trusted-item-box">Jazz Media</div>
+                <div class="trusted-item-box">AM Jewellers</div>
+                <div class="trusted-item-box">Abhushan Mandir</div>
+                <div class="trusted-item-box">Everycom</div>
+                <div class="trusted-item-box">Sonu Graphics</div>
+                <div class="trusted-item-box">Ranj Jewellers</div>
+                <div class="trusted-item-box">Garima Garg Makeup Studio</div>
+                <div class="trusted-item-box">Alluring Memories</div>
+                <div class="trusted-item-box">VVIP Travels</div>
+                <div class="trusted-item-box">Jewllz</div>
+                <div class="trusted-item-box">Fine Jewllz</div>
+                <div class="trusted-item-box">OfbuzzMart</div>
+                <div class="trusted-item-box">BBK India</div>
+                <div class="trusted-item-box">Vellora Global Sourcing</div>
+                <div class="trusted-item-box">Vellora Gs</div>
+                <div class="trusted-item-box">Suman Jewellers - Gurugram</div>
+                <div class="trusted-item-box">Mon Cher (Cafe)</div>
+                <div class="trusted-item-box">Ask Gems Veda</div>
+                <div class="trusted-item-box">Skin Story</div>
+                <div class="trusted-item-box">Kayastha Shadi Vivah</div>
+                <div class="trusted-item-box">Bien ERP</div>
+                <div class="trusted-item-box">Stephano Slack</div>
+                <div class="trusted-item-box">Devon Veterinary Hospital</div>
+                <div class="trusted-item-box">Diamond Mansion</div>
+                <div class="trusted-item-box">Shagun Jewellers</div>
+                <div class="trusted-item-box">NYJ Chicago</div>
+                <div class="trusted-item-box">Bienvenue Systems</div>
+                <div class="trusted-item-box">Veddic Urja</div>
+                <div class="trusted-item-box">Rajni Elements</div>
+                <div class="trusted-item-box">Mahalakshami Jewellers</div>
+
+                <!-- SET 2 (DUPLICATE FOR CONTINUOUS SMOOTH SCROLL) -->
+                <div class="trusted-item-box">Getwise POS</div>
+                <div class="trusted-item-box">Vachya</div>
+                <div class="trusted-item-box">Vachya Jewels USA</div>
+                <div class="trusted-item-box">Rosce Jewellers</div>
+                <div class="trusted-item-box">Manohar Lal Jewellers</div>
+                <div class="trusted-item-box">Sonir by Adarsh</div>
+                <div class="trusted-item-box">Royal Estate Developers</div>
+                <div class="trusted-item-box">Malhotra Properties</div>
+                <div class="trusted-item-box">Jindal Properties</div>
+                <div class="trusted-item-box">Indoroute Global LLP</div>
+                <div class="trusted-item-box">Krishna Jewellers</div>
+                <div class="trusted-item-box">NS Trending Unisex Salon</div>
+                <div class="trusted-item-box">Loona Hospital</div>
+                <div class="trusted-item-box">Kashi Hospital</div>
+                <div class="trusted-item-box">Jazz Media</div>
+                <div class="trusted-item-box">AM Jewellers</div>
+                <div class="trusted-item-box">Abhushan Mandir</div>
+                <div class="trusted-item-box">Everycom</div>
+                <div class="trusted-item-box">Sonu Graphics</div>
+                <div class="trusted-item-box">Ranj Jewellers</div>
+                <div class="trusted-item-box">Garima Garg Makeup Studio</div>
+                <div class="trusted-item-box">Alluring Memories</div>
+                <div class="trusted-item-box">VVIP Travels</div>
+                <div class="trusted-item-box">Jewllz</div>
+                <div class="trusted-item-box">Fine Jewllz</div>
+                <div class="trusted-item-box">OfbuzzMart</div>
+                <div class="trusted-item-box">BBK India</div>
+                <div class="trusted-item-box">Vellora Global Sourcing</div>
+                <div class="trusted-item-box">Vellora Gs</div>
+                <div class="trusted-item-box">Suman Jewellers - Gurugram</div>
+                <div class="trusted-item-box">Mon Cher (Cafe)</div>
+                <div class="trusted-item-box">Ask Gems Veda</div>
+                <div class="trusted-item-box">Skin Story</div>
+                <div class="trusted-item-box">Kayastha Shadi Vivah</div>
+                <div class="trusted-item-box">Bien ERP</div>
+                <div class="trusted-item-box">Stephano Slack</div>
+                <div class="trusted-item-box">Devon Veterinary Hospital</div>
+                <div class="trusted-item-box">Diamond Mansion</div>
+                <div class="trusted-item-box">Shagun Jewellers</div>
+                <div class="trusted-item-box">NYJ Chicago</div>
+                <div class="trusted-item-box">Bienvenue Systems</div>
+                <div class="trusted-item-box">Veddic Urja</div>
+                <div class="trusted-item-box">Rajni Elements</div>
+                <div class="trusted-item-box">Mahalakshami Jewellers</div>
+            </div>
         </div>
-        <div class="input-group">
-          <label>Email Address</label>
-          <input type="email" id="custEmail" placeholder="client@domain.com">
-        </div>
-        <div class="input-group">
-          <label>Renewal / Due Date</label>
-          <input type="date" id="custDate">
-        </div>
-        <div class="input-group">
-          <label>1. One-Time Service</label>
-          <input type="text" id="oneTimeTitle" placeholder="Website Development">
-        </div>
-        <div class="input-group">
-          <label>One-Time Fee (INR)</label>
-          <input type="number" id="oneTimeAmt" placeholder="0">
-        </div>
-        <div class="input-group">
-          <label>2. Monthly Retainer Service</label>
-          <input type="text" id="monthlyTitle" placeholder="SEO & Meta Ads">
-        </div>
-        <div class="input-group">
-          <label>Monthly Fee (INR)</label>
-          <input type="number" id="monthlyAmt" placeholder="0">
-        </div>
-        <div class="input-group">
-          <label>3. Annual Support Service</label>
-          <input type="text" id="annualTitle" placeholder="Cloud Server & AMC">
-        </div>
-        <div class="input-group">
-          <label>Annual Fee (INR)</label>
-          <input type="number" id="annualAmt" placeholder="0">
-        </div>
-      </div>
-      <div style="margin-top: 16px; display: flex; gap: 10px;">
-        <button class="btn-primary" id="btnSaveClient" onclick="saveClientRecord()">Save & Update Client</button>
-        <button class="btn-del" id="btnCancelEdit" style="display:none;" onclick="cancelClientEdit()">Cancel</button>
-      </div>
     </div>
 
-    <!-- 2. CLIENTS TABLE WITH STRICT CATEGORY FILTERING -->
-    <div class="section-card">
-      <div class="section-head">
-        <span>Active Clients Directory</span>
-        <div class="category-filter-bar">
-          <button class="cat-pill active" onclick="setClientCategoryFilter('all', this)">All Accounts</button>
-          <button class="cat-pill" onclick="setClientCategoryFilter('monthly', this)">Monthly Retainers</button>
-          <button class="cat-pill" onclick="setClientCategoryFilter('annual', this)">Annual AMC</button>
-          <button class="cat-pill" onclick="setClientCategoryFilter('onetime', this)">One-Time Projects</button>
-        </div>
-      </div>
-      <div class="table-box">
-        <table>
-          <thead>
-            <tr>
-              <th>Client ID</th>
-              <th>Customer Name</th>
-              <th>Contact Info</th>
-              <th>Active Services (Filtered)</th>
-              <th>Billing Due</th>
-              <th style="text-align: right;">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="clientTableBody">
-            <tr><td colspan="6" style="text-align:center;">Synchronizing records...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- DEDICATED STAFF MANAGEMENT MODAL -->
-  <div class="modal-backdrop" id="staffManagementModal">
-    <div class="modal-window" style="max-width: 900px;">
-      <div class="modal-header">
-        <h3 style="font-size: 1.1rem; font-weight: 800;">Workforce & Staff Management Studio</h3>
-        <button class="btn-del" onclick="closeStaffModal()">Close</button>
-      </div>
-      <div class="modal-body">
-        <!-- ADD STAFF MEMBER -->
-        <div class="section-card" style="margin-bottom: 20px;">
-          <div class="section-head">
-            <span id="staffFormTitle">Add New Workforce / Staff Member</span>
-          </div>
-          <input type="hidden" id="staffEditId">
-          <div class="input-grid">
-            <div class="input-group">
-              <label>Staff ID</label>
-              <input type="text" id="stfId" placeholder="STF01">
+    <!-- About Section -->
+    <section class="about-statement section-padding">
+        <div class="container about-inner sm-fade-up">
+            <span class="badge">Corporate Statement</span>
+            <blockquote>
+                Ofbuzz Technology is a global enterprise growth consultancy. We blend data-backed digital marketing, Search Engine Optimization (SEO), custom web development, and studio shoots to help your business get consistent sales across India, US, UK, and Australia.
+            </blockquote>
+            <div class="tags-container">
+                <span class="tag-item">Jewellery Digital Marketing</span>
+                <span class="tag-item">Luxury Fashion Growth</span>
+                <span class="tag-item">Real Estate Lead Generation</span>
+                <span class="tag-item">CA Firm SEO Marketing</span>
             </div>
-            <div class="input-group">
-              <label>Full Legal Name</label>
-              <input type="text" id="stfName" placeholder="Full Name">
-            </div>
-            <div class="input-group">
-              <label>Corporate Email Address</label>
-              <input type="email" id="stfEmail" placeholder="staff@ofbuzz.com">
-            </div>
-            <div class="input-group">
-              <label>Functional Role</label>
-              <input type="text" id="stfRole" placeholder="Senior Designer / Developer">
-            </div>
-          </div>
-          <div style="margin-top: 16px; display: flex; gap: 10px;">
-            <button class="btn-primary" id="btnSaveStaff" onclick="saveStaffRecord()">Commit Associate Record</button>
-            <button class="btn-del" id="btnCancelStaffEdit" style="display:none;" onclick="cancelStaffEdit()">Cancel</button>
-          </div>
         </div>
+    </section>
 
-        <!-- STAFF DIRECTORY TABLE -->
-        <div class="section-card" style="margin-bottom: 20px;">
-          <div class="section-head">
-            <span>Workforce Directory</span>
-          </div>
-          <div class="table-box">
-            <table>
-              <thead>
-                <tr>
-                  <th>Staff ID</th>
-                  <th>Associate Name</th>
-                  <th>Email</th>
-                  <th>Role</th>
-                  <th>Status</th>
-                  <th style="text-align: right;">Actions</th>
-                </tr>
-              </thead>
-              <tbody id="staffTableBody">
-                <tr><td colspan="6" style="text-align:center;">Loading staff...</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- STAFF DELEGATION & TASK APPROVALS -->
-        <div class="section-card" style="margin-bottom: 0;">
-          <div class="section-head">
-            <span>Task Delegation & Assignment Queue</span>
-          </div>
-          <div class="input-grid">
-            <div class="input-group">
-              <label>Select Staff Member</label>
-              <select id="staffSelect">
-                <option value="">Choose Staff Profile</option>
-              </select>
-            </div>
-            <div class="input-group">
-              <label>Task Title</label>
-              <input type="text" id="taskTitle" placeholder="Assignment Title">
-            </div>
-            <div class="input-group" style="grid-column: span 2;">
-              <label>Assignment Instructions</label>
-              <input type="text" id="taskDesc" placeholder="Describe instructions and timeline...">
-            </div>
-          </div>
-          <button class="btn-primary" style="margin-top: 12px;" onclick="assignStaffTask()">Assign Task & Send Notification Email</button>
-          
-          <div class="table-box" style="margin-top: 20px;">
-            <h4 style="font-size: 0.85rem; margin-bottom: 8px;">Pending Task Approvals</h4>
-            <table>
-              <thead>
-                <tr>
-                  <th>Task</th>
-                  <th>Assigned Associate</th>
-                  <th>Staff Remark</th>
-                  <th>Status</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody id="taskApprovalBody">
-                <tr><td colspan="5" style="text-align:center;">No deliverables awaiting approval.</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- CUSTOMER PASSBOOK & MULTI-INSTALLMENT HISTORY MODAL -->
-  <div class="modal-backdrop" id="customerProfileModal">
-    <div class="modal-window" style="max-width: 680px;">
-      <div class="modal-header">
-        <div>
-          <h3 style="font-size: 1.1rem; font-weight: 800;" id="profClientName">Customer Passbook</h3>
-          <p style="font-size: 0.75rem; color: var(--text-muted);" id="profClientDetails">Client ID & Contact</p>
-        </div>
-        <button class="btn-del" onclick="closeCustomerProfileModal()">Close</button>
-      </div>
-      <div class="modal-body">
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px;">
-          <div style="background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:14px; text-align:center;">
-            <span style="font-size:0.72rem; text-transform:uppercase; color:#64748b; font-weight:700;">Total Deal Billed</span>
-            <div style="font-size:1.25rem; font-weight:800; color:#0f172a; margin-top:4px;" id="profBilledAmt">INR 0.00</div>
-          </div>
-          <div style="background:#ecfdf5; border:1px solid #d1fae5; border-radius:10px; padding:14px; text-align:center;">
-            <span style="font-size:0.72rem; text-transform:uppercase; color:#065f46; font-weight:700;">Total Received</span>
-            <div style="font-size:1.25rem; font-weight:800; color:#059669; margin-top:4px;" id="profReceivedAmt">INR 0.00</div>
-          </div>
-          <div style="background:#fff7ed; border:1px solid #ffedd5; border-radius:10px; padding:14px; text-align:center;">
-            <span style="font-size:0.72rem; text-transform:uppercase; color:#9a3412; font-weight:700;">Balance Pending</span>
-            <div style="font-size:1.25rem; font-weight:800; color:#ea580c; margin-top:4px;" id="profPendingAmt">INR 0.00</div>
-          </div>
-        </div>
-
-        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:16px;">
-          <h4 style="font-size:0.85rem; font-weight:800; color:#0f172a; margin-bottom:10px;">Installment / Payment Timeline</h4>
-          <div class="table-box" style="margin-top:0;">
-            <table>
-              <thead>
-                <tr>
-                  <th>Payment Date</th>
-                  <th>Type / Mode</th>
-                  <th>Amount</th>
-                  <th>Installment Note</th>
-                </tr>
-              </thead>
-              <tbody id="profPaymentsHistoryBody">
-                <tr><td colspan="4" style="text-align:center;">No payment records found.</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- PAYMENT ADJUSTMENT MODAL -->
-  <div class="modal-backdrop" id="paymentAdjustmentModal">
-    <div class="modal-window" style="max-width: 480px;">
-      <div class="modal-header">
-        <h3 style="font-size: 1.05rem; font-weight: 800;">Adjust Client Payment</h3>
-        <button class="btn-del" onclick="closePaymentAdjustmentModal()">Close</button>
-      </div>
-      <div class="modal-body">
-        <input type="hidden" id="adjClientId">
-        <div style="margin-bottom: 14px; background: #fff; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
-          <span style="font-size: 0.75rem; color: #64748b; font-weight: 700;">Account:</span>
-          <strong id="adjClientName" style="display: block; font-size: 0.95rem; color: #0f172a; margin-top: 2px;"></strong>
-          <div style="display:flex; justify-content:space-between; margin-top: 6px; font-size: 0.8rem;">
-            <span>Total Billed: <strong id="adjBilledVal">INR 0.00</strong></span>
-            <span>Current Received: <strong id="adjCurrentPaidVal" style="color:#059669;">INR 0.00</strong></span>
-          </div>
-        </div>
-
-        <div class="input-group" style="margin-bottom: 12px;">
-          <label>Adjustment Action</label>
-          <select id="adjActionType">
-            <option value="add">Option 1: Add Payment (+ Increase Received)</option>
-            <option value="deduct">Option 2: Deduct / Correction (- Refund or Mistake Correction)</option>
-          </select>
-        </div>
-
-        <div class="input-group" style="margin-bottom: 12px;">
-          <label>Amount (INR)</label>
-          <input type="number" id="adjAmount" placeholder="e.g. 500" min="1">
-        </div>
-
-        <div class="input-group" style="margin-bottom: 16px;">
-          <label>Adjustment Remark / Reason</label>
-          <input type="text" id="adjRemark" placeholder="e.g. Partial payment / Cash settlement">
-        </div>
-
-        <button class="btn-primary" id="btnSaveAdjustment" style="width: 100%;" onclick="savePaymentAdjustment()">Save Adjustment & Recalculate</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- INVOICE GENERATOR MODAL WITH CUSTOM BILLING ITEM -->
-  <div class="modal-backdrop" id="invoiceModal">
-    <div class="modal-window">
-      <div class="modal-header">
-        <div>
-          <h3 style="font-size: 1.1rem; font-weight: 800;">BillCraft Invoice Studio</h3>
-          <p style="font-size: 0.75rem; color: var(--text-muted);" id="modalClientHeader">Client Billing Console</p>
-        </div>
-        <div style="display:flex; gap: 8px;">
-          <button class="btn-mail" id="btnSendEmail" onclick="sendInvoiceToClientEmail()">Send Bill via Email</button>
-          <button class="btn-primary" style="background:#059669;" onclick="openDedicatedPrintWindow()">Print / Download 1-Page PDF</button>
-          <button class="btn-del" onclick="closeInvoiceModal()">Close</button>
-        </div>
-      </div>
-
-      <div class="modal-body">
-        <div class="modal-grid">
-          <div>
-            <div class="section-card" style="padding: 16px; margin-bottom: 16px; border-left: 4px solid var(--primary);">
-              <h4 style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px;">Select Invoice Cycle</h4>
-              <div class="input-group">
-                <label>Billing Period / Type</label>
-                <select id="invoiceCycleSelector" onchange="changeInvoiceCycle()">
-                  <option value="monthly" selected>Monthly Retainer (Excludes One-Time)</option>
-                  <option value="initial">Initial Onboarding (One-Time + Retainer)</option>
-                  <option value="annual">Annual Renewal (Excludes One-Time)</option>
-                  <option value="full">Consolidated Statement (All Services)</option>
-                </select>
-              </div>
-              <button class="btn-primary" style="margin-top: 10px; width: 100%; font-size: 0.78rem;" onclick="markCycleRenewed()">Save & Rollover Due Date</button>
+    <!-- Services Section -->
+    <section class="section-padding">
+        <div class="container">
+            <div class="section-header sm-fade-up">
+                <h2>Our Business Solutions</h2>
+                <p>Simple, effective, and results-focused growth solutions built to increase your revenues.</p>
             </div>
 
-            <!-- CUSTOM BILL ITEM BUILDER -->
-            <div class="section-card" style="padding: 16px; margin-bottom: 16px; border-left: 4px solid #1877f2;">
-              <h4 style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px;">Add Custom Bill Item</h4>
-              <div class="input-grid">
-                <div class="input-group" style="grid-column: span 2;">
-                  <label>Custom Item Title</label>
-                  <input type="text" id="customItemTitle" placeholder="e.g. Extra Graphic Design Work">
-                </div>
-                <div class="input-group">
-                  <label>Amount (INR)</label>
-                  <input type="number" id="customItemAmt" placeholder="1000">
-                </div>
-                <div class="input-group">
-                  <label>Quantity</label>
-                  <input type="number" id="customItemQty" value="1">
-                </div>
-              </div>
-              <button class="btn-primary" style="margin-top: 10px; width: 100%; background: #1877f2;" onclick="addCustomBillItem()">+ Add Custom Item to Bill</button>
-            </div>
-
-            <!-- INSTALLMENT RECORDING -->
-            <div class="section-card" style="padding: 16px; margin-bottom: 16px;">
-              <h4 style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px;">Record Installment / Advance (e.g. 500 out of 1000)</h4>
-              <div class="input-grid">
-                <div class="input-group">
-                  <label>Payment Method</label>
-                  <select id="advMode">
-                    <option value="UPI / QR Scan">UPI / QR Scan</option>
-                    <option value="Bank Transfer / NEFT">Bank Transfer / NEFT</option>
-                    <option value="Cash / Cheque">Cash / Cheque</option>
-                  </select>
-                </div>
-                <div class="input-group">
-                  <label>Installment Date</label>
-                  <input type="date" id="advDate">
-                </div>
-                <div class="input-group">
-                  <label>Amount Paid (INR)</label>
-                  <input type="number" id="advAmount" placeholder="500">
-                </div>
-                <div class="input-group">
-                  <label>Installment Reference / Note</label>
-                  <input type="text" id="advNote" placeholder="e.g. 1st installment paid">
-                </div>
-              </div>
-              <button class="btn-primary" id="btnCommitAdvance" style="margin-top: 10px; width: 100%; background: #059669;" onclick="addAdvanceReceipt()">Record & Save Installment</button>
-            </div>
-
-            <div class="section-card" style="padding: 16px;">
-              <h4 style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px;">Tax & Discount Config</h4>
-              <div class="input-grid">
-                <div class="input-group">
-                  <label>GST / Tax Rate (%)</label>
-                  <input type="number" id="invTaxRate" value="0" oninput="renderInvoicePreview()">
-                </div>
-                <div class="input-group">
-                  <label>Discount (%)</label>
-                  <input type="number" id="invDiscountRate" value="0" oninput="renderInvoicePreview()">
-                </div>
-                <div class="input-group" style="grid-column: span 2;">
-                  <label>Merchant UPI ID (For Dynamic QR)</label>
-                  <input type="text" id="invUpiId" value="satyamxpandey11@gmail.com" placeholder="username@upi" oninput="renderInvoicePreview()">
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <div id="invoiceRenderWrapper">
-              <div class="zylker-invoice" id="printableInvoice">
-                <div class="inv-top-row">
-                  <div>
-                    <div class="inv-brand-wrapper">
-                      <img id="mainOfbuzzLogo" src="https://i.pinimg.com/736x/bd/d0/5c/bdd05c94afb66b5a72f5e17a7a879ab3.jpg" class="inv-logo-img" alt="Ofbuzz Technology Logo" referrerpolicy="no-referrer">
-                      <div class="inv-brand-text">Ofbuzz Technology</div>
+            <div class="services-grid sm-cascade">
+                <!-- Service 1 -->
+                <a href="https://www.ofbuzztechnology.in/choose/marketing-for-jewellery" class="service-card tilt-card" target="_blank" rel="noopener">
+                    <img src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&q=80&w=600" alt="Jewellery Digital Marketing" class="service-card-image" loading="lazy">
+                    <div class="service-card-body">
+                        <span class="service-num">01 / Fine Jewellery</span>
+                        <h3>Jewellery Marketing</h3>
+                        <p>Specialized digital marketing strategies and social media growth for fine jewellery brands and bullion retailers.</p>
                     </div>
-                    <div class="inv-brand-meta">
-                      1912 Tech Hub, Delhi NCR<br>
-                      India | ofbuzztechnology@gmail.com
+                </a>
+
+                <!-- Service 2 -->
+                <a href="https://www.ofbuzztechnology.in/choose/marketing-for-real-estate" class="service-card tilt-card" target="_blank" rel="noopener">
+                    <img src="https://i.pinimg.com/736x/e1/d5/17/e1d517bef42db9be0303ef0de90870e8.jpg" alt="Real Estate Marketing" class="service-card-image" loading="lazy">
+                    <div class="service-card-body">
+                        <span class="service-num">02 / Real Estate</span>
+                        <h3>Real Estate Marketing</h3>
+                        <p>High-converting lead generation and digital campaigns tailored for real estate developers and property consultants.</p>
                     </div>
-                  </div>
+                </a>
 
-                  <div class="inv-title-col">
-                    <div class="inv-title-main">Invoice</div>
-                    <div class="inv-hash-num" id="previewInvNumber"># INV-000085</div>
-                    <div class="inv-balance-top-tag">
-                      <span>Balance Due</span>
-                      <strong id="topBalanceDue">INR 0.00</strong>
+                <!-- Service 3 -->
+                <a href="https://www.ofbuzztechnology.in/choose/ofbuzz-studio-photography-videography" class="service-card tilt-card" target="_blank" rel="noopener">
+                    <img src="https://images.unsplash.com/photo-1542038784456-1ea8e935640e?auto=format&fit=crop&q=80&w=600" alt="Studio Video Production" class="service-card-image" loading="lazy">
+                    <div class="service-card-body">
+                        <span class="service-num">03 / Ofbuzz Studio</span>
+                        <h3>Photo & Video Production</h3>
+                        <p>High-end studio photography, product shoots, and viral ad videos managed directly by <strong>Ofbuzz Studio</strong>.</p>
                     </div>
-                  </div>
-                </div>
+                </a>
 
-                <div class="inv-dates-grid">
-                  <div class="bill-to-box">
-                    <span>Bill To</span>
-                    <strong id="previewCustName">Customer Name</strong>
-                    <p id="previewCustAddress">Delhi NCR, India<br>Phone: +91 7827201014</p>
-                  </div>
-
-                  <div class="date-meta-box">
-                    <div class="date-meta-row">
-                      <span class="lbl">Invoice Date :</span>
-                      <span class="val" id="previewInvDate">23 Sep 2026</span>
+                <!-- Service 4 -->
+                <a href="https://www.ofbuzztechnology.in/choose/web-tools" class="service-card tilt-card" target="_blank" rel="noopener">
+                    <img src="https://images.unsplash.com/photo-1432888498266-38ffec3eaf0a?auto=format&fit=crop&q=80&w=600" alt="Web & Tools" class="service-card-image" loading="lazy">
+                    <div class="service-card-body">
+                        <span class="service-num">04 / Web & Tools</span>
+                        <h3>Web Systems & Custom Tools</h3>
+                        <p>Bespoke web development, calculators, and automated web tools built to scale your enterprise operations.</p>
                     </div>
-                    <div class="date-meta-row">
-                      <span class="lbl">Terms :</span>
-                      <span class="val" id="previewTerms">Due on Receipt</span>
+                </a>
+
+                <!-- Service 5 -->
+                <a href="https://www.ofbuzztechnology.in/choose/e-commerce-partner" class="service-card tilt-card" target="_blank" rel="noopener">
+                    <img src="https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&q=80&w=600" alt="Ecommerce Services" class="service-card-image" loading="lazy">
+                    <div class="service-card-body">
+                        <span class="service-num">05 / E-Commerce Partner</span>
+                        <h3>E-Commerce Services</h3>
+                        <p>Complete e-commerce store setup, optimization, and scaling partner solutions for retail brands globally.</p>
                     </div>
-                    <div class="date-meta-row">
-                      <span class="lbl">Due Date :</span>
-                      <span class="val" id="previewDueDate">23 Sep 2026</span>
+                </a>
+
+                <!-- Service 6 -->
+                <a href="https://www.ofbuzztechnology.in/choose/marketing-for-ca-firms" class="service-card tilt-card" target="_blank" rel="noopener">
+                    <img src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&q=80&w=600" alt="CA Firm Client Acquisition" class="service-card-image" loading="lazy">
+                    <div class="service-card-body">
+                        <span class="service-num">06 / FinMark Systems</span>
+                        <h3>Marketing For CA & Financial Firms</h3>
+                        <p>Targeted client lead generation funnels designed for Chartered Accountants, CPAs, and advisory firms.</p>
                     </div>
-                  </div>
-                </div>
-
-                <table class="zylker-table">
-                  <thead>
-                    <tr>
-                      <th style="width: 38px; text-align: center;">#</th>
-                      <th>Item & Description</th>
-                      <th style="width: 70px; text-align: center;">Qty</th>
-                      <th style="width: 100px; text-align: right;">Rate</th>
-                      <th style="width: 110px; text-align: right;">Amount</th>
-                    </tr>
-                  </thead>
-                  <tbody id="previewLineItems"></tbody>
-                </table>
-
-                <div id="previewAdvanceBox" style="display: none; margin-top: 8px; margin-bottom: 10px;">
-                  <table class="zylker-table" style="margin-bottom: 0;">
-                    <thead>
-                      <tr>
-                        <th style="background:#059669;" colspan="2">Installments / Payments Settled</th>
-                        <th style="background:#059669; text-align:center;">Mode</th>
-                        <th style="background:#059669; text-align:right;" colspan="2">Amount Paid</th>
-                      </tr>
-                    </thead>
-                    <tbody id="previewAdvanceItems"></tbody>
-                  </table>
-                </div>
-
-                <div class="summary-section">
-                  <table class="summary-table">
-                    <tr>
-                      <td class="label">Sub Total</td>
-                      <td class="value" id="prevSubtotal">0.00</td>
-                    </tr>
-                    <tr id="rowDiscount" style="display:none;">
-                      <td class="label" id="lblDiscount">Discount(0%)</td>
-                      <td class="value" id="prevDiscount">(-) 0.00</td>
-                    </tr>
-                    <tr id="rowTax" style="display:none;">
-                      <td class="label" id="lblTax">Sales Tax (0%)</td>
-                      <td class="value" id="prevTax">0.00</td>
-                    </tr>
-                    <tr class="grand-total">
-                      <td class="label">Total</td>
-                      <td class="value" id="prevTotal">INR 0.00</td>
-                    </tr>
-                    <tr id="rowPaid" style="display:none; color: #059669;">
-                      <td class="label" style="color: #059669;">Total Paid</td>
-                      <td class="value" style="color: #059669;" id="prevPaid">(-) INR 0.00</td>
-                    </tr>
-                    <tr class="balance-due-strip">
-                      <td class="label">Balance Due</td>
-                      <td class="value" id="prevDue">INR 0.00</td>
-                    </tr>
-                  </table>
-                </div>
-
-                <div class="inv-bottom-notes">
-                  <div class="notes-block">
-                    <h5>Notes</h5>
-                    <p>It was wonderful doing business with you.<br>If you have any questions, do let me know. Thank you.</p>
-
-                    <h5>Terms & Conditions</h5>
-                    <p>Please make payment before the due date.</p>
-                  </div>
-
-                  <div class="qr-container-box">
-                    <div id="invoiceQr" style="width: 70px; height: 70px; margin: 0 auto;"></div>
-                    <span style="font-size: 0.65rem; color: #64748b; font-weight: 700; display: block; margin-top: 3px;">Instant UPI Scan</span>
-                  </div>
-                </div>
-
-              </div>
+                </a>
             </div>
-          </div>
         </div>
-      </div>
+    </section>
+
+    <!-- Industries Served -->
+    <section class="industries section-padding">
+        <div class="container">
+            <div class="section-header sm-fade-up">
+                <h2>Industries We Scale</h2>
+                <p>Dedicated growth frameworks tailored for high-ticket market segments globally.</p>
+            </div>
+            <div class="industry-list sm-cascade">
+                <div class="industry-card">Fine Jewellery</div>
+                <div class="industry-card">Luxury Fashion & Retail</div>
+                <div class="industry-card">Real Estate Developers</div>
+                <div class="industry-card">CA & Financial Consultancies</div>
+                <div class="industry-card">D2C E-Commerce Brands</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dynamic Counter Stats -->
+    <section class="stats-banner sm-fade-up">
+        <div class="container stats-grid">
+            <div class="stat-item">
+                <h3 class="counter" data-target="94" data-suffix="%">0%</h3>
+                <p>Client Retention Rate</p>
+            </div>
+            <div class="stat-item">
+                <h3 class="counter" data-target="10" data-suffix="+">0+</h3>
+                <p>Key Industries Served</p>
+            </div>
+            <div class="stat-item">
+                <h3 class="counter" data-target="100" data-suffix="%">0%</h3>
+                <p>Transparent Reporting</p>
+            </div>
+            <div class="stat-item">
+                <h3>Dedicated</h3>
+                <p>Growth Directors</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Workflow Section -->
+    <section class="section-padding">
+        <div class="container">
+            <div class="section-header sm-fade-up">
+                <h2>How We Work With You</h2>
+                <p>A simple 3-step process to generate high-value leads and maximize your business ROI.</p>
+            </div>
+            <div class="process-steps sm-cascade">
+                <div class="step-card">
+                    <h4>1. Business Audit</h4>
+                    <p>We review your current website, social media, ad performance, and competitors to find new growth gaps.</p>
+                </div>
+                <div class="step-card">
+                    <h4>2. System Setup</h4>
+                    <p>We build high-converting landing pages, set up accurate conversion tracking, and design high-performing ads.</p>
+                </div>
+                <div class="step-card">
+                    <h4>3. Scale & Optimize</h4>
+                    <p>We launch targeted Google Ads, Meta Ads, and SEO campaigns to generate verified customer inquiries.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Strategic Tier -->
+    <section class="the-8-section section-padding">
+        <div class="container the-8-container sm-fade-up">
+            <span class="badge" style="background: rgba(255,255,255,0.1); color: #A5B4FC; border-color: rgba(255,255,255,0.2);">Exclusive Partnership Tier</span>
+            <h2 class="the-8-title">The Growth Program: <strong>The 8</strong></h2>
+            <p class="the-8-desc">
+                An exclusive partnership model where we strictly accept 8 corporate accounts globally at a time to deliver focused founder-level involvement.
+            </p>
+
+            <div class="exclusivity-wrapper">
+                <div class="exclusivity-box">
+                    <span class="num">08</span>
+                    <span class="lbl">Global Client Capacity</span>
+                </div>
+                <div class="exclusivity-box" style="border-left: 1px solid rgba(255,255,255,0.12); padding-left: 40px;">
+                    <span class="num">Direct</span>
+                    <span class="lbl">Founder Level Support</span>
+                </div>
+            </div>
+
+            <a href="https://www.ofbuzztechnology.in/choose/the-8" target="_blank" rel="noopener" class="btn btn-primary">Discover The 8 Program</a>
+        </div>
+    </section>
+
+    <!-- Ecosystem Section -->
+    <section class="ecosystem section-padding">
+        <div class="container">
+            <div class="section-header sm-fade-up">
+                <h2>Ofbuzz Tools & Resources</h2>
+                <p>Powerful software ecosystems and portals engineered for global business owners.</p>
+            </div>
+
+            <div class="tools-layout sm-cascade">
+                <a href="https://www.ofbuzztechnology.in/ofbuzz-tools" target="_blank" rel="noopener" class="tool-button">Ofbuzz Tools Hub</a>
+                <a href="https://www.ofbuzztechnology.in/choose/daily-poster-365" target="_blank" rel="noopener" class="tool-button">365 Marketing</a>
+                <a href="https://www.ofbuzztechnology.in/about/blogs" target="_blank" rel="noopener" class="tool-button">Business Blogs</a>
+                <a href="https://www.ofbuzztechnology.in/operations" target="_blank" rel="noopener" class="tool-button" style="border-color: rgba(37, 99, 235, 0.5); color: #60A5FA;"><i class="fas fa-user-shield" style="margin-right: 6px;"></i> Staff Portal</a>
+                <a href="https://chat.whatsapp.com/KShccjQGtulFjnocl0LK4A" target="_blank" rel="noopener" class="tool-button tool-whatsapp">WhatsApp Community</a>
+            </div>
+
+            <div class="sm-fade-up" style="text-align: center; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+                <a href="https://www.ofbuzztechnology.in/about/our-work" target="_blank" rel="noopener" class="btn btn-hover-navy">Our Work Portfolio</a>
+                <a href="https://www.ofbuzztechnology.in/about/privacy-policy" target="_blank" rel="noopener" class="btn btn-hover-navy">Privacy Policy & T&C</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="section-padding">
+        <div class="container">
+            <div class="section-header sm-fade-up">
+                <h2>Frequently Asked Questions</h2>
+                <p>Clear, direct answers regarding our agency operations and global coverage.</p>
+            </div>
+            <div class="faq-layout sm-cascade">
+                <div class="faq-item">
+                    <h3>Which cities and states does Ofbuzz Technology serve?</h3>
+                    <p>We run dedicated growth campaigns and localized SEO for brands across Delhi NCR, Noida, Gurugram, Gujarat, Rajasthan, Bengaluru, New York, New Jersey, Sydney, and London.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>Why choose a specialized digital growth partner?</h3>
+                    <p>High-ticket industries such as Fine Jewellery and Real Estate demand hyper-targeted sales funnels and high trust signals. Our specialized knowledge drives faster ROI and lowers cost-per-lead globally.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>How fast can paid advertising deliver results?</h3>
+                    <p>Meta and Google ad campaigns generate verified leads within 7 to 14 days of launch. SEO ranking expansions typically consolidate within 3 to 6 months.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Corporate Footer -->
+    <footer class="footer-corporate">
+        <div class="container footer-grid">
+            <div class="footer-col">
+                <h3>OFBUZZ.</h3>
+                <p style="max-width: 380px;">India's trusted global business growth agency. Delivering web platforms, ad strategies, and SEO across Delhi, Indian States, New York, New Jersey, Sydney & London.</p>
+                <div class="footer-socials">
+                    <a href="https://www.linkedin.com/company/ofbuzztechnology" target="_blank" rel="noopener" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="https://www.instagram.com/ofbuzztechnology" target="_blank" rel="noopener" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="https://www.youtube.com/@ofbuzztechnology" target="_blank" rel="noopener" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                    <a href="https://chat.whatsapp.com/KShccjQGtulFjnocl0LK4A" target="_blank" rel="noopener" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </div>
+
+            <div class="footer-col">
+                <h4>Growth Solutions</h4>
+                <a href="https://www.ofbuzztechnology.in/choose/marketing-for-jewellery" target="_blank" rel="noopener">Jewellery Marketing</a>
+                <a href="https://www.ofbuzztechnology.in/choose/marketing-for-real-estate" target="_blank" rel="noopener">Real Estate Marketing</a>
+                <a href="https://www.ofbuzztechnology.in/choose/e-commerce-partner" target="_blank" rel="noopener">E-Commerce Services</a>
+                <a href="https://www.ofbuzztechnology.in/choose/ofbuzz-studio-photography-videography" target="_blank" rel="noopener">Ofbuzz Studio</a>
+                <a href="https://www.ofbuzztechnology.in/choose/marketing-for-ca-firms" target="_blank" rel="noopener">CA Firm Marketing</a>
+                <a href="https://www.ofbuzztechnology.in/choose/daily-poster-365" target="_blank" rel="noopener">365 Marketing</a>
+            </div>
+
+            <div class="footer-col">
+                <h4>Quick Links</h4>
+                <a href="https://www.ofbuzztechnology.in/choose/web-tools" target="_blank" rel="noopener">Web & Tools</a>
+                <a href="https://www.ofbuzztechnology.in/operations" target="_blank" rel="noopener" style="color: #60A5FA; font-weight: 700;"><i class="fas fa-user-shield" style="margin-right: 6px;"></i> Staff Portal</a>
+                <a href="https://www.ofbuzztechnology.in/about/blogs" target="_blank" rel="noopener">Blogs</a>
+                <a href="https://www.ofbuzztechnology.in/career" target="_blank" rel="noopener">Careers</a>
+                <a href="https://www.ofbuzztechnology.in/about/privacy-policy" target="_blank" rel="noopener">Privacy Policy & T&C</a>
+            </div>
+
+            <div class="footer-col">
+                <h4>Delhi Head Office</h4>
+                <p>Pandav Nagar, New Delhi, India</p>
+                <p style="margin-bottom: 4px;">hello@ofbuzztechnology.in</p>
+                <a href="tel:+917827201014" class="btn-call-direct"><i class="fas fa-phone-alt" style="margin-right: 8px;"></i> Call Us Now</a>
+            </div>
+        </div>
+
+        <div class="container footer-bottom">
+            <div>
+                &copy; 2026 Ofbuzz Technology. All rights reserved. Empowering global companies to dominate online.
+            </div>
+            <div class="footer-bottom-links">
+                <a href="https://www.ofbuzztechnology.in/operations" style="color: #60A5FA;">Staff Portal</a>
+                <a href="https://www.ofbuzztechnology.in/about/privacy-policy">Privacy Policy & T&C</a>
+                <a href="https://www.ofbuzztechnology.in/choose/web-tools">Web & Tools</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Mobile Floating Dock -->
+    <div class="mobile-dock">
+        <div class="mobile-dock-content">
+            <button onclick="openFormModal()" class="mobile-dock-btn btn-strategy">Book Strategy Call</button>
+            <a href="https://www.ofbuzztechnology.in/operations" target="_blank" rel="noopener" class="mobile-dock-btn" style="background: rgba(37, 99, 235, 0.25); color: #60A5FA;"><i class="fas fa-user-shield" style="margin-right: 4px;"></i> Staff</a>
+            <a href="https://chat.whatsapp.com/KShccjQGtulFjnocl0LK4A" target="_blank" rel="noopener" class="mobile-dock-btn btn-wa">WhatsApp</a>
+            <a href="tel:+917827201014" class="mobile-dock-btn" style="background: rgba(255,255,255,0.12); color: #fff;"><i class="fas fa-phone-alt" style="margin-right: 6px;"></i> Call</a>
+        </div>
     </div>
-  </div>
 
-  <script>
-    const API_ENDPOINT = "https://script.google.com/macros/s/AKfycby9yiIo9euB9KTt0zBuwcF3x6pdaeJJ48mAwcTFC6xl53oH8eh0Agfwlr138t3D5KNPYQ/exec";
-    const BRAND_LOGO_URL = "https://i.pinimg.com/736x/bd/d0/5c/bdd05c94afb66b5a72f5e17a7a879ab3.jpg";
-    const SECURE_PIN = "1312";
+    <!-- Embedded SEO Conversion & Telemetry Tracking Script -->
+    <script>
+        (function() {
+            window.dataLayer = window.dataLayer || [];
+            function trackSeoEvent(eventName, eventDetails) {
+                window.dataLayer.push({
+                    event: eventName,
+                    ...eventDetails,
+                    timestamp: new Date().toISOString()
+                });
+            }
 
-    let state = {
-      clients: [],
-      staff: [],
-      tasks: [],
-      payments: []
-    };
+            // Track phone clicks
+            document.querySelectorAll('a[href^="tel:"]').forEach(link => {
+                link.addEventListener('click', function() {
+                    trackSeoEvent('direct_phone_call', { targetNumber: link.getAttribute('href') });
+                });
+            });
 
-    let currentInvoice = {
-      client: null,
-      lineItems: [],
-      customItems: [],
-      advances: [],
-      calculatedNextDue: "",
-      financials: {}
-    };
+            // Track WhatsApp actions
+            document.querySelectorAll('a[href*="whatsapp.com"]').forEach(wa => {
+                wa.addEventListener('click', function() {
+                    trackSeoEvent('whatsapp_click', { destination: wa.getAttribute('href') });
+                });
+            });
 
-    let activeTimeFilter = "all";
-    let activeClientCategory = "all";
-    let lineChartInstance = null;
-    let mixChartInstance = null;
+            // Track lead inquiry modal engagements
+            document.querySelectorAll('button[onclick*="openFormModal"]').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    trackSeoEvent('inquiry_modal_opened', { buttonText: btn.innerText.trim() });
+                });
+            });
+        })();
+    </script>
 
-    function validateAdminPin() {
-      const input = document.getElementById("adminPinInput");
-      const errorMsg = document.getElementById("authErrorMsg");
-      
-      if (input.value.trim() === SECURE_PIN) {
-        sessionStorage.setItem("ofbuzz_admin_auth", "true");
-        document.getElementById("authOverlay").style.display = "none";
-        document.getElementById("mainDashboard").style.display = "block";
-        errorMsg.style.display = "none";
-        syncAllData();
-      } else {
-        errorMsg.style.display = "block";
-        input.value = "";
-        input.focus();
-      }
-    }
+    <!-- Scripts -->
+    <script>
+        // 1. Scroll Progress & Parallax
+        const progressBar = document.getElementById('progressBar');
+        const orb1 = document.getElementById('orb1');
+        const orb2 = document.getElementById('orb2');
 
-    function handlePinKeyPress(e) {
-      if (e.key === "Enter") {
-        validateAdminPin();
-      }
-    }
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const progress = (scrollTop / docHeight) * 100;
+            
+            if (progressBar) progressBar.style.width = progress + '%';
+            
+            if (orb1) orb1.style.transform = `translate3d(0, ${scrollTop * 0.12}px, 0)`;
+            if (orb2) orb2.style.transform = `translate3d(0, ${-scrollTop * 0.1}px, 0)`;
+        }, { passive: true });
 
-    function lockAdminSession() {
-      sessionStorage.removeItem("ofbuzz_admin_auth");
-      document.getElementById("authOverlay").style.display = "flex";
-      document.getElementById("mainDashboard").style.display = "none";
-      document.getElementById("adminPinInput").value = "";
-      document.getElementById("authErrorMsg").style.display = "none";
-      document.getElementById("adminPinInput").focus();
-    }
+        // 2. Intersection Observer
+        const observerOptions = {
+            threshold: 0.08,
+            rootMargin: '0px 0px -30px 0px'
+        };
 
-    function checkAuthOnLoad() {
-      if (sessionStorage.getItem("ofbuzz_admin_auth") === "true") {
-        document.getElementById("authOverlay").style.display = "none";
-        document.getElementById("mainDashboard").style.display = "block";
-        syncAllData();
-      } else {
-        document.getElementById("authOverlay").style.display = "flex";
-        document.getElementById("mainDashboard").style.display = "none";
-        document.getElementById("adminPinInput").focus();
-      }
-    }
+        const smObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('sm-active');
 
-    function showToast(msg) {
-      const toast = document.getElementById("toast");
-      toast.innerText = msg;
-      toast.style.display = "block";
-      setTimeout(() => { toast.style.display = "none"; }, 3500);
-    }
+                    if (entry.target.classList.contains('stats-banner')) {
+                        runCounters();
+                    }
 
-    function jsonp(url, callbackName) {
-      const script = document.createElement("script");
-      const connector = url.indexOf("?") >= 0 ? "&" : "?";
-      script.src = url + connector + "callback=" + callbackName + "&_t=" + Date.now();
-      document.body.appendChild(script);
-      script.onload = () => script.remove();
-      script.onerror = () => {
-        script.remove();
-        showToast("Network request failed. Please check connectivity.");
-      };
-    }
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
 
-    function syncAllData() {
-      const btn = document.getElementById("btnRefresh");
-      if (btn) {
-        btn.disabled = true;
-        btn.innerText = "Refreshing...";
-      }
-      showToast("Fetching latest records...");
-      jsonp(API_ENDPOINT + "?action=getAdminData", "onAdminSync");
-    }
-
-    window.onAdminSync = function(res) {
-      const btn = document.getElementById("btnRefresh");
-      if (btn) {
-        btn.disabled = false;
-        btn.innerText = "Refresh Data";
-      }
-
-      if (res && res.success && res.data) {
-        state = res.data;
-        renderAdminDashboard();
-        renderPaymentLedger();
-        renderMetaAnalytics();
-        showToast("System synchronized successfully.");
-      } else {
-        showToast("Error retrieving records.");
-      }
-    };
-
-    function toggleAnalyticsDrawer() {
-      const panel = document.getElementById("analyticsPanel");
-      const btn = document.getElementById("btnToggleAnalytics");
-      if (panel.style.display === "block") {
-        panel.style.display = "none";
-        btn.innerText = "Analytics View";
-      } else {
-        panel.style.display = "block";
-        btn.innerText = "Close Analytics";
-        renderMetaAnalytics();
-      }
-    }
-
-    function openStaffModal() {
-      document.getElementById("staffManagementModal").style.display = "flex";
-    }
-
-    function closeStaffModal() {
-      document.getElementById("staffManagementModal").style.display = "none";
-    }
-
-    function setTimeFilter(filter, el) {
-      activeTimeFilter = filter;
-      document.querySelectorAll(".time-pill").forEach(btn => btn.classList.remove("active"));
-      if (el) el.classList.add("active");
-      renderMetaAnalytics();
-    }
-
-    function setClientCategoryFilter(cat, el) {
-      activeClientCategory = cat;
-      document.querySelectorAll(".cat-pill").forEach(btn => btn.classList.remove("active"));
-      if (el) el.classList.add("active");
-      renderAdminDashboard();
-    }
-
-    // PAYMENT LEDGER & AUTOMATIC DUE CALCULATIONS
-    function renderPaymentLedger() {
-      const tbody = document.getElementById("recoveryLedgerBody");
-      let totalReceivedAll = 0;
-      let totalPendingAll = 0;
-      let rowsHtml = "";
-
-      const now = new Date();
-      const todayDateStr = now.toISOString().split("T")[0];
-      let calculatedTodaySales = 0;
-
-      (state.clients || []).forEach(c => {
-        const status = String(c[11] || "").trim().toLowerCase();
-        if (status === "cancelled") return;
-
-        const clientId = String(c[0] || "").trim();
-        const clientName = c[1] || "Account";
-        const phone = c[2] || "—";
-        const email = c[3] || "—";
-
-        const oneTime = parseFloat(c[5]) || 0;
-        const monthly = parseFloat(c[7]) || 0;
-        const annual = parseFloat(c[9]) || 0;
-        const clientBilled = oneTime + monthly + annual;
-
-        const billingDate = String(c[10] || "").substring(0, 10);
-        if (billingDate === todayDateStr) {
-          calculatedTodaySales += clientBilled;
-        }
-
-        let clientPaid = 0;
-        (state.payments || []).forEach(p => {
-          if (String(p[1] || "").trim() === clientId) {
-            clientPaid += parseFloat(p[4]) || 0;
-          }
+        document.querySelectorAll('.sm-fade-up, .sm-cascade').forEach(el => {
+            smObserver.observe(el);
         });
 
-        const pendingDue = Math.max(0, clientBilled - clientPaid);
-        totalReceivedAll += clientPaid;
-        totalPendingAll += pendingDue;
+        // 3. Live Animated Counter
+        let countersRan = false;
+        function runCounters() {
+            if (countersRan) return;
+            countersRan = true;
 
-        rowsHtml += `
-          <tr>
-            <td><strong>${clientName}</strong><br><span style="font-size:0.75rem; color:#64748b;">${clientId}</span></td>
-            <td>${phone}<br><span style="font-size:0.75rem; color:#64748b;">${email}</span></td>
-            <td><strong>INR ${clientBilled.toFixed(2)}</strong></td>
-            <td style="color:#059669; font-weight:700;">INR ${clientPaid.toFixed(2)}</td>
-            <td style="color:${pendingDue > 0 ? '#ea580c' : '#64748b'}; font-weight:700;">INR ${pendingDue.toFixed(2)}</td>
-            <td style="text-align: right; white-space: nowrap;">
-              <button class="btn-profile" onclick="openCustomerProfileModal('${clientId}')">View Passbook</button>
-              <button class="btn-adjust" onclick="openPaymentAdjustmentModal('${clientId}')">Adjust Payment</button>
-              ${pendingDue > 0 ? `<button class="btn-reminder" onclick="sendPaymentReminderMail('${clientId}', '${pendingDue.toFixed(2)}')">Send Reminder</button>` : `<span style="font-size:0.75rem; color:#059669; font-weight:700; margin-left:6px;">Settled</span>`}
-            </td>
-          </tr>
-        `;
-      });
+            const counters = document.querySelectorAll('.counter');
+            counters.forEach(counter => {
+                const target = +counter.getAttribute('data-target');
+                const suffix = counter.getAttribute('data-suffix') || '';
+                const duration = 1400;
+                const startTime = performance.now();
 
-      tbody.innerHTML = rowsHtml || '<tr><td colspan="6" style="text-align:center;">No active accounts available in ledger.</td></tr>';
-      
-      document.getElementById("todaySales").innerText = "INR " + calculatedTodaySales.toFixed(2);
-      document.getElementById("kpiTotalPaid").innerText = "INR " + totalReceivedAll.toFixed(2);
-      document.getElementById("kpiTotalPending").innerText = "INR " + totalPendingAll.toFixed(2);
-    }
+                function updateCount(currentTime) {
+                    const elapsed = currentTime - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    const easeOutProgress = 1 - Math.pow(2, -10 * progress);
+                    const currentVal = Math.floor(easeOutProgress * target);
+                    
+                    counter.innerText = currentVal + suffix;
 
-    // CUSTOMER PASSBOOK VIEW
-    function openCustomerProfileModal(clientId) {
-      const c = (state.clients || []).find(item => String(item[0]).trim() === String(clientId).trim());
-      if (!c) return;
-
-      const oneTime = parseFloat(c[5]) || 0;
-      const monthly = parseFloat(c[7]) || 0;
-      const annual = parseFloat(c[9]) || 0;
-      const clientBilled = oneTime + monthly + annual;
-
-      let clientPaid = 0;
-      let historyRows = "";
-
-      (state.payments || []).forEach(p => {
-        if (String(p[1] || "").trim() === String(clientId).trim()) {
-          const amt = parseFloat(p[4]) || 0;
-          clientPaid += amt;
-          historyRows += `
-            <tr>
-              <td>${p[5] ? String(p[5]).substring(0, 10) : "—"}</td>
-              <td><span class="status-badge" style="${amt < 0 ? 'background:#fee2e2; color:#dc2626;' : ''}">${p[3] || 'Installment'}</span></td>
-              <td style="font-weight:700; color:${amt < 0 ? '#dc2626' : '#059669'};">INR ${amt.toFixed(2)}</td>
-              <td style="font-size:0.78rem; color:#64748b;">${p[6] || '—'}</td>
-            </tr>
-          `;
-        }
-      });
-
-      const pendingDue = Math.max(0, clientBilled - clientPaid);
-
-      document.getElementById("profClientName").innerText = `${c[1]}`;
-      document.getElementById("profClientDetails").innerText = `Client ID: ${c[0]} | Phone: ${c[2] || '—'} | Email: ${c[3] || '—'}`;
-      document.getElementById("profBilledAmt").innerText = `INR ${clientBilled.toFixed(2)}`;
-      document.getElementById("profReceivedAmt").innerText = `INR ${clientPaid.toFixed(2)}`;
-      document.getElementById("profPendingAmt").innerText = `INR ${pendingDue.toFixed(2)}`;
-      document.getElementById("profPaymentsHistoryBody").innerHTML = historyRows || '<tr><td colspan="4" style="text-align:center;">No payment records found.</td></tr>';
-
-      document.getElementById("customerProfileModal").style.display = "flex";
-    }
-
-    function closeCustomerProfileModal() {
-      document.getElementById("customerProfileModal").style.display = "none";
-    }
-
-    function openPaymentAdjustmentModal(clientId) {
-      const c = (state.clients || []).find(item => String(item[0]).trim() === String(clientId).trim());
-      if (!c) return;
-
-      const oneTime = parseFloat(c[5]) || 0;
-      const monthly = parseFloat(c[7]) || 0;
-      const annual = parseFloat(c[9]) || 0;
-      const clientBilled = oneTime + monthly + annual;
-
-      let clientPaid = 0;
-      (state.payments || []).forEach(p => {
-        if (String(p[1] || "").trim() === String(clientId).trim()) {
-          clientPaid += parseFloat(p[4]) || 0;
-        }
-      });
-
-      document.getElementById("adjClientId").value = c[0];
-      document.getElementById("adjClientName").innerText = `${c[1]} (${c[0]})`;
-      document.getElementById("adjBilledVal").innerText = `INR ${clientBilled.toFixed(2)}`;
-      document.getElementById("adjCurrentPaidVal").innerText = `INR ${clientPaid.toFixed(2)}`;
-      document.getElementById("adjActionType").value = "add";
-      document.getElementById("adjAmount").value = "";
-      document.getElementById("adjRemark").value = "";
-
-      document.getElementById("paymentAdjustmentModal").style.display = "flex";
-    }
-
-    function closePaymentAdjustmentModal() {
-      document.getElementById("paymentAdjustmentModal").style.display = "none";
-    }
-
-    function savePaymentAdjustment() {
-      const clientId = document.getElementById("adjClientId").value;
-      const amount = parseFloat(document.getElementById("adjAmount").value) || 0;
-      const type = document.getElementById("adjActionType").value;
-      const remark = document.getElementById("adjRemark").value.trim();
-
-      if (amount <= 0) {
-        showToast("Please enter a valid amount greater than 0.");
-        return;
-      }
-
-      const btn = document.getElementById("btnSaveAdjustment");
-      btn.disabled = true;
-      btn.innerText = "Saving Adjustment...";
-
-      window.onAdjustmentSaved = function(res) {
-        btn.disabled = false;
-        btn.innerText = "Save Adjustment & Recalculate";
-        if (res && res.success) {
-          showToast(type === "deduct" ? "Deduction/Correction recorded." : "Payment addition recorded.");
-          closePaymentAdjustmentModal();
-          syncAllData();
-        } else {
-          showToast("Failed to save payment adjustment.");
-        }
-      };
-
-      jsonp(API_ENDPOINT + `?action=adjustClientPayment&clientId=${encodeURIComponent(clientId)}&amount=${encodeURIComponent(amount)}&type=${encodeURIComponent(type)}&remark=${encodeURIComponent(remark)}`, "onAdjustmentSaved");
-    }
-
-    function cancelClientService(clientId) {
-      if (!confirm("Are you sure you want to cancel/deactivate service for client " + clientId + "?")) return;
-      jsonp(API_ENDPOINT + `?action=deactivateClient&clientId=${encodeURIComponent(clientId)}`, "onServiceCancelled");
-    }
-
-    window.onServiceCancelled = function(res) {
-      if (res && res.success) {
-        showToast("Client service successfully deactivated/cancelled.");
-        syncAllData();
-      } else {
-        showToast("Failed to cancel service.");
-      }
-    };
-
-    function sendPaymentReminderMail(clientId, dueAmt) {
-      showToast("Dispatching formal payment reminder...");
-      jsonp(API_ENDPOINT + `?action=sendPaymentReminder&clientId=${encodeURIComponent(clientId)}&amount=${encodeURIComponent(dueAmt)}`, "onReminderDispatched");
-    }
-
-    window.onReminderDispatched = function(res) {
-      if (res && res.success) {
-        showToast(res.message);
-      } else {
-        showToast((res && res.message) ? res.message : "Failed to dispatch reminder.");
-      }
-    };
-
-    function renderMetaAnalytics() {
-      const now = new Date();
-      let filterStartDate = null;
-
-      if (activeTimeFilter === "today") {
-        filterStartDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      } else if (activeTimeFilter === "7d") {
-        filterStartDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-      } else if (activeTimeFilter === "30d") {
-        filterStartDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-      } else if (activeTimeFilter === "month") {
-        filterStartDate = new Date(now.getFullYear(), now.getMonth(), 1);
-      }
-
-      let totalCollected = 0;
-      const timelineBuckets = {};
-
-      (state.payments || []).forEach(p => {
-        const pDateStr = String(p[5] || "").substring(0, 10);
-        const pDate = new Date(pDateStr);
-        const amt = parseFloat(p[4]) || 0;
-
-        if (!filterStartDate || pDate >= filterStartDate) {
-          totalCollected += amt;
-          const bucketKey = pDateStr.length >= 7 ? pDateStr : "Current";
-          timelineBuckets[bucketKey] = (timelineBuckets[bucketKey] || 0) + amt;
-        }
-      });
-
-      let totalGross = 0;
-      let totalMrr = 0;
-      let oneTimeSum = 0;
-      let monthlySum = 0;
-      let annualSum = 0;
-      let activeAccounts = 0;
-
-      (state.clients || []).forEach(c => {
-        const status = String(c[11] || "").trim().toLowerCase();
-        if (status === "cancelled") return;
-
-        const cDate = c[12] ? new Date(c[12]) : null;
-        if (!filterStartDate || (cDate && cDate >= filterStartDate)) {
-          const ot = parseFloat(c[5]) || 0;
-          const mo = parseFloat(c[7]) || 0;
-          const an = parseFloat(c[9]) || 0;
-
-          oneTimeSum += ot;
-          monthlySum += mo;
-          annualSum += an;
-
-          totalGross += (ot + mo + an);
-          totalMrr += mo;
-          activeAccounts++;
-        }
-      });
-
-      const outstandingDue = Math.max(0, totalGross - totalCollected);
-
-      let tasksTotal = (state.tasks || []).length;
-      let tasksDone = (state.tasks || []).filter(t => t[6] === "Approved").length;
-      let fulfillmentPct = tasksTotal > 0 ? Math.round((tasksDone / tasksTotal) * 100) : 100;
-
-      document.getElementById("metaKpiGross").innerText = "INR " + totalGross.toLocaleString("en-IN");
-      document.getElementById("metaKpiMrr").innerText = "INR " + totalMrr.toLocaleString("en-IN");
-      document.getElementById("metaKpiPaid").innerText = "INR " + totalCollected.toLocaleString("en-IN");
-      document.getElementById("metaKpiDue").innerText = "INR " + outstandingDue.toLocaleString("en-IN");
-      document.getElementById("metaKpiClients").innerText = activeAccounts;
-      document.getElementById("metaKpiClientsSub").innerText = activeAccounts + " active accounts in scope";
-      document.getElementById("metaKpiFulfillment").innerText = fulfillmentPct + "%";
-      document.getElementById("metaKpiFulfillmentSub").innerText = tasksDone + " of " + tasksTotal + " deliverables closed";
-
-      let collectionEff = totalGross > 0 ? Math.min(100, Math.round((totalCollected / totalGross) * 100)) : 100;
-      document.getElementById("collectionPercentText").innerText = collectionEff + "%";
-      document.getElementById("collectionProgressBar").style.width = collectionEff + "%";
-
-      renderTimelineChart(timelineBuckets);
-      renderServiceMixChart(oneTimeSum, monthlySum, annualSum);
-    }
-
-    function renderTimelineChart(buckets) {
-      const canvas = document.getElementById("revenueLineChart");
-      if (!canvas) return;
-      const ctx = canvas.getContext("2d");
-      let labels = Object.keys(buckets).sort();
-      let data = labels.map(k => buckets[k]);
-
-      if (labels.length === 0) {
-        labels = ["Current Period"];
-        data = [0];
-      }
-
-      if (lineChartInstance) lineChartInstance.destroy();
-
-      const gradient = ctx.createLinearGradient(0, 0, 0, 200);
-      gradient.addColorStop(0, "rgba(24, 119, 242, 0.35)");
-      gradient.addColorStop(1, "rgba(24, 119, 242, 0.0)");
-
-      lineChartInstance = new Chart(ctx, {
-        type: "line",
-        data: {
-          labels: labels,
-          datasets: [{
-            label: "Collections (INR)",
-            data: data,
-            borderColor: "#1877f2",
-            borderWidth: 2.5,
-            fill: true,
-            backgroundColor: gradient,
-            tension: 0.35,
-            pointBackgroundColor: "#1877f2",
-            pointRadius: 4,
-            pointHoverRadius: 6
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              callbacks: {
-                label: function(ctx) {
-                  return " Revenue: INR " + ctx.parsed.y.toLocaleString("en-IN");
+                    if (progress < 1) {
+                        requestAnimationFrame(updateCount);
+                    } else {
+                        counter.innerText = target + suffix;
+                    }
                 }
-              }
+                requestAnimationFrame(updateCount);
+            });
+        }
+
+        // 4. Desktop Tilt
+        if (window.matchMedia("(min-width: 992px)").matches) {
+            const tiltCards = document.querySelectorAll('.tilt-card');
+            tiltCards.forEach(card => {
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    
+                    const rotateX = ((y - centerY) / centerY) * -5;
+                    const rotateY = ((x - centerX) / centerX) * 5;
+
+                    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-6px)`;
+                });
+
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0)';
+                });
+            });
+        }
+
+        // 5. Modal Controllers
+        const modal = document.getElementById('formModal');
+        const closeBtn = document.getElementById('closeModalBtn');
+
+        function openFormModal() {
+            if (!modal) return;
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeFormModal() {
+            if (!modal) return;
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        if (closeBtn) closeBtn.addEventListener('click', closeFormModal);
+
+        if (modal) {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeFormModal();
+            });
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modal && modal.classList.contains('active')) {
+                closeFormModal();
             }
-          },
-          scales: {
-            x: { grid: { display: false }, ticks: { font: { size: 11 } } },
-            y: {
-              grid: { color: "#f1f5f9" },
-              ticks: { callback: function(val) { return "INR " + val; }, font: { size: 11 } }
-            }
-          }
-        }
-      });
-    }
-
-    function renderServiceMixChart(oneTime, monthly, annual) {
-      const canvas = document.getElementById("serviceMixChart");
-      if (!canvas) return;
-      const ctx = canvas.getContext("2d");
-      const hasData = (oneTime + monthly + annual) > 0;
-      const dataValues = hasData ? [oneTime, monthly, annual] : [1, 1, 1];
-      const backgroundColors = hasData ? ["#f25c3b", "#1877f2", "#10b981"] : ["#e2e8f0", "#e2e8f0", "#e2e8f0"];
-
-      if (mixChartInstance) mixChartInstance.destroy();
-
-      mixChartInstance = new Chart(ctx, {
-        type: "doughnut",
-        data: {
-          labels: ["One-Time Setup", "Monthly Retainer", "Annual AMC"],
-          datasets: [{
-            data: dataValues,
-            backgroundColor: backgroundColors,
-            borderWidth: 2,
-            borderColor: "#ffffff"
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          cutout: "70%",
-          plugins: {
-            legend: { position: "right", labels: { boxWidth: 10, font: { size: 10 } } },
-            tooltip: {
-              callbacks: {
-                label: function(ctx) {
-                  const val = hasData ? "INR " + ctx.raw.toLocaleString("en-IN") : "No data";
-                  return " " + ctx.label + ": " + val;
-                }
-              }
-            }
-          }
-        }
-      });
-    }
-
-    function renderAdminDashboard() {
-      const clientBody = document.getElementById("clientTableBody");
-      let cHtml = "";
-      
-      (state.clients || []).forEach(c => {
-        const status = String(c[11] || "").trim().toLowerCase();
-        if (status === "cancelled") return;
-
-        const otAmt = parseFloat(c[5]) || 0;
-        const moAmt = parseFloat(c[7]) || 0;
-        const anAmt = parseFloat(c[9]) || 0;
-
-        if (activeClientCategory === "monthly" && moAmt <= 0) return;
-        if (activeClientCategory === "annual" && anAmt <= 0) return;
-        if (activeClientCategory === "onetime" && otAmt <= 0) return;
-
-        let serv = [];
-        if (activeClientCategory === "all" || activeClientCategory === "onetime") {
-          if (c[4] && otAmt > 0) serv.push(`One-Time: ${c[4]} (INR ${otAmt})`);
-        }
-        if (activeClientCategory === "all" || activeClientCategory === "monthly") {
-          if (c[6] && moAmt > 0) serv.push(`Monthly: ${c[6]} (INR ${moAmt})`);
-        }
-        if (activeClientCategory === "all" || activeClientCategory === "annual") {
-          if (c[8] && anAmt > 0) serv.push(`Annual: ${c[8]} (INR ${anAmt})`);
-        }
-
-        if (serv.length === 0 && activeClientCategory !== "all") return;
-
-        cHtml += `
-          <tr>
-            <td><strong>${c[0]}</strong></td>
-            <td><strong>${c[1]}</strong></td>
-            <td>${c[2]}<br><span style="font-size:0.75rem; color:#64748b;">${c[3]}</span></td>
-            <td>${serv.join("<br>") || "—"}</td>
-            <td><strong>${c[10] ? c[10].substring(0,10) : "—"}</strong></td>
-            <td style="text-align: right; white-space: nowrap;">
-              <button class="btn-bill" onclick="openInvoiceModal('${c[0]}')">Generate Bill</button>
-              <button class="btn-cancel-service" onclick="cancelClientService('${c[0]}')">Cancel Service</button>
-              <button class="btn-edit" onclick="editClientRecord('${c[0]}')">Edit</button>
-              <button class="btn-del" onclick="deleteClientRecord('${c[0]}')">Delete</button>
-            </td>
-          </tr>
-        `;
-      });
-      clientBody.innerHTML = cHtml || '<tr><td colspan="6" style="text-align:center;">No accounts found for this filter.</td></tr>';
-
-      const staffBody = document.getElementById("staffTableBody");
-      let sTableHtml = "";
-      let sOptions = '<option value="">Choose Staff Profile</option>';
-      (state.staff || []).forEach(s => {
-        sTableHtml += `
-          <tr>
-            <td><strong>${s[0]}</strong></td>
-            <td><strong>${s[1]}</strong></td>
-            <td>${s[2]}</td>
-            <td>${s[3] || "—"}</td>
-            <td><span class="status-badge">${s[4] || "Active"}</span></td>
-            <td style="text-align: right; white-space: nowrap;">
-              <button class="btn-edit" onclick="editStaffRecord('${s[0]}')">Edit</button>
-              <button class="btn-del" onclick="deleteStaffRecord('${s[0]}')">Delete</button>
-            </td>
-          </tr>
-        `;
-        sOptions += `<option value="${s[0]}" data-email="${s[2]}" data-name="${s[1]}">${s[1]} (${s[0]}) — ${s[3]}</option>`;
-      });
-      staffBody.innerHTML = sTableHtml || '<tr><td colspan="6" style="text-align:center;">No personnel profiles found.</td></tr>';
-
-      const staffSelect = document.getElementById("staffSelect");
-      staffSelect.innerHTML = sOptions;
-
-      const taskBody = document.getElementById("taskApprovalBody");
-      let tHtml = "";
-      (state.tasks || []).forEach(t => {
-        if (t[6] === "Pending Approval") {
-          tHtml += `
-            <tr>
-              <td><strong>${t[3]}</strong></td>
-              <td>${t[2]}</td>
-              <td>${t[7] || "—"}</td>
-              <td><span class="status-badge" style="background:#fef3c7; color:#b45309;">${t[6]}</span></td>
-              <td><button class="btn-primary" style="background:#10b981; padding: 4px 10px;" onclick="approveTask('${t[0]}')">Approve</button></td>
-            </tr>
-          `;
-        }
-      });
-      taskBody.innerHTML = tHtml || '<tr><td colspan="5" style="text-align:center;">No deliverables awaiting approval.</td></tr>';
-    }
-
-    function saveClientRecord() {
-      const id = document.getElementById("clientId").value;
-      const client = {
-        id: id,
-        name: document.getElementById("custName").value.trim(),
-        phone: document.getElementById("custPhone").value.trim(),
-        email: document.getElementById("custEmail").value.trim(),
-        nextBillingDate: document.getElementById("custDate").value,
-        oneTimeService: document.getElementById("oneTimeTitle").value.trim(),
-        oneTimeAmount: document.getElementById("oneTimeAmt").value,
-        monthlyService: document.getElementById("monthlyTitle").value.trim(),
-        monthlyAmount: document.getElementById("monthlyAmt").value,
-        annualService: document.getElementById("annualTitle").value.trim(),
-        annualAmount: document.getElementById("annualAmt").value
-      };
-
-      if (!client.name) { showToast("Client name is required."); return; }
-
-      const action = id ? "editClient" : "addClient";
-      showToast("Saving client record...");
-      
-      jsonp(API_ENDPOINT + `?action=${action}&data=${encodeURIComponent(JSON.stringify(client))}`, "onClientSaved");
-    }
-
-    window.onClientSaved = function() {
-      showToast("Client record saved successfully.");
-      cancelClientEdit();
-      syncAllData();
-    };
-
-    function editClientRecord(id) {
-      const c = (state.clients || []).find(item => String(item[0]).trim() === String(id).trim());
-      if (!c) return;
-
-      document.getElementById("clientId").value = c[0];
-      document.getElementById("custName").value = c[1] || "";
-      document.getElementById("custPhone").value = c[2] || "";
-      document.getElementById("custEmail").value = c[3] || "";
-      document.getElementById("custDate").value = c[10] ? c[10].substring(0,10) : "";
-      document.getElementById("oneTimeTitle").value = c[4] || "";
-      document.getElementById("oneTimeAmt").value = c[5] || "";
-      document.getElementById("monthlyTitle").value = c[6] || "";
-      document.getElementById("monthlyAmt").value = c[7] || "";
-      document.getElementById("annualTitle").value = c[8] || "";
-      document.getElementById("annualAmt").value = c[9] || "";
-
-      document.getElementById("formTitle").innerText = "Edit Client: " + c[1];
-      document.getElementById("btnCancelEdit").style.display = "inline-block";
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-
-    function cancelClientEdit() {
-      document.getElementById("clientId").value = "";
-      document.getElementById("custName").value = "";
-      document.getElementById("custPhone").value = "";
-      document.getElementById("custEmail").value = "";
-      document.getElementById("custDate").value = "";
-      document.getElementById("oneTimeTitle").value = "";
-      document.getElementById("oneTimeAmt").value = "";
-      document.getElementById("monthlyTitle").value = "";
-      document.getElementById("monthlyAmt").value = "";
-      document.getElementById("annualTitle").value = "";
-      document.getElementById("annualAmt").value = "";
-      document.getElementById("formTitle").innerText = "Register Client & Setup Multi-Tier Services";
-      document.getElementById("btnCancelEdit").style.display = "none";
-    }
-
-    function deleteClientRecord(id) {
-      if (!confirm("Are you sure you want to delete client " + id + "?")) return;
-      jsonp(API_ENDPOINT + `?action=deleteClient&clientId=${encodeURIComponent(id)}`, "onDeleted");
-    }
-
-    window.onDeleted = function() {
-      showToast("Client removed.");
-      syncAllData();
-    };
-
-    function saveStaffRecord() {
-      const editId = document.getElementById("staffEditId").value;
-      const s = {
-        id: document.getElementById("stfId").value.trim(),
-        name: document.getElementById("stfName").value.trim(),
-        email: document.getElementById("stfEmail").value.trim(),
-        role: document.getElementById("stfRole").value.trim()
-      };
-
-      if (!s.id || !s.name) {
-        showToast("Both Staff ID and Name are required.");
-        return;
-      }
-
-      const action = editId ? "editStaff" : "addStaff";
-      showToast("Saving workforce profile...");
-
-      jsonp(API_ENDPOINT + `?action=${action}&data=${encodeURIComponent(JSON.stringify(s))}`, "onStaffSaved");
-    }
-
-    window.onStaffSaved = function(res) {
-      if (res && res.success) {
-        showToast("Staff profile committed successfully.");
-        cancelStaffEdit();
-        syncAllData();
-      } else {
-        showToast("Failed to save staff record.");
-      }
-    };
-
-    function editStaffRecord(id) {
-      const s = (state.staff || []).find(item => String(item[0]).trim() === String(id).trim());
-      if (!s) return;
-
-      document.getElementById("staffEditId").value = s[0];
-      document.getElementById("stfId").value = s[0];
-      document.getElementById("stfId").readOnly = true;
-      document.getElementById("stfName").value = s[1] || "";
-      document.getElementById("stfEmail").value = s[2] || "";
-      document.getElementById("stfRole").value = s[3] || "";
-
-      document.getElementById("staffFormTitle").innerText = "Edit Workforce File: " + s[1];
-      document.getElementById("btnSaveStaff").innerText = "Update Associate File";
-      document.getElementById("btnCancelStaffEdit").style.display = "inline-block";
-      window.scrollTo({ top: 400, behavior: "smooth" });
-    }
-
-    function cancelStaffEdit() {
-      document.getElementById("staffEditId").value = "";
-      document.getElementById("stfId").value = "";
-      document.getElementById("stfId").readOnly = false;
-      document.getElementById("stfName").value = "";
-      document.getElementById("stfEmail").value = "";
-      document.getElementById("stfRole").value = "";
-
-      document.getElementById("staffFormTitle").innerText = "Add New Workforce / Staff Member";
-      document.getElementById("btnSaveStaff").innerText = "Commit Associate Record";
-      document.getElementById("btnCancelStaffEdit").style.display = "none";
-    }
-
-    function deleteStaffRecord(id) {
-      if (!confirm("Are you sure you want to purge workforce profile " + id + "?")) return;
-      jsonp(API_ENDPOINT + `?action=deleteStaff&staffId=${encodeURIComponent(id)}`, "onStaffDeleted");
-    }
-
-    window.onStaffDeleted = function(res) {
-      showToast("Staff profile purged.");
-      syncAllData();
-    };
-
-    function assignStaffTask() {
-      const sel = document.getElementById("staffSelect");
-      const staffId = sel.value;
-      const opt = sel.options[sel.selectedIndex];
-      const task = {
-        staffId: staffId,
-        staffName: opt.getAttribute("data-name"),
-        staffEmail: opt.getAttribute("data-email"),
-        title: document.getElementById("taskTitle").value.trim(),
-        description: document.getElementById("taskDesc").value.trim()
-      };
-
-      if (!task.staffId || !task.title) { showToast("Select staff and enter task title."); return; }
-
-      showToast("Delegating task & dispatching mail...");
-      jsonp(API_ENDPOINT + `?action=assignTask&data=${encodeURIComponent(JSON.stringify(task))}`, "onTaskAssigned");
-    }
-
-    window.onTaskAssigned = function() {
-      showToast("Task assigned & Email notification sent.");
-      document.getElementById("taskTitle").value = "";
-      document.getElementById("taskDesc").value = "";
-      syncAllData();
-    };
-
-    function approveTask(id) {
-      jsonp(API_ENDPOINT + `?action=approveTask&taskId=${encodeURIComponent(id)}&remark=Approved via Admin`, "onTaskApproved");
-    }
-
-    window.onTaskApproved = function() {
-      showToast("Task approved and completed.");
-      syncAllData();
-    };
-
-    function openInvoiceModal(clientId) {
-      const c = (state.clients || []).find(item => String(item[0]).trim() === String(clientId).trim());
-      if (!c) return;
-
-      currentInvoice.client = c;
-      currentInvoice.advances = [];
-      currentInvoice.customItems = [];
-
-      (state.payments || []).forEach(p => {
-        if (String(p[1] || "").trim() === String(c[0]).trim() && parseFloat(p[4]) !== 0) {
-          currentInvoice.advances.push({
-            mode: p[6] ? (p[6].includes("[") ? p[6].split("[")[1].replace("]", "") : "Direct") : "Direct",
-            amount: parseFloat(p[4]),
-            note: p[6] ? p[6].split("[")[0].trim() : "Installment"
-          });
-        }
-      });
-      
-      document.getElementById("invoiceCycleSelector").value = "monthly";
-      document.getElementById("advDate").value = new Date().toISOString().split("T")[0];
-      changeInvoiceCycle();
-
-      document.getElementById("modalClientHeader").innerText = `Generating bill for: ${c[1]} (${c[0]})`;
-      document.getElementById("previewCustName").innerText = c[1];
-      document.getElementById("previewCustAddress").innerHTML = `Phone: ${c[2] || '—'}<br>Email: ${c[3] || '—'}`;
-
-      document.getElementById("invoiceModal").style.display = "flex";
-    }
-
-    function changeInvoiceCycle() {
-      const c = currentInvoice.client;
-      if (!c) return;
-
-      const cycle = document.getElementById("invoiceCycleSelector").value;
-      currentInvoice.lineItems = [];
-
-      const now = new Date();
-      const currentMonthStr = now.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
-      const currentYear = now.getFullYear();
-
-      let termLabel = "Net 15 Days";
-      let dueOffsetDays = 15;
-
-      if (cycle === "monthly") {
-        if (c[6] && parseFloat(c[7]) > 0) {
-          currentInvoice.lineItems.push({
-            name: c[6],
-            desc: `Monthly Recurring Service Retainer (${currentMonthStr})`,
-            price: parseFloat(c[7]),
-            qty: 1
-          });
-        }
-        termLabel = "Monthly Retainer (Net 7)";
-        dueOffsetDays = 7;
-      } else if (cycle === "initial") {
-        if (c[4] && parseFloat(c[5]) > 0) {
-          currentInvoice.lineItems.push({
-            name: c[4],
-            desc: "One-Time Initial Setup & Project Deployment",
-            price: parseFloat(c[5]),
-            qty: 1
-          });
-        }
-        if (c[6] && parseFloat(c[7]) > 0) {
-          currentInvoice.lineItems.push({
-            name: c[6],
-            desc: `1st Month Service Retainer (${currentMonthStr})`,
-            price: parseFloat(c[7]),
-            qty: 1
-          });
-        }
-        termLabel = "Due on Receipt";
-        dueOffsetDays = 0;
-      } else if (cycle === "annual") {
-        if (c[8] && parseFloat(c[9]) > 0) {
-          currentInvoice.lineItems.push({
-            name: c[8],
-            desc: `Annual AMC, Cloud Infrastructure & Maintenance (${currentYear} - ${currentYear + 1})`,
-            price: parseFloat(c[9]),
-            qty: 1
-          });
-        }
-        termLabel = "Annual Subscription (Net 15)";
-        dueOffsetDays = 15;
-      } else {
-        if (c[4] && parseFloat(c[5]) > 0) currentInvoice.lineItems.push({ name: c[4], desc: "One-Time Custom Setup", price: parseFloat(c[5]), qty: 1 });
-        if (c[6] && parseFloat(c[7]) > 0) currentInvoice.lineItems.push({ name: c[6], desc: "Monthly Recurring Retainer", price: parseFloat(c[7]), qty: 1 });
-        if (c[8] && parseFloat(c[9]) > 0) currentInvoice.lineItems.push({ name: c[8], desc: "Annual Contract", price: parseFloat(c[9]), qty: 1 });
-        termLabel = "Consolidated Statement";
-        dueOffsetDays = 0;
-      }
-
-      currentInvoice.customItems.forEach(ci => {
-        currentInvoice.lineItems.push(ci);
-      });
-
-      if (currentInvoice.lineItems.length === 0) {
-        currentInvoice.lineItems.push({ name: "Agency Services", desc: "Digital Technology Consulting", price: 2000, qty: 1 });
-      }
-
-      const invCode = "INV-" + Math.floor(100000 + Math.random() * 900000);
-      document.getElementById("previewInvNumber").innerText = `# ${invCode}`;
-
-      const todayFormatted = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-      document.getElementById("previewInvDate").innerText = todayFormatted;
-      document.getElementById("previewTerms").innerText = termLabel;
-
-      const calculatedDueDate = new Date(now.getTime() + dueOffsetDays * 24 * 60 * 60 * 1000);
-      document.getElementById("previewDueDate").innerText = calculatedDueDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-      
-      const rolloverTarget = new Date(now);
-      if (cycle === "annual") {
-        rolloverTarget.setFullYear(rolloverTarget.getFullYear() + 1);
-      } else {
-        rolloverTarget.setMonth(rolloverTarget.getMonth() + 1);
-      }
-      currentInvoice.calculatedNextDue = rolloverTarget.toISOString().split('T')[0];
-
-      renderInvoicePreview();
-    }
-
-    function addCustomBillItem() {
-      const title = document.getElementById("customItemTitle").value.trim();
-      const amt = parseFloat(document.getElementById("customItemAmt").value) || 0;
-      const qty = parseFloat(document.getElementById("customItemQty").value) || 1;
-
-      if (!title || amt <= 0) {
-        showToast("Enter valid custom item name and amount.");
-        return;
-      }
-
-      currentInvoice.customItems.push({
-        name: title,
-        desc: "Custom Bill Item",
-        price: amt,
-        qty: qty
-      });
-
-      document.getElementById("customItemTitle").value = "";
-      document.getElementById("customItemAmt").value = "";
-      document.getElementById("customItemQty").value = "1";
-
-      changeInvoiceCycle();
-      showToast("Custom item added to bill.");
-    }
-
-    function markCycleRenewed() {
-      const c = currentInvoice.client;
-      if (!c) return;
-      const cycle = document.getElementById("invoiceCycleSelector").value;
-      const nextDate = currentInvoice.calculatedNextDue;
-
-      showToast("Updating client next billing cycle...");
-      c[10] = nextDate;
-
-      jsonp(API_ENDPOINT + `?action=rolloverCycle&clientId=${encodeURIComponent(c[0])}&cycleType=${cycle}&nextDate=${nextDate}`, "onRolloverDone");
-    }
-
-    window.onRolloverDone = function(res) {
-      if (res && res.success) {
-        showToast("Billing cycle rolled over to: " + res.nextBillingDate);
-        syncAllData();
-      }
-    };
-
-    function sendInvoiceToClientEmail() {
-      const c = currentInvoice.client;
-      if (!c || !c[3]) {
-        showToast("Client does not have a registered email address.");
-        return;
-      }
-
-      const btn = document.getElementById("btnSendEmail");
-      btn.disabled = true;
-      btn.innerText = "Sending Mail...";
-
-      const payload = {
-        name: c[1],
-        email: c[3],
-        invoiceNumber: document.getElementById("previewInvNumber").innerText,
-        date: document.getElementById("previewInvDate").innerText,
-        dueDate: document.getElementById("previewDueDate").innerText,
-        items: currentInvoice.lineItems,
-        subtotal: currentInvoice.financials.subtotal,
-        total: currentInvoice.financials.total,
-        paid: currentInvoice.financials.paid,
-        balanceDue: currentInvoice.financials.balanceDue,
-        upi: document.getElementById("invUpiId").value.trim()
-      };
-
-      window.onMailSent = function(res) {
-        btn.disabled = false;
-        btn.innerText = "Send Bill via Email";
-        if (res && res.success) {
-          showToast(res.message);
-        } else {
-          showToast((res && res.message) ? res.message : "Failed to dispatch email.");
-        }
-      };
-
-      jsonp(API_ENDPOINT + `?action=sendInvoiceMail&data=${encodeURIComponent(JSON.stringify(payload))}`, "onMailSent");
-    }
-
-    function closeInvoiceModal() {
-      document.getElementById("invoiceModal").style.display = "none";
-    }
-
-    function addAdvanceReceipt() {
-      const c = currentInvoice.client;
-      if (!c) return;
-
-      const mode = document.getElementById("advMode").value;
-      const amt = parseFloat(document.getElementById("advAmount").value) || 0;
-      const payDate = document.getElementById("advDate").value;
-      const note = document.getElementById("advNote").value.trim() || "Installment";
-
-      if (amt <= 0) { showToast("Enter a valid installment amount."); return; }
-
-      const btn = document.getElementById("btnCommitAdvance");
-      btn.disabled = true;
-      btn.innerText = "Saving Installment...";
-
-      window.onAdvanceRecorded = function(res) {
-        btn.disabled = false;
-        btn.innerText = "Record & Save Installment";
-        if (res && res.success) {
-          currentInvoice.advances.push({
-            mode: mode,
-            amount: amt,
-            note: note + (payDate ? ` (${payDate})` : '')
-          });
-          document.getElementById("advAmount").value = "";
-          document.getElementById("advNote").value = "";
-          renderInvoicePreview();
-          showToast("Installment of INR " + amt.toFixed(2) + " saved successfully.");
-          syncAllData();
-        } else {
-          showToast("Failed to write installment record.");
-        }
-      };
-
-      jsonp(API_ENDPOINT + `?action=recordAdvancePayment&clientId=${encodeURIComponent(c[0])}&amount=${encodeURIComponent(amt)}&mode=${encodeURIComponent(mode)}&note=${encodeURIComponent(note)}&payDate=${encodeURIComponent(payDate)}`, "onAdvanceRecorded");
-    }
-
-    function renderInvoicePreview() {
-      const lineBody = document.getElementById("previewLineItems");
-      let subtotal = 0;
-      let lHtml = "";
-      currentInvoice.lineItems.forEach((item, idx) => {
-        const itemTotal = item.qty * item.price;
-        subtotal += itemTotal;
-        lHtml += `
-          <tr>
-            <td style="text-align: center; color:#64748b;">${idx + 1}</td>
-            <td>
-              <strong>${item.name}</strong>
-              <span class="item-sub-desc">${item.desc}</span>
-            </td>
-            <td style="text-align: center;">${item.qty.toFixed(2)}<br><span style="font-size:0.68rem; color:#94a3b8;">Nos</span></td>
-            <td style="text-align: right;">${item.price.toFixed(2)}</td>
-            <td style="text-align: right; font-weight:700;">${itemTotal.toFixed(2)}</td>
-          </tr>
-        `;
-      });
-      lineBody.innerHTML = lHtml;
-
-      const advBox = document.getElementById("previewAdvanceBox");
-      const advBody = document.getElementById("previewAdvanceItems");
-      let totalPaid = 0;
-
-      if (currentInvoice.advances.length > 0) {
-        advBox.style.display = "block";
-        let aHtml = "";
-        currentInvoice.advances.forEach(a => {
-          totalPaid += a.amount;
-          aHtml += `
-            <tr>
-              <td colspan="2"><strong>${a.note}</strong></td>
-              <td style="text-align: center; color:#64748b; font-size:0.75rem;">${a.mode}</td>
-              <td colspan="2" style="text-align: right; font-weight:700; color:#059669;">(-) ${a.amount.toFixed(2)}</td>
-            </tr>
-          `;
         });
-        advBody.innerHTML = aHtml;
-      } else {
-        advBox.style.display = "none";
-      }
 
-      const taxRate = parseFloat(document.getElementById("invTaxRate").value) || 0;
-      const discountRate = parseFloat(document.getElementById("invDiscountRate").value) || 0;
-
-      const discountAmt = subtotal * (discountRate / 100);
-      const taxableAmount = Math.max(0, subtotal - discountAmt);
-      const taxAmt = taxableAmount * (taxRate / 100);
-      const grandTotal = taxableAmount + taxAmt;
-      const balanceDue = Math.max(0, grandTotal - totalPaid);
-
-      currentInvoice.financials = {
-        subtotal: subtotal.toFixed(2),
-        total: grandTotal.toFixed(2),
-        paid: totalPaid.toFixed(2),
-        balanceDue: balanceDue.toFixed(2)
-      };
-
-      document.getElementById("prevSubtotal").innerText = subtotal.toFixed(2);
-
-      const rowDisc = document.getElementById("rowDiscount");
-      if (discountRate > 0) {
-        rowDisc.style.display = "table-row";
-        document.getElementById("lblDiscount").innerText = `Discount(${discountRate}%)`;
-        document.getElementById("prevDiscount").innerText = `(-) ${discountAmt.toFixed(2)}`;
-      } else {
-        rowDisc.style.display = "none";
-      }
-
-      const rowTax = document.getElementById("rowTax");
-      if (taxRate > 0) {
-        rowTax.style.display = "table-row";
-        document.getElementById("lblTax").innerText = `Sales Tax (${taxRate}%)`;
-        document.getElementById("prevTax").innerText = taxAmt.toFixed(2);
-      } else {
-        rowTax.style.display = "none";
-      }
-
-      document.getElementById("prevTotal").innerText = `INR ${grandTotal.toFixed(2)}`;
-
-      const rowPaid = document.getElementById("rowPaid");
-      if (totalPaid > 0) {
-        rowPaid.style.display = "table-row";
-        document.getElementById("prevPaid").innerText = `(-) INR ${totalPaid.toFixed(2)}`;
-      } else {
-        rowPaid.style.display = "none";
-      }
-
-      document.getElementById("prevDue").innerText = `INR ${balanceDue.toFixed(2)}`;
-      document.getElementById("topBalanceDue").innerText = `INR ${balanceDue.toFixed(2)}`;
-
-      const upi = document.getElementById("invUpiId").value.trim();
-      const qrBox = document.getElementById("invoiceQr");
-      qrBox.innerHTML = "";
-
-      if (upi && balanceDue > 0) {
-        const qrPayload = `upi://pay?pa=${encodeURIComponent(upi)}&pn=Ofbuzz%20Technology&am=${balanceDue.toFixed(2)}&cu=INR`;
-        new QRCode(qrBox, { text: qrPayload, width: 70, height: 70 });
-      }
-    }
-
-    function openDedicatedPrintWindow() {
-      const printableContent = document.getElementById("printableInvoice").outerHTML;
-      const printWindow = window.open("", "_blank", "width=920,height=1000");
-
-      printWindow.document.open();
-      printWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>Invoice - Ofbuzz Technology</title>
-          <link rel="preconnect" href="https://fonts.googleapis.com">
-          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-          <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-          <style>
-            @page {
-              size: A4 portrait;
-              margin: 0 !important;
-            }
-            * {
-              box-sizing: border-box;
-              margin: 0;
-              padding: 0;
-              font-family: 'Plus Jakarta Sans', sans-serif;
-              -webkit-print-color-adjust: exact !important;
-              print-color-adjust: exact !important;
-            }
-            html, body {
-              width: 210mm;
-              height: 297mm;
-              max-height: 297mm;
-              overflow: hidden;
-              background: #ffffff !important;
-              color: #1e293b !important;
-            }
-            .a4-container {
-              width: 210mm;
-              height: 297mm;
-              max-height: 297mm;
-              padding: 16mm 18mm;
-              position: relative;
-              background: #ffffff;
-              display: flex;
-              flex-direction: column;
-              justify-content: space-between;
-              transform-origin: top left;
-            }
-            .zylker-invoice {
-              border: none !important;
-              box-shadow: none !important;
-              padding: 0 !important;
-              width: 100% !important;
-              height: 100% !important;
-              display: flex;
-              flex-direction: column;
-              justify-content: space-between;
-            }
-            ${document.querySelector('style').innerHTML}
-            .inv-bottom-notes { margin-top: auto !important; padding-top: 12px !important; }
-            .inv-dates-grid { margin-bottom: 16px !important; }
-            .inv-top-row { margin-bottom: 16px !important; }
-            .zylker-table td { padding: 8px 10px !important; }
-          </style>
-        </head>
-        <body>
-          <div class="a4-container" id="scaleContainer">
-            ${printableContent}
-          </div>
-
-          <script>
-            function fitToOnePageAndPrint() {
-              const container = document.getElementById("scaleContainer");
-              const logo = document.getElementById("mainOfbuzzLogo");
-              
-              if (logo && !logo.complete) {
-                logo.onload = fitToOnePageAndPrint;
-                return;
-              }
-
-              const maxHeightPx = 1122 - 40; 
-              const currentHeight = container.scrollHeight;
-
-              if (currentHeight > maxHeightPx) {
-                const scaleFactor = (maxHeightPx / currentHeight);
-                container.style.transform = "scale(" + scaleFactor + ")";
-                container.style.width = (210 / scaleFactor) + "mm";
-              }
-
-              setTimeout(function() {
-                window.print();
-                window.close();
-              }, 450);
-            }
-
-            window.onload = fitToOnePageAndPrint;
-          <\/script>
-        </body>
-        </html>
-      `);
-      printWindow.document.close();
-    }
-
-    window.onload = checkAuthOnLoad;
-  </script>
+        // 6. Fast 1-Second Auto Popup Trigger
+        window.addEventListener('load', () => {
+            setTimeout(openFormModal, 1000);
+        });
+    </script>
 </body>
 </html>
