@@ -72,15 +72,18 @@
   <div class="chat-modal" id="staffChatModal">
     <div class="chat-box">
       <div class="chat-header">
-        <span id="chatTitle">Live Admin Support Chat</span>
-        <button onclick="closeStaffChat()" style="width:auto; padding:4px 10px; background:#ef4444; margin:0;">Close</button>
+        <span>Live Admin Support Chat</span>
+        <div style="display:flex; gap:6px; align-items:center;">
+          <button onclick="loadChatMessages()" style="width:auto; padding:4px 8px; background:#0284c7; font-size:11px; margin:0;" title="Manual Sync">🔄 Refresh</button>
+          <button onclick="closeStaffChat()" style="width:auto; padding:4px 10px; background:#ef4444; font-size:11px; margin:0;">Close</button>
+        </div>
       </div>
       <div class="chat-messages" id="chatMessagesBox">
-        <div style="text-align:center; color:#64748b; font-size:12px;">Connecting to secure chat...</div>
+        <div style="text-align:center; color:#64748b; font-size:12px;">Click Refresh to load messages.</div>
       </div>
       <div class="chat-input-area">
         <input type="file" id="chatFilePicker" accept="image/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx" style="display:none;" onchange="handleChatAttachment(this)">
-        <button onclick="document.getElementById('chatFilePicker').click()" style="width:38px; padding:8px; background:#64748b; margin:0;" title="Attach Photo, Audio or Document">📎</button>
+        <button onclick="document.getElementById('chatFilePicker').click()" style="width:38px; padding:8px; background:#64748b; margin:0;" title="Attach File">📎</button>
         <input type="text" id="chatTextInput" placeholder="Type message..." style="flex:1; margin:0;" onkeypress="handleChatKeyPress(event)">
         <button onclick="sendChatMessage()" style="width:70px; padding:9px; margin:0;">Send</button>
       </div>
@@ -90,7 +93,6 @@
   <script>
     var API_ENDPOINT = "https://script.google.com/macros/s/AKfycby9yiIo9euB9KTt0zBuwcF3x6pdaeJJ48mAwcTFC6xl53oH8eh0Agfwlr138t3D5KNPYQ/exec";
     var activeAttachment = { url: "", type: "" };
-    var chatPollInterval = null;
 
     function showToast(msg, isSuccess) {
       var toast = document.getElementById("toast");
@@ -154,22 +156,21 @@
       jsonp(API_ENDPOINT + "?action=submitTaskCompletion&taskId=" + encodeURIComponent(taskId) + "&remark=" + encodeURIComponent(remarkValue), "onCompleteDone");
     }
 
-    /* LIVE CHAT FUNCTIONS */
+    /* MANUAL REFRESH CHAT FUNCTIONS */
     function openStaffChat() {
       var id = document.getElementById("workforceId").value.trim();
       if (!id) { showToast("Please enter your Staff ID first to open chat.", false); return; }
       document.getElementById("staffChatModal").style.display = "flex";
       loadChatMessages();
-      chatPollInterval = setInterval(loadChatMessages, 4000);
     }
 
     function closeStaffChat() {
       document.getElementById("staffChatModal").style.display = "none";
-      if (chatPollInterval) clearInterval(chatPollInterval);
     }
 
     function loadChatMessages() {
       var id = document.getElementById("workforceId").value.trim();
+      showToast("Syncing chat...", true);
       window.onStaffChatLoaded = function(res) {
         var box = document.getElementById("chatMessagesBox");
         if (!res || !res.success || !res.data || res.data.length === 0) {
