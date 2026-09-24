@@ -18,17 +18,27 @@
     button:active { transform: translateY(1px); }
     button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
     button.btn-success { background: #198754; margin-top: 12px; }
+    button.btn-chat { background: #0ea5e9; margin-top: 10px; }
     .task-card { border: 1px solid #dee2e6; border-radius: 8px; padding: 14px; margin-top: 12px; background: #ffffff; }
     .badge { display: inline-block; padding: 4px 8px; font-size: 11px; border-radius: 4px; font-weight: 600; }
     .badge-Assigned { background: #fff3cd; color: #664d03; }
     .badge-Pending { background: #cff4fc; color: #055160; }
     .badge-Approved { background: #d1e7dd; color: #0f5132; }
 
-    /* On-Screen Toast Notification */
-    .toast-box { position: fixed; top: 20px; right: 20px; padding: 12px 18px; border-radius: 8px; color: #fff; font-size: 13px; font-weight: 500; display: none; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,0.15); animation: slideIn 0.25s ease; }
+    /* CHAT MODAL STYLES */
+    .chat-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.75); z-index: 1000; align-items: center; justify-content: center; padding: 16px; }
+    .chat-box { background: #fff; width: 100%; max-width: 500px; height: 520px; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; }
+    .chat-header { padding: 14px 18px; background: #0ea5e9; color: #fff; display: flex; justify-content: space-between; align-items: center; font-weight: 700; }
+    .chat-messages { flex: 1; padding: 14px; overflow-y: auto; background: #f8fafc; display: flex; flex-direction: column; gap: 8px; }
+    .msg-bubble { max-width: 75%; padding: 10px 12px; border-radius: 8px; font-size: 12.5px; line-height: 1.4; }
+    .msg-staff { background: #e0f2fe; color: #0369a1; align-self: flex-end; }
+    .msg-admin { background: #ffffff; color: #0f172a; align-self: flex-start; border: 1px solid #e2e8f0; }
+    .chat-input-area { padding: 12px; background: #fff; border-top: 1px solid #e2e8f0; display: flex; gap: 8px; align-items: center; }
+
+    /* Toast */
+    .toast-box { position: fixed; top: 20px; right: 20px; padding: 12px 18px; border-radius: 8px; color: #fff; font-size: 13px; font-weight: 500; display: none; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
     .toast-success { background: #198754; }
     .toast-error { background: #dc3545; }
-    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
   </style>
 </head>
 <body>
@@ -47,6 +57,7 @@
       <input type="text" id="workforceName" placeholder="Provide full corporate name">
       <button class="btn-success" id="btnAttendance" onclick="logAttendance()">Log Daily Attendance</button>
       <button id="btnFetchTasks" onclick="retrieveTasks()" style="margin-top:10px;">Retrieve Assignments</button>
+      <button class="btn-chat" onclick="openStaffChat()">Open Live Chat Dashboard</button>
     </div>
 
     <div style="margin-top:24px; border-top:1px solid #e9ecef; padding-top:16px;">
@@ -57,8 +68,29 @@
     </div>
   </div>
 
+  <!-- LIVE CHAT MODAL FOR STAFF -->
+  <div class="chat-modal" id="staffChatModal">
+    <div class="chat-box">
+      <div class="chat-header">
+        <span id="chatTitle">Live Admin Support Chat</span>
+        <button onclick="closeStaffChat()" style="width:auto; padding:4px 10px; background:#ef4444; margin:0;">Close</button>
+      </div>
+      <div class="chat-messages" id="chatMessagesBox">
+        <div style="text-align:center; color:#64748b; font-size:12px;">Connecting to secure chat...</div>
+      </div>
+      <div class="chat-input-area">
+        <input type="file" id="chatFilePicker" accept="image/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx" style="display:none;" onchange="handleChatAttachment(this)">
+        <button onclick="document.getElementById('chatFilePicker').click()" style="width:38px; padding:8px; background:#64748b; margin:0;" title="Attach Photo, Audio or Document">📎</button>
+        <input type="text" id="chatTextInput" placeholder="Type message..." style="flex:1; margin:0;" onkeypress="handleChatKeyPress(event)">
+        <button onclick="sendChatMessage()" style="width:70px; padding:9px; margin:0;">Send</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     var API_ENDPOINT = "https://script.google.com/macros/s/AKfycby9yiIo9euB9KTt0zBuwcF3x6pdaeJJ48mAwcTFC6xl53oH8eh0Agfwlr138t3D5KNPYQ/exec";
+    var activeAttachment = { url: "", type: "" };
+    var chatPollInterval = null;
 
     function showToast(msg, isSuccess) {
       var toast = document.getElementById("toast");
@@ -70,7 +102,7 @@
 
     function jsonp(url, callbackName) {
       var script = document.createElement("script");
-      script.src = url + (url.indexOf("?") >= 0 ? "&" : "?") + "callback=" + callbackName;
+      script.src = url + (url.indexOf("?") >= 0 ? "&" : "?") + "callback=" + callbackName + "&_t=" + Date.now();
       document.body.appendChild(script);
       script.onload = function() { script.remove(); };
     }
@@ -79,84 +111,134 @@
       var id = document.getElementById("workforceId").value.trim();
       var name = document.getElementById("workforceName").value.trim();
       var btn = document.getElementById("btnAttendance");
-
-      if (!id || !name) {
-        showToast("Both Staff ID and Full Name are mandatory.", false);
-        return;
-      }
-      btn.disabled = true;
-      btn.innerText = "Processing Attendance...";
-
+      if (!id || !name) { showToast("Both Staff ID and Full Name are mandatory.", false); return; }
+      btn.disabled = true; btn.innerText = "Processing...";
       window.onAttDone = function(res) {
-        btn.disabled = false;
-        btn.innerText = "Log Daily Attendance";
-        if (res && res.success) {
-          showToast(res.message || "Attendance recorded successfully.", true);
-        } else {
-          showToast((res && res.message) ? res.message : "Attendance could not be logged.", false);
-        }
+        btn.disabled = false; btn.innerText = "Log Daily Attendance";
+        showToast(res && res.success ? res.message : "Failed.", res && res.success);
       };
-
       jsonp(API_ENDPOINT + "?action=markAttendance&staffId=" + encodeURIComponent(id) + "&staffName=" + encodeURIComponent(name), "onAttDone");
     }
 
     function retrieveTasks() {
       var id = document.getElementById("workforceId").value.trim();
       var btn = document.getElementById("btnFetchTasks");
-      if (!id) {
-        showToast("Please provide your Staff ID.", false);
-        return;
-      }
-
-      btn.disabled = true;
-      btn.innerText = "Retrieving...";
-
+      if (!id) { showToast("Please provide your Staff ID.", false); return; }
+      btn.disabled = true; btn.innerText = "Retrieving...";
       window.onTasksReceived = function(res) {
-        btn.disabled = false;
-        btn.innerText = "Retrieve Assignments";
+        btn.disabled = false; btn.innerText = "Retrieve Assignments";
         var queue = document.getElementById("assignmentQueue");
         if (!res || !res.success || !res.data || res.data.length === 0) {
-          queue.innerHTML = '<p style="font-size:13px; color:#6c757d;">No active deliverables assigned to Staff ID: ' + id + '</p>';
+          queue.innerHTML = '<p style="font-size:13px; color:#6c757d;">No active deliverables assigned.</p>';
           return;
         }
         var output = "";
         res.data.forEach(function(item) {
           var badgeClass = item.status === "Pending Approval" ? "badge-Pending" : (item.status === "Approved" ? "badge-Approved" : "badge-Assigned");
-          output += '<div class="task-card">';
-          output += '  <div style="display:flex; justify-content:space-between; align-items:center;">';
-          output += '    <strong>' + item.title + '</strong>';
-          output += '    <span class="badge ' + badgeClass + '">' + item.status + '</span>';
-          output += '  </div>';
-          output += '  <p style="font-size:13px; color:#495057; margin:8px 0;">' + item.description + '</p>';
-          
+          output += '<div class="task-card"><div style="display:flex; justify-content:space-between; align-items:center;"><strong>' + item.title + '</strong><span class="badge ' + badgeClass + '">' + item.status + '</span></div>';
+          output += '<p style="font-size:13px; color:#495057; margin:8px 0;">' + item.description + '</p>';
           if (item.status === "Assigned") {
-            output += '  <textarea id="remark_' + item.id + '" placeholder="Optional deliverable remarks..."></textarea>';
-            output += '  <button id="btnComp_' + item.id + '" onclick="markTaskComplete(\'' + item.id + '\')" style="margin-top:6px;">Submit for Verification</button>';
-          } else if (item.status === "Pending Approval") {
-            output += '  <div style="font-size:12px; color:#055160; margin-top:6px; font-weight:500;">Verification Status: Awaiting Administrative Sign-Off</div>';
-          } else if (item.status === "Approved") {
-            output += '  <div style="font-size:12px; color:#0f5132; margin-top:6px; font-weight:500;">Approved' + (item.adminRemark ? ': ' + item.adminRemark : '') + '</div>';
+            output += '<textarea id="remark_' + item.id + '" placeholder="Optional remarks..."></textarea><button id="btnComp_' + item.id + '" onclick="markTaskComplete(\'' + item.id + '\')" style="margin-top:6px;">Submit for Verification</button>';
           }
           output += '</div>';
         });
         queue.innerHTML = output;
       };
-
       jsonp(API_ENDPOINT + "?action=getStaffTasks&staffId=" + encodeURIComponent(id), "onTasksReceived");
     }
 
     function markTaskComplete(taskId) {
       var remarkInput = document.getElementById("remark_" + taskId);
       var remarkValue = remarkInput ? remarkInput.value : "";
-      var btn = document.getElementById("btnComp_" + taskId);
-      if (btn) { btn.disabled = true; btn.innerText = "Submitting..."; }
+      window.onCompleteDone = function(res) { showToast("Task submitted.", true); retrieveTasks(); };
+      jsonp(API_ENDPOINT + "?action=submitTaskCompletion&taskId=" + encodeURIComponent(taskId) + "&remark=" + encodeURIComponent(remarkValue), "onCompleteDone");
+    }
 
-      window.onCompleteDone = function(res) {
-        showToast("Task submitted for administrative review.", true);
-        retrieveTasks();
+    /* LIVE CHAT FUNCTIONS */
+    function openStaffChat() {
+      var id = document.getElementById("workforceId").value.trim();
+      if (!id) { showToast("Please enter your Staff ID first to open chat.", false); return; }
+      document.getElementById("staffChatModal").style.display = "flex";
+      loadChatMessages();
+      chatPollInterval = setInterval(loadChatMessages, 4000);
+    }
+
+    function closeStaffChat() {
+      document.getElementById("staffChatModal").style.display = "none";
+      if (chatPollInterval) clearInterval(chatPollInterval);
+    }
+
+    function loadChatMessages() {
+      var id = document.getElementById("workforceId").value.trim();
+      window.onStaffChatLoaded = function(res) {
+        var box = document.getElementById("chatMessagesBox");
+        if (!res || !res.success || !res.data || res.data.length === 0) {
+          box.innerHTML = '<div style="text-align:center; color:#64748b; font-size:12px;">No chat history yet. Say hello to Admin!</div>';
+          return;
+        }
+        var html = "";
+        res.data.forEach(function(m) {
+          var isStaff = m.senderType === "Staff";
+          var bubbleClass = isStaff ? "msg-staff" : "msg-admin";
+          var attachMarkup = "";
+          if (m.attachmentUrl) {
+            if (m.attachmentType.includes("image")) {
+              attachMarkup = '<br><a href="' + m.attachmentUrl + '" target="_blank"><img src="' + m.attachmentUrl + '" style="max-width:140px; border-radius:6px; margin-top:4px;"></a>';
+            } else if (m.attachmentType.includes("audio")) {
+              attachMarkup = '<br><audio controls src="' + m.attachmentUrl + '" style="width:180px; height:32px; margin-top:4px;"></audio>';
+            } else {
+              attachMarkup = '<br><a href="' + m.attachmentUrl + '" target="_blank" style="color:inherit; font-weight:bold;">📎 Download File</a>';
+            }
+          }
+          html += '<div class="msg-bubble ' + bubbleClass + '"><b>' + m.staffName + ':</b> ' + m.messageText + attachMarkup + '<div style="font-size:9px; opacity:0.7; margin-top:2px; text-align:right;">' + m.timestamp + '</div></div>';
+        });
+        box.innerHTML = html;
+        box.scrollTop = box.scrollHeight;
+      };
+      jsonp(API_ENDPOINT + "?action=getChatMessages&staffId=" + encodeURIComponent(id), "onStaffChatLoaded");
+    }
+
+    function handleChatAttachment(input) {
+      if (input.files && input.files[0]) {
+        var file = input.files[0];
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          activeAttachment.url = e.target.result;
+          activeAttachment.type = file.type;
+          showToast("File attached successfully!", true);
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function sendChatMessage() {
+      var id = document.getElementById("workforceId").value.trim();
+      var name = document.getElementById("workforceName").value.trim() || "Staff";
+      var textInput = document.getElementById("chatTextInput");
+      var text = textInput.value.trim();
+
+      if (!text && !activeAttachment.url) return;
+
+      var payload = {
+        staffId: id,
+        staffName: name,
+        senderType: "Staff",
+        messageText: text,
+        attachmentUrl: activeAttachment.url,
+        attachmentType: activeAttachment.type
       };
 
-      jsonp(API_ENDPOINT + "?action=submitTaskCompletion&taskId=" + encodeURIComponent(taskId) + "&remark=" + encodeURIComponent(remarkValue), "onCompleteDone");
+      window.onChatSent = function(res) {
+        textInput.value = "";
+        activeAttachment = { url: "", type: "" };
+        loadChatMessages();
+      };
+
+      jsonp(API_ENDPOINT + "?action=sendChatMessage&data=" + encodeURIComponent(JSON.stringify(payload)), "onChatSent");
+    }
+
+    function handleChatKeyPress(e) {
+      if (e.key === "Enter") sendChatMessage();
     }
   </script>
 </body>
