@@ -540,11 +540,9 @@
         </div>
       </div>
       <div class="modal-body" style="display:flex; gap:16px; height:calc(100% - 65px); padding:16px; overflow:hidden;">
-        <!-- Staff List Sidebar -->
         <div style="width: 220px; border-right:1px solid #e2e8f0; overflow-y:auto; padding-right:8px;" id="adminStaffChatList">
           <div style="font-size:12px; font-weight:700; color:#64748b; margin-bottom:8px;">Active Workforce</div>
         </div>
-        <!-- Active Chat Window -->
         <div style="flex:1; display:flex; flex-direction:column; height:100%;">
           <div style="font-size:13px; font-weight:700; color:#0f172a; margin-bottom:6px;" id="activeChatStaffName">Select a staff member from sidebar</div>
           <div id="adminChatMessages" style="flex:1; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;">
@@ -1077,7 +1075,7 @@
     function openStaffModal() { document.getElementById("staffManagementModal").style.display = "flex"; }
     function closeStaffModal() { document.getElementById("staffManagementModal").style.display = "none"; }
 
-    /* ADMIN LIVE CHAT FUNCTIONS */
+    /* ADMIN LIVE CHAT FUNCTIONS WITH CORRECT SENDER LABELS */
     function openAdminChatModal() {
       document.getElementById("adminChatModal").style.display = "flex";
       renderAdminStaffChatList();
@@ -1116,13 +1114,14 @@
       let html = "";
       res.data.forEach(m => {
         const isAdmin = m.senderType === "Admin";
+        const senderLabel = isAdmin ? "Admin" : m.staffName; // FIX: Admin side shows Admin for admin messages, staff name for staff messages
         let attachMarkup = "";
         if (m.attachmentUrl) {
           if (m.attachmentType.includes("image")) attachMarkup = `<br><a href="${m.attachmentUrl}" target="_blank"><img src="${m.attachmentUrl}" style="max-width:140px; border-radius:6px; margin-top:4px;"></a>`;
           else if (m.attachmentType.includes("audio")) attachMarkup = `<br><audio controls src="${m.attachmentUrl}" style="width:180px; height:32px; margin-top:4px;"></audio>`;
           else attachMarkup = `<br><a href="${m.attachmentUrl}" target="_blank" style="font-weight:bold;">📎 Download File</a>`;
         }
-        html += `<div style="max-width:75%; padding:10px 12px; border-radius:8px; font-size:12.5px; line-height:1.4; ${isAdmin ? 'background:#e0f2fe; color:#0369a1; align-self:flex-end;' : 'background:#fff; color:#0f172a; align-self:flex-start; border:1px solid #e2e8f0;'}"><b>${m.staffName}:</b> ${m.messageText}${attachMarkup}<div style="font-size:9px; opacity:0.7; text-align:right; margin-top:2px;">${m.timestamp}</div></div>`;
+        html += `<div style="max-width:75%; padding:10px 12px; border-radius:8px; font-size:12.5px; line-height:1.4; ${isAdmin ? 'background:#e0f2fe; color:#0369a1; align-self:flex-end;' : 'background:#fff; color:#0f172a; align-self:flex-start; border:1px solid #e2e8f0;'}"><b>${senderLabel}:</b> ${m.messageText}${attachMarkup}<div style="font-size:9px; opacity:0.7; text-align:right; margin-top:2px;">${m.timestamp}</div></div>`;
       });
       box.innerHTML = html;
       box.scrollTop = box.scrollHeight;
@@ -1143,8 +1142,7 @@
       const text = input.value.trim();
       if (!text && !adminActiveAttachment.url) return;
 
-      const staffObj = (state.staff || []).find(s => s[0] === selectedChatStaffId);
-      const payload = { staffId: selectedChatStaffId, staffName: staffObj ? staffObj[1] : "Admin", senderType: "Admin", messageText: text, attachmentUrl: adminActiveAttachment.url, attachmentType: adminActiveAttachment.type };
+      const payload = { staffId: selectedChatStaffId, staffName: "Admin", senderType: "Admin", messageText: text, attachmentUrl: adminActiveAttachment.url, attachmentType: adminActiveAttachment.type };
 
       window.onAdminChatSent = function() { input.value = ""; adminActiveAttachment = { url: "", type: "" }; loadAdminChatMessages(); };
       jsonp(API_ENDPOINT + `?action=sendChatMessage&data=${encodeURIComponent(JSON.stringify(payload))}`, "onAdminChatSent");
