@@ -173,6 +173,8 @@
     .btn-analytics:hover { background: #0f172a; }
     .btn-staff-mgmt { background: #0ea5e9; color: #fff; }
     .btn-staff-mgmt:hover { background: #0284c7; }
+    .btn-chat-mgmt { background: #8b5cf6; color: #fff; }
+    .btn-chat-mgmt:hover { background: #7c3aed; }
     .btn-logout { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); }
     .btn-logout:hover { background: var(--danger); color: #fff; }
 
@@ -204,7 +206,7 @@
 
     .toast { position: fixed; top: 20px; right: 20px; padding: 12px 20px; border-radius: 8px; background: #0f172a; color: #fff; font-size: 0.85rem; font-weight: 600; display: none; z-index: 2000; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
 
-    /* CUSTOM IN-SCREEN CONFIRMATION MODAL */
+    /* CUSTOM CONFIRMATION DIALOG MODAL */
     .confirm-modal-box {
       background: #ffffff; padding: 24px; border-radius: 12px; max-width: 380px; width: 100%;
       text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2); border: 1px solid var(--border);
@@ -297,6 +299,7 @@
       </div>
       <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
         <button class="btn-staff-mgmt" onclick="openStaffModal()">Staff Management</button>
+        <button class="btn-chat-mgmt" onclick="openAdminChatModal()">Live Chat Dashboard</button>
         <button class="btn-analytics" id="btnToggleAnalytics" onclick="toggleAnalyticsDrawer()">Analytics View</button>
         <button class="btn-primary" id="btnRefresh" onclick="syncAllData()">Refresh Data</button>
         <button class="btn-logout" onclick="lockAdminSession()">Logout</button>
@@ -522,6 +525,35 @@
             <tr><td colspan="6" style="text-align:center;">Synchronizing records...</td></tr>
           </tbody>
         </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN LIVE CHAT DASHBOARD MODAL -->
+  <div class="modal-backdrop" id="adminChatModal">
+    <div class="modal-window" style="max-width: 750px; height: 600px;">
+      <div class="modal-header">
+        <h3 style="font-size: 1.1rem; font-weight: 800;">Admin Live Support & Chat Dashboard</h3>
+        <button class="btn-del" onclick="closeAdminChatModal()">Close</button>
+      </div>
+      <div class="modal-body" style="display:flex; gap:16px; height:calc(100% - 65px); padding:16px; overflow:hidden;">
+        <!-- Staff List Sidebar -->
+        <div style="width: 220px; border-right:1px solid #e2e8f0; overflow-y:auto; padding-right:8px;" id="adminStaffChatList">
+          <div style="font-size:12px; font-weight:700; color:#64748b; margin-bottom:8px;">Active Workforce</div>
+        </div>
+        <!-- Active Chat Window -->
+        <div style="flex:1; display:flex; flex-direction:column; height:100%;">
+          <div style="font-size:13px; font-weight:700; color:#0f172a; margin-bottom:6px;" id="activeChatStaffName">Select a staff member from sidebar</div>
+          <div id="adminChatMessages" style="flex:1; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;">
+            <div style="text-align:center; color:#64748b; font-size:12px;">No active chat selected.</div>
+          </div>
+          <div style="display:flex; gap:8px; margin-top:10px; align-items:center;">
+            <input type="file" id="adminChatFilePicker" style="display:none;" onchange="handleAdminAttachment(this)">
+            <button onclick="document.getElementById('adminChatFilePicker').click()" style="width:38px; padding:8px; background:#64748b; margin:0;" title="Attach File">📎</button>
+            <input type="text" id="adminChatInput" placeholder="Type reply as Admin..." style="flex:1; margin:0;" onkeypress="handleAdminChatKey(event)">
+            <button class="btn-primary" onclick="sendAdminChatMessage()" style="width:75px; margin:0;">Send</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -953,7 +985,8 @@
       clients: [],
       staff: [],
       tasks: [],
-      payments: []
+      payments: [],
+      chats: []
     };
 
     let currentInvoice = {
@@ -967,6 +1000,9 @@
 
     let activeTimeFilter = "all";
     let activeClientCategory = "all";
+    let selectedChatStaffId = null;
+    let adminActiveAttachment = { url: "", type: "" };
+    let adminChatPollInterval = null;
     let lineChartInstance = null;
     let mixChartInstance = null;
 
@@ -1021,13 +1057,10 @@
       setTimeout(() => { toast.style.display = "none"; }, 3500);
     }
 
-    // CUSTOM IN-SCREEN CONFIRMATION POPUP LOGIC
     function showCustomConfirm(title, desc, onYesCallback) {
       document.getElementById("confirmTitle").innerText = title;
       document.getElementById("confirmDesc").innerText = desc;
       const yesBtn = document.getElementById("confirmYesBtn");
-      
-      // Clone button to remove old event listeners
       const newBtn = yesBtn.cloneNode(true);
       yesBtn.parentNode.replaceChild(newBtn, yesBtn);
 
@@ -1035,7 +1068,6 @@
         closeCustomConfirm();
         onYesCallback();
       };
-
       document.getElementById("customConfirmModal").style.display = "flex";
     }
 
@@ -1051,7 +1083,7 @@
       script.onload = () => script.remove();
       script.onerror = () => {
         script.remove();
-        showToast("Network request failed. Please check connectivity.");
+        showToast("Network request failed.");
       };
     }
 
@@ -1077,6 +1109,7 @@
         renderAdminDashboard();
         renderPaymentLedger();
         renderMetaAnalytics();
+        if (selectedChatStaffId) loadAdminChatMessages();
         showToast("System synchronized successfully.");
       } else {
         showToast("Error retrieving records.");
@@ -1102,6 +1135,110 @@
 
     function closeStaffModal() {
       document.getElementById("staffManagementModal").style.display = "none";
+    }
+
+    /* ADMIN LIVE CHAT FUNCTIONS */
+    function openAdminChatModal() {
+      document.getElementById("adminChatModal").style.display = "flex";
+      renderAdminStaffChatList();
+      adminChatPollInterval = setInterval(syncAllData, 5000);
+    }
+
+    function closeAdminChatModal() {
+      document.getElementById("adminChatModal").style.display = "none";
+      if (adminChatPollInterval) clearInterval(adminChatPollInterval);
+    }
+
+    function renderAdminStaffChatList() {
+      const listDiv = document.getElementById("adminStaffChatList");
+      let html = '<div style="font-size:12px; font-weight:700; color:#64748b; margin-bottom:8px;">Active Workforce</div>';
+      
+      (state.staff || []).forEach(s => {
+        const isSelected = selectedChatStaffId === s[0];
+        html += `<div onclick="selectChatStaff('${s[0]}', '${s[1]}')" style="padding:10px 12px; border-radius:6px; cursor:pointer; font-size:13px; font-weight:600; margin-bottom:6px; background:${isSelected ? '#e0f2fe' : '#fff'}; color:${isSelected ? '#0369a1' : '#334155'}; border:1px solid ${isSelected ? '#bae6fd' : '#e2e8f0'};">${s[1]}<br><span style="font-size:10px; color:#64748b;">ID: ${s[0]}</span></div>`;
+      });
+      listDiv.innerHTML = html || '<div style="font-size:12px; color:#64748b;">No staff found.</div>';
+    }
+
+    function selectChatStaff(id, name) {
+      selectedChatStaffId = id;
+      document.getElementById("activeChatStaffName").innerText = `Chat with: ${name} (${id})`;
+      renderAdminStaffChatList();
+      loadAdminChatMessages();
+    }
+
+    function loadAdminChatMessages() {
+      if (!selectedChatStaffId) return;
+      jsonp(API_ENDPOINT + `?action=getChatMessages&staffId=${encodeURIComponent(selectedChatStaffId)}`, "onAdminChatLoaded");
+    }
+
+    window.onAdminChatLoaded = function(res) {
+      const box = document.getElementById("adminChatMessages");
+      if (!res || !res.success || !res.data || res.data.length === 0) {
+        box.innerHTML = '<div style="text-align:center; color:#64748b; font-size:12px;">No messages in this thread yet.</div>';
+        return;
+      }
+      let html = "";
+      res.data.forEach(m => {
+        const isAdmin = m.senderType === "Admin";
+        let attachMarkup = "";
+        if (m.attachmentUrl) {
+          if (m.attachmentType.includes("image")) {
+            attachMarkup = `<br><a href="${m.attachmentUrl}" target="_blank"><img src="${m.attachmentUrl}" style="max-width:140px; border-radius:6px; margin-top:4px;"></a>`;
+          } else if (m.attachmentType.includes("audio")) {
+            attachMarkup = `<br><audio controls src="${m.attachmentUrl}" style="width:180px; height:32px; margin-top:4px;"></audio>`;
+          } else {
+            attachMarkup = `<br><a href="${m.attachmentUrl}" target="_blank" style="font-weight:bold;">📎 Download File</a>`;
+          }
+        }
+        html += `<div style="max-width:75%; padding:10px 12px; border-radius:8px; font-size:12.5px; line-height:1.4; ${isAdmin ? 'background:#e0f2fe; color:#0369a1; align-self:flex-end;' : 'background:#fff; color:#0f172a; align-self:flex-start; border:1px solid #e2e8f0;'}"><b>${m.staffName}:</b> ${m.messageText}${attachMarkup}<div style="font-size:9px; opacity:0.7; text-align:right; margin-top:2px;">${m.timestamp}</div></div>`;
+      });
+      box.innerHTML = html;
+      box.scrollTop = box.scrollHeight;
+    };
+
+    function handleAdminAttachment(input) {
+      if (input.files && input.files[0]) {
+        var file = input.files[0];
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          adminActiveAttachment.url = e.target.result;
+          adminActiveAttachment.type = file.type;
+          showToast("Attachment ready!", true);
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function sendAdminChatMessage() {
+      if (!selectedChatStaffId) { showToast("Select a staff member first.", false); return; }
+      const input = document.getElementById("adminChatInput");
+      const text = input.value.trim();
+      if (!text && !adminActiveAttachment.url) return;
+
+      const staffObj = (state.staff || []).find(s => s[0] === selectedChatStaffId);
+      const staffName = staffObj ? staffObj[1] : "Admin";
+
+      const payload = {
+        staffId: selectedChatStaffId,
+        staffName: staffName,
+        senderType: "Admin",
+        messageText: text,
+        attachmentUrl: adminActiveAttachment.url,
+        attachmentType: adminActiveAttachment.type
+      };
+
+      window.onAdminChatSent = function(res) {
+        input.value = "";
+        adminActiveAttachment = { url: "", type: "" };
+        loadAdminChatMessages();
+      };
+
+      jsonp(API_ENDPOINT + `?action=sendChatMessage&data=${encodeURIComponent(JSON.stringify(payload))}`, "onAdminChatSent");
+    }
+
+    function handleAdminChatKey(e) {
+      if (e.key === "Enter") sendAdminChatMessage();
     }
 
     function setTimeFilter(filter, el) {
@@ -1261,140 +1398,85 @@
       const type = document.getElementById("adjActionType").value;
       const remark = document.getElementById("adjRemark").value.trim();
 
-      if (amount <= 0) {
-        showToast("Please enter a valid amount greater than 0.");
-        return;
-      }
+      if (amount <= 0) { showToast("Please enter a valid amount greater than 0."); return; }
 
       const btn = document.getElementById("btnSaveAdjustment");
-      btn.disabled = true;
-      btn.innerText = "Saving Adjustment...";
+      btn.disabled = true; btn.innerText = "Saving Adjustment...";
 
       window.onAdjustmentSaved = function(res) {
-        btn.disabled = false;
-        btn.innerText = "Save Adjustment & Recalculate";
+        btn.disabled = false; btn.innerText = "Save Adjustment & Recalculate";
         if (res && res.success) {
-          showToast(type === "deduct" ? "Deduction/Correction recorded." : "Payment addition recorded.");
+          showToast("Adjustment recorded.");
           closePaymentAdjustmentModal();
           syncAllData();
         } else {
-          showToast("Failed to save payment adjustment.");
+          showToast("Failed to save adjustment.");
         }
       };
 
       jsonp(API_ENDPOINT + `?action=adjustClientPayment&clientId=${encodeURIComponent(clientId)}&amount=${encodeURIComponent(amount)}&type=${encodeURIComponent(type)}&remark=${encodeURIComponent(remark)}`, "onAdjustmentSaved");
     }
 
-    // USING CUSTOM IN-SCREEN CONFIRM MODAL INSTEAD OF NATIVE CONFIRM()
     function cancelClientService(clientId) {
-      showCustomConfirm(
-        "Cancel Service",
-        "Are you sure you want to cancel/deactivate service for client " + clientId + "?",
-        function() {
-          showToast("Processing cancellation...");
-          window.onServiceCancelled = function(res) {
-            if (res && res.success) {
-              showToast("Client service successfully cancelled.");
-              syncAllData();
-            } else {
-              showToast("Failed to cancel service.");
-            }
-          };
-          jsonp(API_ENDPOINT + `?action=deactivateClient&clientId=${encodeURIComponent(clientId)}`, "onServiceCancelled");
-        }
-      );
+      showCustomConfirm("Cancel Service", "Are you sure you want to cancel service for client " + clientId + "?", function() {
+        showToast("Processing cancellation...");
+        window.onServiceCancelled = function(res) {
+          if (res && res.success) { showToast("Service cancelled."); syncAllData(); }
+          else { showToast("Failed."); }
+        };
+        jsonp(API_ENDPOINT + `?action=deactivateClient&clientId=${encodeURIComponent(clientId)}`, "onServiceCancelled");
+      });
     }
 
     function deleteClientRecord(id) {
-      showCustomConfirm(
-        "Delete Client Record",
-        "Are you sure you want to delete client " + id + "?",
-        function() {
-          showToast("Deleting client record...");
-          window.onClientDeleted = function(res) {
-            if (res && res.success) {
-              showToast("Client record removed.");
-              syncAllData();
-            } else {
-              showToast("Failed to delete client.");
-            }
-          };
-          jsonp(API_ENDPOINT + `?action=deleteClient&clientId=${encodeURIComponent(id)}`, "onClientDeleted");
-        }
-      );
+      showCustomConfirm("Delete Client", "Are you sure you want to delete client " + id + "?", function() {
+        showToast("Deleting client...");
+        window.onClientDeleted = function(res) {
+          if (res && res.success) { showToast("Client removed."); syncAllData(); }
+          else { showToast("Failed."); }
+        };
+        jsonp(API_ENDPOINT + `?action=deleteClient&clientId=${encodeURIComponent(id)}`, "onClientDeleted");
+      });
     }
 
     function sendPaymentReminderMail(clientId, dueAmt) {
-      showToast("Dispatching formal payment reminder...");
+      showToast("Dispatching reminder...");
       jsonp(API_ENDPOINT + `?action=sendPaymentReminder&clientId=${encodeURIComponent(clientId)}&amount=${encodeURIComponent(dueAmt)}`, "onReminderDispatched");
     }
 
     window.onReminderDispatched = function(res) {
-      if (res && res.success) {
-        showToast(res.message);
-      } else {
-        showToast((res && res.message) ? res.message : "Failed to dispatch reminder.");
-      }
+      showToast(res && res.success ? res.message : "Failed.", res && res.success);
     };
 
     function renderMetaAnalytics() {
       const now = new Date();
       let filterStartDate = null;
-
-      if (activeTimeFilter === "today") {
-        filterStartDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      } else if (activeTimeFilter === "7d") {
-        filterStartDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-      } else if (activeTimeFilter === "30d") {
-        filterStartDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-      } else if (activeTimeFilter === "month") {
-        filterStartDate = new Date(now.getFullYear(), now.getMonth(), 1);
-      }
+      if (activeTimeFilter === "today") filterStartDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      else if (activeTimeFilter === "7d") filterStartDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      else if (activeTimeFilter === "30d") filterStartDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      else if (activeTimeFilter === "month") filterStartDate = new Date(now.getFullYear(), now.getMonth(), 1);
 
       let totalCollected = 0;
       const timelineBuckets = {};
-
       (state.payments || []).forEach(p => {
         const pDateStr = String(p[5] || "").substring(0, 10);
         const pDate = new Date(pDateStr);
         const amt = parseFloat(p[4]) || 0;
-
         if (!filterStartDate || pDate >= filterStartDate) {
           totalCollected += amt;
-          const bucketKey = pDateStr.length >= 7 ? pDateStr : "Current";
-          timelineBuckets[bucketKey] = (timelineBuckets[bucketKey] || 0) + amt;
+          timelineBuckets[pDateStr] = (timelineBuckets[pDateStr] || 0) + amt;
         }
       });
 
-      let totalGross = 0;
-      let totalMrr = 0;
-      let oneTimeSum = 0;
-      let monthlySum = 0;
-      let annualSum = 0;
-      let activeAccounts = 0;
-
+      let totalGross = 0, totalMrr = 0, oneTimeSum = 0, monthlySum = 0, annualSum = 0, activeAccounts = 0;
       (state.clients || []).forEach(c => {
-        const status = String(c[11] || "").trim().toLowerCase();
-        if (status === "cancelled") return;
-
-        const cDate = c[12] ? new Date(c[12]) : null;
-        if (!filterStartDate || (cDate && cDate >= filterStartDate)) {
-          const ot = parseFloat(c[5]) || 0;
-          const mo = parseFloat(c[7]) || 0;
-          const an = parseFloat(c[9]) || 0;
-
-          oneTimeSum += ot;
-          monthlySum += mo;
-          annualSum += an;
-
-          totalGross += (ot + mo + an);
-          totalMrr += mo;
-          activeAccounts++;
-        }
+        if (String(c[11] || "").trim().toLowerCase() === "cancelled") return;
+        const ot = parseFloat(c[5]) || 0, mo = parseFloat(c[7]) || 0, an = parseFloat(c[9]) || 0;
+        oneTimeSum += ot; monthlySum += mo; annualSum += an;
+        totalGross += (ot + mo + an); totalMrr += mo; activeAccounts++;
       });
 
       const outstandingDue = Math.max(0, totalGross - totalCollected);
-
       let tasksTotal = (state.tasks || []).length;
       let tasksDone = (state.tasks || []).filter(t => t[6] === "Approved").length;
       let fulfillmentPct = tasksTotal > 0 ? Math.round((tasksDone / tasksTotal) * 100) : 100;
@@ -1404,9 +1486,9 @@
       document.getElementById("metaKpiPaid").innerText = "INR " + totalCollected.toLocaleString("en-IN");
       document.getElementById("metaKpiDue").innerText = "INR " + outstandingDue.toLocaleString("en-IN");
       document.getElementById("metaKpiClients").innerText = activeAccounts;
-      document.getElementById("metaKpiClientsSub").innerText = activeAccounts + " active accounts in scope";
+      document.getElementById("metaKpiClientsSub").innerText = activeAccounts + " active accounts";
       document.getElementById("metaKpiFulfillment").innerText = fulfillmentPct + "%";
-      document.getElementById("metaKpiFulfillmentSub").innerText = tasksDone + " of " + tasksTotal + " deliverables closed";
+      document.getElementById("metaKpiFulfillmentSub").innerText = tasksDone + " of " + tasksTotal + " done";
 
       let collectionEff = totalGross > 0 ? Math.min(100, Math.round((totalCollected / totalGross) * 100)) : 100;
       document.getElementById("collectionPercentText").innerText = collectionEff + "%";
@@ -1422,96 +1504,30 @@
       const ctx = canvas.getContext("2d");
       let labels = Object.keys(buckets).sort();
       let data = labels.map(k => buckets[k]);
-
-      if (labels.length === 0) {
-        labels = ["Current Period"];
-        data = [0];
-      }
-
+      if (labels.length === 0) { labels = ["Current"]; data = [0]; }
       if (lineChartInstance) lineChartInstance.destroy();
-
-      const gradient = ctx.createLinearGradient(0, 0, 0, 200);
-      gradient.addColorStop(0, "rgba(24, 119, 242, 0.35)");
-      gradient.addColorStop(1, "rgba(24, 119, 242, 0.0)");
 
       lineChartInstance = new Chart(ctx, {
         type: "line",
-        data: {
-          labels: labels,
-          datasets: [{
-            label: "Collections (INR)",
-            data: data,
-            borderColor: "#1877f2",
-            borderWidth: 2.5,
-            fill: true,
-            backgroundColor: gradient,
-            tension: 0.35,
-            pointBackgroundColor: "#1877f2",
-            pointRadius: 4,
-            pointHoverRadius: 6
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              callbacks: {
-                label: function(ctx) {
-                  return " Revenue: INR " + ctx.parsed.y.toLocaleString("en-IN");
-                }
-              }
-            }
-          },
-          scales: {
-            x: { grid: { display: false }, ticks: { font: { size: 11 } } },
-            y: {
-              grid: { color: "#f1f5f9" },
-              ticks: { callback: function(val) { return "INR " + val; }, font: { size: 11 } }
-            }
-          }
-        }
+        data: { labels: labels, datasets: [{ data: data, borderColor: "#1877f2", borderWidth: 2, fill: true, backgroundColor: "rgba(24,119,242,0.1)", tension: 0.3 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { ticks: { font: { size: 10 } } } } }
       });
     }
 
-    function renderServiceMixChart(oneTime, monthly, annual) {
+    function renderServiceMixChart(ot, mo, an) {
       const canvas = document.getElementById("serviceMixChart");
       if (!canvas) return;
       const ctx = canvas.getContext("2d");
-      const hasData = (oneTime + monthly + annual) > 0;
-      const dataValues = hasData ? [oneTime, monthly, annual] : [1, 1, 1];
-      const backgroundColors = hasData ? ["#f25c3b", "#1877f2", "#10b981"] : ["#e2e8f0", "#e2e8f0", "#e2e8f0"];
-
+      const hasData = (ot + mo + an) > 0;
       if (mixChartInstance) mixChartInstance.destroy();
 
       mixChartInstance = new Chart(ctx, {
         type: "doughnut",
         data: {
-          labels: ["One-Time Setup", "Monthly Retainer", "Annual AMC"],
-          datasets: [{
-            data: dataValues,
-            backgroundColor: backgroundColors,
-            borderWidth: 2,
-            borderColor: "#ffffff"
-          }]
+          labels: ["One-Time", "Monthly", "Annual"],
+          datasets: [{ data: hasData ? [ot, mo, an] : [1, 1, 1], backgroundColor: hasData ? ["#f25c3b", "#1877f2", "#10b981"] : ["#e2e8f0", "#e2e8f0", "#e2e8f0"] }]
         },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          cutout: "70%",
-          plugins: {
-            legend: { position: "right", labels: { boxWidth: 10, font: { size: 10 } } },
-            tooltip: {
-              callbacks: {
-                label: function(ctx) {
-                  const val = hasData ? "INR " + ctx.raw.toLocaleString("en-IN") : "No data";
-                  return " " + ctx.label + ": " + val;
-                }
-              }
-            }
-          }
-        }
+        options: { responsive: true, maintainAspectRatio: false, cutout: "70%", plugins: { legend: { position: "right", labels: { boxWidth: 8, font: { size: 9 } } } } }
       });
     }
 
@@ -1520,28 +1536,16 @@
       let cHtml = "";
       
       (state.clients || []).forEach(c => {
-        const status = String(c[11] || "").trim().toLowerCase();
-        if (status === "cancelled") return;
-
-        const otAmt = parseFloat(c[5]) || 0;
-        const moAmt = parseFloat(c[7]) || 0;
-        const anAmt = parseFloat(c[9]) || 0;
-
+        if (String(c[11] || "").trim().toLowerCase() === "cancelled") return;
+        const otAmt = parseFloat(c[5]) || 0, moAmt = parseFloat(c[7]) || 0, anAmt = parseFloat(c[9]) || 0;
         if (activeClientCategory === "monthly" && moAmt <= 0) return;
         if (activeClientCategory === "annual" && anAmt <= 0) return;
         if (activeClientCategory === "onetime" && otAmt <= 0) return;
 
         let serv = [];
-        if (activeClientCategory === "all" || activeClientCategory === "onetime") {
-          if (c[4] && otAmt > 0) serv.push(`One-Time: ${c[4]} (INR ${otAmt})`);
-        }
-        if (activeClientCategory === "all" || activeClientCategory === "monthly") {
-          if (c[6] && moAmt > 0) serv.push(`Monthly: ${c[6]} (INR ${moAmt})`);
-        }
-        if (activeClientCategory === "all" || activeClientCategory === "annual") {
-          if (c[8] && anAmt > 0) serv.push(`Annual: ${c[8]} (INR ${anAmt})`);
-        }
-
+        if (activeClientCategory === "all" || activeClientCategory === "onetime") { if (c[4] && otAmt > 0) serv.push(`One-Time: ${c[4]} (INR ${otAmt})`); }
+        if (activeClientCategory === "all" || activeClientCategory === "monthly") { if (c[6] && moAmt > 0) serv.push(`Monthly: ${c[6]} (INR ${moAmt})`); }
+        if (activeClientCategory === "all" || activeClientCategory === "annual") { if (c[8] && anAmt > 0) serv.push(`Annual: ${c[8]} (INR ${anAmt})`); }
         if (serv.length === 0 && activeClientCategory !== "all") return;
 
         cHtml += `
@@ -1560,680 +1564,225 @@
           </tr>
         `;
       });
-      clientBody.innerHTML = cHtml || '<tr><td colspan="6" style="text-align:center;">No accounts found for this filter.</td></tr>';
+      clientBody.innerHTML = cHtml || '<tr><td colspan="6" style="text-align:center;">No accounts found.</td></tr>';
 
       const staffBody = document.getElementById("staffTableBody");
-      let sTableHtml = "";
-      let sOptions = '<option value="">Choose Staff Profile</option>';
+      let sTableHtml = "", sOptions = '<option value="">Choose Staff Profile</option>';
       (state.staff || []).forEach(s => {
-        sTableHtml += `
-          <tr>
-            <td><strong>${s[0]}</strong></td>
-            <td><strong>${s[1]}</strong></td>
-            <td>${s[2]}</td>
-            <td>${s[3] || "—"}</td>
-            <td><span class="status-badge">${s[4] || "Active"}</span></td>
-            <td style="text-align: right; white-space: nowrap;">
-              <button class="btn-edit" onclick="editStaffRecord('${s[0]}')">Edit</button>
-              <button class="btn-del" onclick="deleteStaffRecord('${s[0]}')">Delete</button>
-            </td>
-          </tr>
-        `;
-        sOptions += `<option value="${s[0]}" data-email="${s[2]}" data-name="${s[1]}">${s[1]} (${s[0]}) — ${s[3]}</option>`;
+        sTableHtml += `<tr><td><strong>${s[0]}</strong></td><td><strong>${s[1]}</strong></td><td>${s[2]}</td><td>${s[3] || "—"}</td><td><span class="status-badge">${s[4] || "Active"}</span></td><td style="text-align: right;"><button class="btn-edit" onclick="editStaffRecord('${s[0]}')">Edit</button> <button class="btn-del" onclick="deleteStaffRecord('${s[0]}')">Delete</button></td></tr>`;
+        sOptions += `<option value="${s[0]}" data-email="${s[2]}" data-name="${s[1]}">${s[1]} (${s[0]})</option>`;
       });
-      staffBody.innerHTML = sTableHtml || '<tr><td colspan="6" style="text-align:center;">No personnel profiles found.</td></tr>';
-
-      const staffSelect = document.getElementById("staffSelect");
-      staffSelect.innerHTML = sOptions;
+      staffBody.innerHTML = sTableHtml || '<tr><td colspan="6" style="text-align:center;">No staff found.</td></tr>';
+      document.getElementById("staffSelect").innerHTML = sOptions;
 
       const taskBody = document.getElementById("taskApprovalBody");
       let tHtml = "";
       (state.tasks || []).forEach(t => {
         if (t[6] === "Pending Approval") {
-          tHtml += `
-            <tr>
-              <td><strong>${t[3]}</strong></td>
-              <td>${t[2]}</td>
-              <td>${t[7] || "—"}</td>
-              <td><span class="status-badge" style="background:#fef3c7; color:#b45309;">${t[6]}</span></td>
-              <td><button class="btn-primary" style="background:#10b981; padding: 4px 10px;" onclick="approveTask('${t[0]}')">Approve</button></td>
-            </tr>
-          `;
+          tHtml += `<tr><td><strong>${t[3]}</strong></td><td>${t[2]}</td><td>${t[7] || "—"}</td><td><span class="status-badge" style="background:#fef3c7; color:#b45309;">${t[6]}</span></td><td><button class="btn-primary" style="background:#10b981; padding: 4px 10px;" onclick="approveTask('${t[0]}')">Approve</button></td></tr>`;
         }
       });
-      taskBody.innerHTML = tHtml || '<tr><td colspan="5" style="text-align:center;">No deliverables awaiting approval.</td></tr>';
+      taskBody.innerHTML = tHtml || '<tr><td colspan="5" style="text-align:center;">No tasks pending approval.</td></tr>';
     }
 
     function saveClientRecord() {
       const id = document.getElementById("clientId").value;
       const client = {
-        id: id,
-        name: document.getElementById("custName").value.trim(),
-        phone: document.getElementById("custPhone").value.trim(),
-        email: document.getElementById("custEmail").value.trim(),
-        nextBillingDate: document.getElementById("custDate").value,
-        oneTimeService: document.getElementById("oneTimeTitle").value.trim(),
-        oneTimeAmount: document.getElementById("oneTimeAmt").value,
-        monthlyService: document.getElementById("monthlyTitle").value.trim(),
-        monthlyAmount: document.getElementById("monthlyAmt").value,
-        annualService: document.getElementById("annualTitle").value.trim(),
-        annualAmount: document.getElementById("annualAmt").value
+        id: id, name: document.getElementById("custName").value.trim(), phone: document.getElementById("custPhone").value.trim(), email: document.getElementById("custEmail").value.trim(), nextBillingDate: document.getElementById("custDate").value,
+        oneTimeService: document.getElementById("oneTimeTitle").value.trim(), oneTimeAmount: document.getElementById("oneTimeAmt").value,
+        monthlyService: document.getElementById("monthlyTitle").value.trim(), monthlyAmount: document.getElementById("monthlyAmt").value,
+        annualService: document.getElementById("annualTitle").value.trim(), annualAmount: document.getElementById("annualAmt").value
       };
-
       if (!client.name) { showToast("Client name is required."); return; }
-
-      const action = id ? "editClient" : "addClient";
-      showToast("Saving client record...");
-      
-      jsonp(API_ENDPOINT + `?action=${action}&data=${encodeURIComponent(JSON.stringify(client))}`, "onClientSaved");
+      jsonp(API_ENDPOINT + `?action=${id ? 'editClient' : 'addClient'}&data=${encodeURIComponent(JSON.stringify(client))}`, "onClientSaved");
     }
-
-    window.onClientSaved = function() {
-      showToast("Client record saved successfully.");
-      cancelClientEdit();
-      syncAllData();
-    };
+    window.onClientSaved = function() { showToast("Client saved."); cancelClientEdit(); syncAllData(); };
 
     function editClientRecord(id) {
       const c = (state.clients || []).find(item => String(item[0]).trim() === String(id).trim());
       if (!c) return;
-
       document.getElementById("clientId").value = c[0];
-      document.getElementById("custName").value = c[1] || "";
-      document.getElementById("custPhone").value = c[2] || "";
-      document.getElementById("custEmail").value = c[3] || "";
-      document.getElementById("custDate").value = c[10] ? c[10].substring(0,10) : "";
-      document.getElementById("oneTimeTitle").value = c[4] || "";
-      document.getElementById("oneTimeAmt").value = c[5] || "";
-      document.getElementById("monthlyTitle").value = c[6] || "";
-      document.getElementById("monthlyAmt").value = c[7] || "";
-      document.getElementById("annualTitle").value = c[8] || "";
-      document.getElementById("annualAmt").value = c[9] || "";
-
+      document.getElementById("custName").value = c[1] || ""; document.getElementById("custPhone").value = c[2] || ""; document.getElementById("custEmail").value = c[3] || ""; document.getElementById("custDate").value = c[10] ? c[10].substring(0,10) : "";
+      document.getElementById("oneTimeTitle").value = c[4] || ""; document.getElementById("oneTimeAmt").value = c[5] || "";
+      document.getElementById("monthlyTitle").value = c[6] || ""; document.getElementById("monthlyAmt").value = c[7] || "";
+      document.getElementById("annualTitle").value = c[8] || ""; document.getElementById("annualAmt").value = c[9] || "";
       document.getElementById("formTitle").innerText = "Edit Client: " + c[1];
       document.getElementById("btnCancelEdit").style.display = "inline-block";
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
     function cancelClientEdit() {
-      document.getElementById("clientId").value = "";
-      document.getElementById("custName").value = "";
-      document.getElementById("custPhone").value = "";
-      document.getElementById("custEmail").value = "";
-      document.getElementById("custDate").value = "";
-      document.getElementById("oneTimeTitle").value = "";
-      document.getElementById("oneTimeAmt").value = "";
-      document.getElementById("monthlyTitle").value = "";
-      document.getElementById("monthlyAmt").value = "";
-      document.getElementById("annualTitle").value = "";
-      document.getElementById("annualAmt").value = "";
+      document.getElementById("clientId").value = ""; document.getElementById("custName").value = ""; document.getElementById("custPhone").value = ""; document.getElementById("custEmail").value = ""; document.getElementById("custDate").value = "";
+      document.getElementById("oneTimeTitle").value = ""; document.getElementById("oneTimeAmt").value = ""; document.getElementById("monthlyTitle").value = ""; document.getElementById("monthlyAmt").value = ""; document.getElementById("annualTitle").value = ""; document.getElementById("annualAmt").value = "";
       document.getElementById("formTitle").innerText = "Register Client & Setup Multi-Tier Services";
       document.getElementById("btnCancelEdit").style.display = "none";
     }
 
     function saveStaffRecord() {
       const editId = document.getElementById("staffEditId").value;
-      const s = {
-        id: document.getElementById("stfId").value.trim(),
-        name: document.getElementById("stfName").value.trim(),
-        email: document.getElementById("stfEmail").value.trim(),
-        role: document.getElementById("stfRole").value.trim()
-      };
-
-      if (!s.id || !s.name) {
-        showToast("Both Staff ID and Name are required.");
-        return;
-      }
-
-      const action = editId ? "editStaff" : "addStaff";
-      showToast("Saving workforce profile...");
-
-      jsonp(API_ENDPOINT + `?action=${action}&data=${encodeURIComponent(JSON.stringify(s))}`, "onStaffSaved");
+      const s = { id: document.getElementById("stfId").value.trim(), name: document.getElementById("stfName").value.trim(), email: document.getElementById("stfEmail").value.trim(), role: document.getElementById("stfRole").value.trim() };
+      if (!s.id || !s.name) { showToast("Staff ID and Name required."); return; }
+      jsonp(API_ENDPOINT + `?action=${editId ? 'editStaff' : 'addStaff'}&data=${encodeURIComponent(JSON.stringify(s))}`, "onStaffSaved");
     }
-
-    window.onStaffSaved = function(res) {
-      if (res && res.success) {
-        showToast("Staff profile committed successfully.");
-        cancelStaffEdit();
-        syncAllData();
-      } else {
-        showToast("Failed to save staff record.");
-      }
-    };
+    window.onStaffSaved = function() { showToast("Staff saved."); cancelStaffEdit(); syncAllData(); };
 
     function editStaffRecord(id) {
       const s = (state.staff || []).find(item => String(item[0]).trim() === String(id).trim());
       if (!s) return;
-
-      document.getElementById("staffEditId").value = s[0];
-      document.getElementById("stfId").value = s[0];
-      document.getElementById("stfId").readOnly = true;
-      document.getElementById("stfName").value = s[1] || "";
-      document.getElementById("stfEmail").value = s[2] || "";
-      document.getElementById("stfRole").value = s[3] || "";
-
-      document.getElementById("staffFormTitle").innerText = "Edit Workforce File: " + s[1];
-      document.getElementById("btnSaveStaff").innerText = "Update Associate File";
-      document.getElementById("btnCancelStaffEdit").style.display = "inline-block";
+      document.getElementById("staffEditId").value = s[0]; document.getElementById("stfId").value = s[0]; document.getElementById("stfId").readOnly = true;
+      document.getElementById("stfName").value = s[1] || ""; document.getElementById("stfEmail").value = s[2] || ""; document.getElementById("stfRole").value = s[3] || "";
+      document.getElementById("staffFormTitle").innerText = "Edit Staff: " + s[1]; document.getElementById("btnSaveStaff").innerText = "Update Staff"; document.getElementById("btnCancelStaffEdit").style.display = "inline-block";
+      openStaffModal();
     }
 
     function cancelStaffEdit() {
-      document.getElementById("staffEditId").value = "";
-      document.getElementById("stfId").value = "";
-      document.getElementById("stfId").readOnly = false;
-      document.getElementById("stfName").value = "";
-      document.getElementById("stfEmail").value = "";
-      document.getElementById("stfRole").value = "";
-
-      document.getElementById("staffFormTitle").innerText = "Add New Workforce / Staff Member";
-      document.getElementById("btnSaveStaff").innerText = "Commit Associate Record";
-      document.getElementById("btnCancelStaffEdit").style.display = "none";
+      document.getElementById("staffEditId").value = ""; document.getElementById("stfId").value = ""; document.getElementById("stfId").readOnly = false;
+      document.getElementById("stfName").value = ""; document.getElementById("stfEmail").value = ""; document.getElementById("stfRole").value = "";
+      document.getElementById("staffFormTitle").innerText = "Add New Workforce / Staff Member"; document.getElementById("btnSaveStaff").innerText = "Commit Associate Record"; document.getElementById("btnCancelStaffEdit").style.display = "none";
     }
 
     function deleteStaffRecord(id) {
-      showCustomConfirm(
-        "Purge Workforce Profile",
-        "Are you sure you want to purge workforce profile " + id + "?",
-        function() {
-          jsonp(API_ENDPOINT + `?action=deleteStaff&staffId=${encodeURIComponent(id)}`, "onStaffDeleted");
-        }
-      );
+      showCustomConfirm("Delete Staff", "Purge staff " + id + "?", function() {
+        jsonp(API_ENDPOINT + `?action=deleteStaff&staffId=${encodeURIComponent(id)}`, "onStaffPurged");
+      });
     }
-
-    window.onStaffDeleted = function(res) {
-      showToast("Staff profile purged.");
-      syncAllData();
-    };
+    window.onStaffPurged = function() { showToast("Staff purged."); syncAllData(); };
 
     function assignStaffTask() {
       const sel = document.getElementById("staffSelect");
-      const staffId = sel.value;
-      const opt = sel.options[sel.selectedIndex];
-      const task = {
-        staffId: staffId,
-        staffName: opt.getAttribute("data-name"),
-        staffEmail: opt.getAttribute("data-email"),
-        title: document.getElementById("taskTitle").value.trim(),
-        description: document.getElementById("taskDesc").value.trim()
-      };
-
-      if (!task.staffId || !task.title) { showToast("Select staff and enter task title."); return; }
-
-      showToast("Delegating task & dispatching mail...");
+      const task = { staffId: sel.value, staffName: sel.options[sel.selectedIndex].getAttribute("data-name"), title: document.getElementById("taskTitle").value.trim(), description: document.getElementById("taskDesc").value.trim() };
+      if (!task.staffId || !task.title) { showToast("Select staff and title."); return; }
       jsonp(API_ENDPOINT + `?action=assignTask&data=${encodeURIComponent(JSON.stringify(task))}`, "onTaskAssigned");
     }
-
-    window.onTaskAssigned = function() {
-      showToast("Task assigned & Email notification sent.");
-      document.getElementById("taskTitle").value = "";
-      document.getElementById("taskDesc").value = "";
-      syncAllData();
-    };
+    window.onTaskAssigned = function() { showToast("Task assigned."); document.getElementById("taskTitle").value = ""; document.getElementById("taskDesc").value = ""; syncAllData(); };
 
     function approveTask(id) {
-      jsonp(API_ENDPOINT + `?action=approveTask&taskId=${encodeURIComponent(id)}&remark=Approved via Admin`, "onTaskApproved");
+      jsonp(API_ENDPOINT + `?action=approveTask&taskId=${encodeURIComponent(id)}&remark=Approved`, "onTaskApproved");
     }
-
-    window.onTaskApproved = function() {
-      showToast("Task approved and completed.");
-      syncAllData();
-    };
+    window.onTaskApproved = function() { showToast("Task approved."); syncAllData(); };
 
     function openInvoiceModal(clientId) {
       const c = (state.clients || []).find(item => String(item[0]).trim() === String(clientId).trim());
       if (!c) return;
-
-      currentInvoice.client = c;
-      currentInvoice.advances = [];
-      currentInvoice.customItems = [];
-
+      currentInvoice.client = c; currentInvoice.advances = []; currentInvoice.customItems = [];
       (state.payments || []).forEach(p => {
         if (String(p[1] || "").trim() === String(c[0]).trim() && parseFloat(p[4]) !== 0) {
-          currentInvoice.advances.push({
-            mode: p[6] ? (p[6].includes("[") ? p[6].split("[")[1].replace("]", "") : "Direct") : "Direct",
-            amount: parseFloat(p[4]),
-            note: p[6] ? p[6].split("[")[0].trim() : "Installment"
-          });
+          currentInvoice.advances.push({ mode: p[6] ? (p[6].includes("[") ? p[6].split("[")[1].replace("]", "") : "Direct") : "Direct", amount: parseFloat(p[4]), note: p[6] ? p[6].split("[")[0].trim() : "Installment" });
         }
       });
-      
-      document.getElementById("invoiceCycleSelector").value = "monthly";
-      document.getElementById("advDate").value = new Date().toISOString().split("T")[0];
+      document.getElementById("invoiceCycleSelector").value = "monthly"; document.getElementById("advDate").value = new Date().toISOString().split("T")[0];
       changeInvoiceCycle();
-
-      document.getElementById("modalClientHeader").innerText = `Generating bill for: ${c[1]} (${c[0]})`;
+      document.getElementById("modalClientHeader").innerText = `Billing: ${c[1]} (${c[0]})`;
       document.getElementById("previewCustName").innerText = c[1];
       document.getElementById("previewCustAddress").innerHTML = `Phone: ${c[2] || '—'}<br>Email: ${c[3] || '—'}`;
-
       document.getElementById("invoiceModal").style.display = "flex";
     }
 
     function changeInvoiceCycle() {
-      const c = currentInvoice.client;
-      if (!c) return;
-
+      const c = currentInvoice.client; if (!c) return;
       const cycle = document.getElementById("invoiceCycleSelector").value;
       currentInvoice.lineItems = [];
+      const now = new Date(); const mStr = now.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+      let term = "Net 15 Days", dueDays = 15;
 
-      const now = new Date();
-      const currentMonthStr = now.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
-      const currentYear = now.getFullYear();
-
-      let termLabel = "Net 15 Days";
-      let dueOffsetDays = 15;
-
-      if (cycle === "monthly") {
-        if (c[6] && parseFloat(c[7]) > 0) {
-          currentInvoice.lineItems.push({
-            name: c[6],
-            desc: `Monthly Recurring Service Retainer (${currentMonthStr})`,
-            price: parseFloat(c[7]),
-            qty: 1
-          });
-        }
-        termLabel = "Monthly Retainer (Net 7)";
-        dueOffsetDays = 7;
-      } else if (cycle === "initial") {
-        if (c[4] && parseFloat(c[5]) > 0) {
-          currentInvoice.lineItems.push({
-            name: c[4],
-            desc: "One-Time Initial Setup & Project Deployment",
-            price: parseFloat(c[5]),
-            qty: 1
-          });
-        }
-        if (c[6] && parseFloat(c[7]) > 0) {
-          currentInvoice.lineItems.push({
-            name: c[6],
-            desc: `1st Month Service Retainer (${currentMonthStr})`,
-            price: parseFloat(c[7]),
-            qty: 1
-          });
-        }
-        termLabel = "Due on Receipt";
-        dueOffsetDays = 0;
-      } else if (cycle === "annual") {
-        if (c[8] && parseFloat(c[9]) > 0) {
-          currentInvoice.lineItems.push({
-            name: c[8],
-            desc: `Annual AMC, Cloud Infrastructure & Maintenance (${currentYear} - ${currentYear + 1})`,
-            price: parseFloat(c[9]),
-            qty: 1
-          });
-        }
-        termLabel = "Annual Subscription (Net 15)";
-        dueOffsetDays = 15;
-      } else {
-        if (c[4] && parseFloat(c[5]) > 0) currentInvoice.lineItems.push({ name: c[4], desc: "One-Time Custom Setup", price: parseFloat(c[5]), qty: 1 });
-        if (c[6] && parseFloat(c[7]) > 0) currentInvoice.lineItems.push({ name: c[6], desc: "Monthly Recurring Retainer", price: parseFloat(c[7]), qty: 1 });
-        if (c[8] && parseFloat(c[9]) > 0) currentInvoice.lineItems.push({ name: c[8], desc: "Annual Contract", price: parseFloat(c[9]), qty: 1 });
-        termLabel = "Consolidated Statement";
-        dueOffsetDays = 0;
+      if (cycle === "monthly" && c[6] && parseFloat(c[7]) > 0) { currentInvoice.lineItems.push({ name: c[6], desc: `Monthly Retainer (${mStr})`, price: parseFloat(c[7]), qty: 1 }); term = "Net 7"; dueDays = 7; }
+      else if (cycle === "initial") {
+        if (c[4] && parseFloat(c[5]) > 0) currentInvoice.lineItems.push({ name: c[4], desc: "One-Time Setup", price: parseFloat(c[5]), qty: 1 });
+        if (c[6] && parseFloat(c[7]) > 0) currentInvoice.lineItems.push({ name: c[6], desc: `1st Month Retainer (${mStr})`, price: parseFloat(c[7]), qty: 1 });
+        term = "Due on Receipt"; dueDays = 0;
+      } else if (cycle === "annual" && c[8] && parseFloat(c[9]) > 0) { currentInvoice.lineItems.push({ name: c[8], desc: "Annual AMC", price: parseFloat(c[9]), qty: 1 }); term = "Net 15"; dueDays = 15; }
+      else {
+        if (c[4] && parseFloat(c[5]) > 0) currentInvoice.lineItems.push({ name: c[4], desc: "One-Time", price: parseFloat(c[5]), qty: 1 });
+        if (c[6] && parseFloat(c[7]) > 0) currentInvoice.lineItems.push({ name: c[6], desc: "Monthly", price: parseFloat(c[7]), qty: 1 });
+        if (c[8] && parseFloat(c[9]) > 0) currentInvoice.lineItems.push({ name: c[8], desc: "Annual", price: parseFloat(c[9]), qty: 1 });
+        term = "Consolidated"; dueDays = 0;
       }
 
-      currentInvoice.customItems.forEach(ci => {
-        currentInvoice.lineItems.push(ci);
-      });
+      currentInvoice.customItems.forEach(ci => currentInvoice.lineItems.push(ci));
+      if (currentInvoice.lineItems.length === 0) currentInvoice.lineItems.push({ name: "Consulting", desc: "Digital Services", price: 2000, qty: 1 });
 
-      if (currentInvoice.lineItems.length === 0) {
-        currentInvoice.lineItems.push({ name: "Agency Services", desc: "Digital Technology Consulting", price: 2000, qty: 1 });
-      }
-
-      const invCode = "INV-" + Math.floor(100000 + Math.random() * 900000);
-      document.getElementById("previewInvNumber").innerText = `# ${invCode}`;
-
-      const todayFormatted = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-      document.getElementById("previewInvDate").innerText = todayFormatted;
-      document.getElementById("previewTerms").innerText = termLabel;
-
-      const calculatedDueDate = new Date(now.getTime() + dueOffsetDays * 24 * 60 * 60 * 1000);
-      document.getElementById("previewDueDate").innerText = calculatedDueDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+      document.getElementById("previewInvNumber").innerText = `# INV-${Math.floor(100000 + Math.random() * 900000)}`;
+      document.getElementById("previewInvDate").innerText = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+      document.getElementById("previewTerms").innerText = term;
+      document.getElementById("previewDueDate").innerText = new Date(now.getTime() + dueDays * 24 * 60 * 60 * 1000).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
       
-      const rolloverTarget = new Date(now);
-      if (cycle === "annual") {
-        rolloverTarget.setFullYear(rolloverTarget.getFullYear() + 1);
-      } else {
-        rolloverTarget.setMonth(rolloverTarget.getMonth() + 1);
-      }
-      currentInvoice.calculatedNextDue = rolloverTarget.toISOString().split('T')[0];
-
+      const rol = new Date(now);
+      if (cycle === "annual") rol.setFullYear(rol.getFullYear() + 1); else rol.setMonth(rol.getMonth() + 1);
+      currentInvoice.calculatedNextDue = rol.toISOString().split('T')[0];
       renderInvoicePreview();
     }
 
     function addCustomBillItem() {
       const title = document.getElementById("customItemTitle").value.trim();
       const amt = parseFloat(document.getElementById("customItemAmt").value) || 0;
-      const qty = parseFloat(document.getElementById("customItemQty").value) || 1;
-
-      if (!title || amt <= 0) {
-        showToast("Enter valid custom item name and amount.");
-        return;
-      }
-
-      currentInvoice.customItems.push({
-        name: title,
-        desc: "Custom Bill Item",
-        price: amt,
-        qty: qty
-      });
-
-      document.getElementById("customItemTitle").value = "";
-      document.getElementById("customItemAmt").value = "";
-      document.getElementById("customItemQty").value = "1";
-
+      if (!title || amt <= 0) { showToast("Enter title and amount."); return; }
+      currentInvoice.customItems.push({ name: title, desc: "Custom Item", price: amt, qty: 1 });
+      document.getElementById("customItemTitle").value = ""; document.getElementById("customItemAmt").value = "";
       changeInvoiceCycle();
-      showToast("Custom item added to bill.");
+      showToast("Custom item added.");
     }
 
     function markCycleRenewed() {
-      const c = currentInvoice.client;
-      if (!c) return;
-      const cycle = document.getElementById("invoiceCycleSelector").value;
-      const nextDate = currentInvoice.calculatedNextDue;
-
-      showToast("Updating client next billing cycle...");
-      c[10] = nextDate;
-
-      jsonp(API_ENDPOINT + `?action=rolloverCycle&clientId=${encodeURIComponent(c[0])}&cycleType=${cycle}&nextDate=${nextDate}`, "onRolloverDone");
+      const c = currentInvoice.client; if (!c) return;
+      c[10] = currentInvoice.calculatedNextDue;
+      jsonp(API_ENDPOINT + `?action=rolloverCycle&clientId=${encodeURIComponent(c[0])}&cycleType=${document.getElementById("invoiceCycleSelector").value}&nextDate=${currentInvoice.calculatedNextDue}`, "onRolloverDone");
     }
-
-    window.onRolloverDone = function(res) {
-      if (res && res.success) {
-        showToast("Billing cycle rolled over to: " + res.nextBillingDate);
-        syncAllData();
-      }
-    };
+    window.onRolloverDone = function() { showToast("Cycle rolled over."); syncAllData(); };
 
     function sendInvoiceToClientEmail() {
-      const c = currentInvoice.client;
-      if (!c || !c[3]) {
-        showToast("Client does not have a registered email address.");
-        return;
-      }
-
-      const btn = document.getElementById("btnSendEmail");
-      btn.disabled = true;
-      btn.innerText = "Sending Mail...";
-
-      const payload = {
-        name: c[1],
-        email: c[3],
-        invoiceNumber: document.getElementById("previewInvNumber").innerText,
-        date: document.getElementById("previewInvDate").innerText,
-        dueDate: document.getElementById("previewDueDate").innerText,
-        items: currentInvoice.lineItems,
-        subtotal: currentInvoice.financials.subtotal,
-        total: currentInvoice.financials.total,
-        paid: currentInvoice.financials.paid,
-        balanceDue: currentInvoice.financials.balanceDue,
-        upi: document.getElementById("invUpiId").value.trim()
-      };
-
-      window.onMailSent = function(res) {
-        btn.disabled = false;
-        btn.innerText = "Send Bill via Email";
-        if (res && res.success) {
-          showToast(res.message);
-        } else {
-          showToast((res && res.message) ? res.message : "Failed to dispatch email.");
-        }
-      };
-
+      const c = currentInvoice.client; if (!c || !c[3]) { showToast("No email found."); return; }
+      const payload = { name: c[1], email: c[3], invoiceNumber: document.getElementById("previewInvNumber").innerText, date: document.getElementById("previewInvDate").innerText, dueDate: document.getElementById("previewDueDate").innerText, items: currentInvoice.lineItems, subtotal: currentInvoice.financials.subtotal, total: currentInvoice.financials.total, paid: currentInvoice.financials.paid, balanceDue: currentInvoice.financials.balanceDue, upi: document.getElementById("invUpiId").value.trim() };
       jsonp(API_ENDPOINT + `?action=sendInvoiceMail&data=${encodeURIComponent(JSON.stringify(payload))}`, "onMailSent");
     }
+    window.onMailSent = function(res) { showToast(res && res.success ? res.message : "Failed."); };
 
-    function closeInvoiceModal() {
-      document.getElementById("invoiceModal").style.display = "none";
-    }
+    function closeInvoiceModal() { document.getElementById("invoiceModal").style.display = "none"; }
 
     function addAdvanceReceipt() {
-      const c = currentInvoice.client;
-      if (!c) return;
-
-      const mode = document.getElementById("advMode").value;
+      const c = currentInvoice.client; if (!c) return;
       const amt = parseFloat(document.getElementById("advAmount").value) || 0;
-      const payDate = document.getElementById("advDate").value;
-      const note = document.getElementById("advNote").value.trim() || "Installment";
-
-      if (amt <= 0) { showToast("Enter a valid installment amount."); return; }
-
-      const btn = document.getElementById("btnCommitAdvance");
-      btn.disabled = true;
-      btn.innerText = "Saving Installment...";
-
-      window.onAdvanceRecorded = function(res) {
-        btn.disabled = false;
-        btn.innerText = "Record & Save Installment";
-        if (res && res.success) {
-          currentInvoice.advances.push({
-            mode: mode,
-            amount: amt,
-            note: note + (payDate ? ` (${payDate})` : '')
-          });
-          document.getElementById("advAmount").value = "";
-          document.getElementById("advNote").value = "";
-          renderInvoicePreview();
-          showToast("Installment of INR " + amt.toFixed(2) + " saved successfully.");
-          syncAllData();
-        } else {
-          showToast("Failed to write installment record.");
-        }
-      };
-
-      jsonp(API_ENDPOINT + `?action=recordAdvancePayment&clientId=${encodeURIComponent(c[0])}&amount=${encodeURIComponent(amt)}&mode=${encodeURIComponent(mode)}&note=${encodeURIComponent(note)}&payDate=${encodeURIComponent(payDate)}`, "onAdvanceRecorded");
+      if (amt <= 0) { showToast("Enter valid amount."); return; }
+      jsonp(API_ENDPOINT + `?action=recordAdvancePayment&clientId=${encodeURIComponent(c[0])}&amount=${encodeURIComponent(amt)}&mode=${encodeURIComponent(document.getElementById("advMode").value)}&note=${encodeURIComponent(document.getElementById("advNote").value)}&payDate=${encodeURIComponent(document.getElementById("advDate").value)}`, "onAdvDone");
     }
+    window.onAdvDone = function() { showToast("Installment recorded."); syncAllData(); closeInvoiceModal(); };
 
     function renderInvoicePreview() {
-      const lineBody = document.getElementById("previewLineItems");
-      let subtotal = 0;
-      let lHtml = "";
+      let sub = 0, lHtml = "";
       currentInvoice.lineItems.forEach((item, idx) => {
-        const itemTotal = item.qty * item.price;
-        subtotal += itemTotal;
-        lHtml += `
-          <tr>
-            <td style="text-align: center; color:#64748b;">${idx + 1}</td>
-            <td>
-              <strong>${item.name}</strong>
-              <span class="item-sub-desc">${item.desc}</span>
-            </td>
-            <td style="text-align: center;">${item.qty.toFixed(2)}<br><span style="font-size:0.68rem; color:#94a3b8;">Nos</span></td>
-            <td style="text-align: right;">${item.price.toFixed(2)}</td>
-            <td style="text-align: right; font-weight:700;">${itemTotal.toFixed(2)}</td>
-          </tr>
-        `;
+        let tot = item.qty * item.price; sub += tot;
+        lHtml += `<tr><td style="text-align: center;">${idx + 1}</td><td><strong>${item.name}</strong><span class="item-sub-desc">${item.desc}</span></td><td style="text-align: center;">${item.qty}</td><td style="text-align: right;">${item.price.toFixed(2)}</td><td style="text-align: right; font-weight:700;">${tot.toFixed(2)}</td></tr>`;
       });
-      lineBody.innerHTML = lHtml;
+      document.getElementById("previewLineItems").innerHTML = lHtml;
 
-      const advBox = document.getElementById("previewAdvanceBox");
-      const advBody = document.getElementById("previewAdvanceItems");
-      let totalPaid = 0;
-
+      let paid = 0, aHtml = "";
       if (currentInvoice.advances.length > 0) {
-        advBox.style.display = "block";
-        let aHtml = "";
+        document.getElementById("previewAdvanceBox").style.display = "block";
         currentInvoice.advances.forEach(a => {
-          totalPaid += a.amount;
-          aHtml += `
-            <tr>
-              <td colspan="2"><strong>${a.note}</strong></td>
-              <td style="text-align: center; color:#64748b; font-size:0.75rem;">${a.mode}</td>
-              <td colspan="2" style="text-align: right; font-weight:700; color:#059669;">(-) ${a.amount.toFixed(2)}</td>
-            </tr>
-          `;
+          paid += a.amount;
+          aHtml += `<tr><td colspan="2"><strong>${a.note}</strong></td><td style="text-align: center;">${a.mode}</td><td colspan="2" style="text-align: right; color:#059669; font-weight:700;">(-) ${a.amount.toFixed(2)}</td></tr>`;
         });
-        advBody.innerHTML = aHtml;
-      } else {
-        advBox.style.display = "none";
-      }
+        document.getElementById("previewAdvanceItems").innerHTML = aHtml;
+      } else { document.getElementById("previewAdvanceBox").style.display = "none"; }
 
-      const taxRate = parseFloat(document.getElementById("invTaxRate").value) || 0;
-      const discountRate = parseFloat(document.getElementById("invDiscountRate").value) || 0;
+      const taxR = parseFloat(document.getElementById("invTaxRate").value) || 0, discR = parseFloat(document.getElementById("invDiscountRate").value) || 0;
+      const discAmt = sub * (discR / 100), taxAmt = (sub - discAmt) * (taxR / 100);
+      const total = (sub - discAmt) + taxAmt, due = Math.max(0, total - paid);
+      currentInvoice.financials = { subtotal: sub.toFixed(2), total: total.toFixed(2), paid: paid.toFixed(2), balanceDue: due.toFixed(2) };
 
-      const discountAmt = subtotal * (discountRate / 100);
-      const taxableAmount = Math.max(0, subtotal - discountAmt);
-      const taxAmt = taxableAmount * (taxRate / 100);
-      const grandTotal = taxableAmount + taxAmt;
-      const balanceDue = Math.max(0, grandTotal - totalPaid);
+      document.getElementById("prevSubtotal").innerText = sub.toFixed(2);
+      document.getElementById("prevTotal").innerText = "INR " + total.toFixed(2);
+      document.getElementById("prevDue").innerText = "INR " + due.toFixed(2);
+      document.getElementById("topBalanceDue").innerText = "INR " + due.toFixed(2);
 
-      currentInvoice.financials = {
-        subtotal: subtotal.toFixed(2),
-        total: grandTotal.toFixed(2),
-        paid: totalPaid.toFixed(2),
-        balanceDue: balanceDue.toFixed(2)
-      };
-
-      document.getElementById("prevSubtotal").innerText = subtotal.toFixed(2);
-
-      const rowDisc = document.getElementById("rowDiscount");
-      if (discountRate > 0) {
-        rowDisc.style.display = "table-row";
-        document.getElementById("lblDiscount").innerText = `Discount(${discountRate}%)`;
-        document.getElementById("prevDiscount").innerText = `(-) ${discountAmt.toFixed(2)}`;
-      } else {
-        rowDisc.style.display = "none";
-      }
-
-      const rowTax = document.getElementById("rowTax");
-      if (taxRate > 0) {
-        rowTax.style.display = "table-row";
-        document.getElementById("lblTax").innerText = `Sales Tax (${taxRate}%)`;
-        document.getElementById("prevTax").innerText = taxAmt.toFixed(2);
-      } else {
-        rowTax.style.display = "none";
-      }
-
-      document.getElementById("prevTotal").innerText = `INR ${grandTotal.toFixed(2)}`;
-
-      const rowPaid = document.getElementById("rowPaid");
-      if (totalPaid > 0) {
-        rowPaid.style.display = "table-row";
-        document.getElementById("prevPaid").innerText = `(-) INR ${totalPaid.toFixed(2)}`;
-      } else {
-        rowPaid.style.display = "none";
-      }
-
-      document.getElementById("prevDue").innerText = `INR ${balanceDue.toFixed(2)}`;
-      document.getElementById("topBalanceDue").innerText = `INR ${balanceDue.toFixed(2)}`;
-
-      const upi = document.getElementById("invUpiId").value.trim();
-      const qrBox = document.getElementById("invoiceQr");
-      qrBox.innerHTML = "";
-
-      if (upi && balanceDue > 0) {
-        const qrPayload = `upi://pay?pa=${encodeURIComponent(upi)}&pn=Ofbuzz%20Technology&am=${balanceDue.toFixed(2)}&cu=INR`;
-        new QRCode(qrBox, { text: qrPayload, width: 125, height: 125 });
-      }
+      const qr = document.getElementById("invoiceQr"); qr.innerHTML = "";
+      const upiId = document.getElementById("invUpiId").value.trim();
+      if (upiId && due > 0) new QRCode(qr, { text: `upi://pay?pa=${encodeURIComponent(upiId)}&pn=Ofbuzz&am=${due.toFixed(2)}&cu=INR`, width: 125, height: 125 });
     }
 
     function openDedicatedPrintWindow() {
-      const printableContent = document.getElementById("printableInvoice").outerHTML;
-      const printWindow = window.open("", "_blank", "width=920,height=1000");
-
-      printWindow.document.open();
-      printWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>Invoice - Ofbuzz Technology</title>
-          <link rel="preconnect" href="https://fonts.googleapis.com">
-          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-          <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-          <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
-          <style>
-            @page {
-              size: A4 portrait;
-              margin: 0 !important;
-            }
-            * {
-              box-sizing: border-box;
-              margin: 0;
-              padding: 0;
-              font-family: 'Plus Jakarta Sans', sans-serif;
-              -webkit-print-color-adjust: exact !important;
-              print-color-adjust: exact !important;
-            }
-            html, body {
-              width: 210mm;
-              height: 297mm;
-              max-height: 297mm;
-              overflow: hidden;
-              background: #ffffff !important;
-              color: #1e293b !important;
-            }
-            .a4-container {
-              width: 210mm;
-              height: 297mm;
-              max-height: 297mm;
-              padding: 16mm 18mm;
-              position: relative;
-              background: #ffffff;
-              display: flex;
-              flex-direction: column;
-              justify-content: space-between;
-              transform-origin: top left;
-            }
-            .zylker-invoice {
-              border: none !important;
-              box-shadow: none !important;
-              padding: 0 !important;
-              width: 100% !important;
-              height: 100% !important;
-              display: flex;
-              flex-direction: column;
-              justify-content: space-between;
-            }
-            ${document.querySelector('style').innerHTML}
-            .inv-bottom-notes { margin-top: auto !important; padding-top: 12px !important; }
-            .inv-dates-grid { margin-bottom: 16px !important; }
-            .inv-top-row { margin-bottom: 16px !important; }
-            .zylker-table td { padding: 8px 10px !important; }
-          </style>
-        </head>
-        <body>
-          <div class="a4-container" id="scaleContainer">
-            ${printableContent}
-          </div>
-
-          <script>
-            function fitToOnePageAndPrint() {
-              const container = document.getElementById("scaleContainer");
-              const logo = document.getElementById("mainOfbuzzLogo");
-              
-              if (logo && !logo.complete) {
-                logo.onload = fitToOnePageAndPrint;
-                return;
-              }
-
-              const qrContainer = document.getElementById("invoiceQr");
-              if (qrContainer) {
-                qrContainer.innerHTML = "";
-                const dueText = document.getElementById("topBalanceDue").innerText.replace("INR ", "").trim();
-                const qrPayload = "upi://pay?pa=ofbuzz@ptyes&pn=Ofbuzz%20Technology&am=" + dueText + "&cu=INR";
-                new QRCode(qrContainer, { text: qrPayload, width: 125, height: 125 });
-              }
-
-              const maxHeightPx = 1122 - 40; 
-              const currentHeight = container.scrollHeight;
-
-              if (currentHeight > maxHeightPx) {
-                const scaleFactor = (maxHeightPx / currentHeight);
-                container.style.transform = "scale(" + scaleFactor + ")";
-                container.style.width = (210 / scaleFactor) + "mm";
-              }
-
-              setTimeout(function() {
-                window.print();
-                window.close();
-              }, 600);
-            }
-
-            window.onload = fitToOnePageAndPrint;
-          <\/script>
-        </body>
-        </html>
-      `);
-      printWindow.document.close();
+      const pw = window.open("", "_blank", "width=920,height=1000");
+      pw.document.write(`<!DOCTYPE html><html><head><title>Invoice</title><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700&display=swap" rel="stylesheet"><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script><style>body{font-family:'Plus Jakarta Sans',sans-serif;padding:20px;}</style></head><body>${document.getElementById("printableInvoice").outerHTML}<script>setTimeout(()=>{window.print();window.close();},500);<\/script></body></html>`);
+      pw.document.close();
     }
 
     window.onload = checkAuthOnLoad;
