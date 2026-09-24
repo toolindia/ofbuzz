@@ -74,8 +74,8 @@
       <div class="chat-header">
         <span>Live Admin Support Chat</span>
         <div style="display:flex; gap:6px; align-items:center;">
-          <button onclick="loadChatMessages()" style="width:auto; padding:4px 8px; background:#0284c7; font-size:11px; margin:0;" title="Manual Sync">🔄 Refresh</button>
-          <button onclick="closeStaffChat()" style="width:auto; padding:4px 10px; background:#ef4444; font-size:11px; margin:0;">Close</button>
+          <button onclick="loadChatMessages()" style="width:auto; padding:4px 8px; background:#0284c7; color:#fff; font-size:11px; border-radius:6px; border:none; cursor:pointer;" title="Manual Sync">🔄 Refresh</button>
+          <button onclick="closeStaffChat()" style="width:auto; padding:4px 10px; background:#ef4444; font-size:11px; border-radius:6px; border:none; cursor:pointer;">Close</button>
         </div>
       </div>
       <div class="chat-messages" id="chatMessagesBox">
@@ -156,7 +156,7 @@
       jsonp(API_ENDPOINT + "?action=submitTaskCompletion&taskId=" + encodeURIComponent(taskId) + "&remark=" + encodeURIComponent(remarkValue), "onCompleteDone");
     }
 
-    /* MANUAL REFRESH CHAT FUNCTIONS */
+    /* MANUAL REFRESH CHAT FUNCTIONS WITH CORRECT SENDER LABELS */
     function openStaffChat() {
       var id = document.getElementById("workforceId").value.trim();
       if (!id) { showToast("Please enter your Staff ID first to open chat.", false); return; }
@@ -181,6 +181,7 @@
         res.data.forEach(function(m) {
           var isStaff = m.senderType === "Staff";
           var bubbleClass = isStaff ? "msg-staff" : "msg-admin";
+          var senderLabel = isStaff ? m.staffName : "Admin"; // FIX: Staff side shows staff name for staff messages, Admin for admin replies
           var attachMarkup = "";
           if (m.attachmentUrl) {
             if (m.attachmentType.includes("image")) {
@@ -191,7 +192,7 @@
               attachMarkup = '<br><a href="' + m.attachmentUrl + '" target="_blank" style="color:inherit; font-weight:bold;">📎 Download File</a>';
             }
           }
-          html += '<div class="msg-bubble ' + bubbleClass + '"><b>' + m.staffName + ':</b> ' + m.messageText + attachMarkup + '<div style="font-size:9px; opacity:0.7; margin-top:2px; text-align:right;">' + m.timestamp + '</div></div>';
+          html += '<div class="msg-bubble ' + bubbleClass + '"><b>' + senderLabel + ':</b> ' + m.messageText + attachMarkup + '<div style="font-size:9px; opacity:0.7; margin-top:2px; text-align:right;">' + m.timestamp + '</div></div>';
         });
         box.innerHTML = html;
         box.scrollTop = box.scrollHeight;
@@ -229,7 +230,7 @@
         attachmentType: activeAttachment.type
       };
 
-      window.onChatSent = function(res) {
+      window.onChatSent = function() {
         textInput.value = "";
         activeAttachment = { url: "", type: "" };
         loadChatMessages();
