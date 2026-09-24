@@ -534,7 +534,10 @@
     <div class="modal-window" style="max-width: 750px; height: 600px;">
       <div class="modal-header">
         <h3 style="font-size: 1.1rem; font-weight: 800;">Admin Live Support & Chat Dashboard</h3>
-        <button class="btn-del" onclick="closeAdminChatModal()">Close</button>
+        <div style="display:flex; gap:6px; align-items:center;">
+          <button onclick="loadAdminChatMessages()" style="width:auto; padding:5px 10px; background:#0284c7; color:#fff; font-size:11px; border-radius:6px; border:none; cursor:pointer;" title="Manual Sync">🔄 Refresh</button>
+          <button class="btn-del" onclick="closeAdminChatModal()">Close</button>
+        </div>
       </div>
       <div class="modal-body" style="display:flex; gap:16px; height:calc(100% - 65px); padding:16px; overflow:hidden;">
         <!-- Staff List Sidebar -->
@@ -981,35 +984,15 @@
     const BRAND_LOGO_URL = "https://i.pinimg.com/736x/bd/d0/5c/bdd05c94afb66b5a72f5e17a7a879ab3.jpg";
     const SECURE_PIN = "1312";
 
-    let state = {
-      clients: [],
-      staff: [],
-      tasks: [],
-      payments: [],
-      chats: []
-    };
-
-    let currentInvoice = {
-      client: null,
-      lineItems: [],
-      customItems: [],
-      advances: [],
-      calculatedNextDue: "",
-      financials: {}
-    };
-
-    let activeTimeFilter = "all";
-    let activeClientCategory = "all";
-    let selectedChatStaffId = null;
-    let adminActiveAttachment = { url: "", type: "" };
-    let adminChatPollInterval = null;
-    let lineChartInstance = null;
-    let mixChartInstance = null;
+    let state = { clients: [], staff: [], tasks: [], payments: [], chats: [] };
+    let currentInvoice = { client: null, lineItems: [], customItems: [], advances: [], calculatedNextDue: "", financials: {} };
+    let activeTimeFilter = "all", activeClientCategory = "all";
+    let selectedChatStaffId = null, adminActiveAttachment = { url: "", type: "" };
+    let lineChartInstance = null, mixChartInstance = null;
 
     function validateAdminPin() {
       const input = document.getElementById("adminPinInput");
       const errorMsg = document.getElementById("authErrorMsg");
-      
       if (input.value.trim() === SECURE_PIN) {
         sessionStorage.setItem("ofbuzz_admin_auth", "true");
         document.getElementById("authOverlay").style.display = "none";
@@ -1017,25 +1000,15 @@
         errorMsg.style.display = "none";
         syncAllData();
       } else {
-        errorMsg.style.display = "block";
-        input.value = "";
-        input.focus();
+        errorMsg.style.display = "block"; input.value = ""; input.focus();
       }
     }
 
-    function handlePinKeyPress(e) {
-      if (e.key === "Enter") {
-        validateAdminPin();
-      }
-    }
-
+    function handlePinKeyPress(e) { if (e.key === "Enter") validateAdminPin(); }
     function lockAdminSession() {
       sessionStorage.removeItem("ofbuzz_admin_auth");
       document.getElementById("authOverlay").style.display = "flex";
       document.getElementById("mainDashboard").style.display = "none";
-      document.getElementById("adminPinInput").value = "";
-      document.getElementById("authErrorMsg").style.display = "none";
-      document.getElementById("adminPinInput").focus();
     }
 
     function checkAuthOnLoad() {
@@ -1046,14 +1019,12 @@
       } else {
         document.getElementById("authOverlay").style.display = "flex";
         document.getElementById("mainDashboard").style.display = "none";
-        document.getElementById("adminPinInput").focus();
       }
     }
 
     function showToast(msg) {
       const toast = document.getElementById("toast");
-      toast.innerText = msg;
-      toast.style.display = "block";
+      toast.innerText = msg; toast.style.display = "block";
       setTimeout(() => { toast.style.display = "none"; }, 3500);
     }
 
@@ -1063,96 +1034,59 @@
       const yesBtn = document.getElementById("confirmYesBtn");
       const newBtn = yesBtn.cloneNode(true);
       yesBtn.parentNode.replaceChild(newBtn, yesBtn);
-
-      newBtn.onclick = function() {
-        closeCustomConfirm();
-        onYesCallback();
-      };
+      newBtn.onclick = function() { closeCustomConfirm(); onYesCallback(); };
       document.getElementById("customConfirmModal").style.display = "flex";
     }
-
-    function closeCustomConfirm() {
-      document.getElementById("customConfirmModal").style.display = "none";
-    }
+    function closeCustomConfirm() { document.getElementById("customConfirmModal").style.display = "none"; }
 
     function jsonp(url, callbackName) {
       const script = document.createElement("script");
-      const connector = url.indexOf("?") >= 0 ? "&" : "?";
-      script.src = url + connector + "callback=" + callbackName + "&_t=" + Date.now();
+      script.src = url + (url.indexOf("?") >= 0 ? "&" : "?") + "callback=" + callbackName + "&_t=" + Date.now();
       document.body.appendChild(script);
       script.onload = () => script.remove();
-      script.onerror = () => {
-        script.remove();
-        showToast("Network request failed.");
-      };
+      script.onerror = () => { script.remove(); showToast("Network request failed."); };
     }
 
     function syncAllData() {
       const btn = document.getElementById("btnRefresh");
-      if (btn) {
-        btn.disabled = true;
-        btn.innerText = "Refreshing...";
-      }
+      if (btn) { btn.disabled = true; btn.innerText = "Refreshing..."; }
       showToast("Fetching latest records...");
       jsonp(API_ENDPOINT + "?action=getAdminData", "onAdminSync");
     }
 
     window.onAdminSync = function(res) {
       const btn = document.getElementById("btnRefresh");
-      if (btn) {
-        btn.disabled = false;
-        btn.innerText = "Refresh Data";
-      }
-
+      if (btn) { btn.disabled = false; btn.innerText = "Refresh Data"; }
       if (res && res.success && res.data) {
         state = res.data;
         renderAdminDashboard();
         renderPaymentLedger();
         renderMetaAnalytics();
         if (selectedChatStaffId) loadAdminChatMessages();
-        showToast("System synchronized successfully.");
-      } else {
-        showToast("Error retrieving records.");
-      }
+        showToast("Synchronized successfully.");
+      } else { showToast("Error retrieving records."); }
     };
 
     function toggleAnalyticsDrawer() {
       const panel = document.getElementById("analyticsPanel");
       const btn = document.getElementById("btnToggleAnalytics");
-      if (panel.style.display === "block") {
-        panel.style.display = "none";
-        btn.innerText = "Analytics View";
-      } else {
-        panel.style.display = "block";
-        btn.innerText = "Close Analytics";
-        renderMetaAnalytics();
-      }
+      if (panel.style.display === "block") { panel.style.display = "none"; btn.innerText = "Analytics View"; }
+      else { panel.style.display = "block"; btn.innerText = "Close Analytics"; renderMetaAnalytics(); }
     }
 
-    function openStaffModal() {
-      document.getElementById("staffManagementModal").style.display = "flex";
-    }
-
-    function closeStaffModal() {
-      document.getElementById("staffManagementModal").style.display = "none";
-    }
+    function openStaffModal() { document.getElementById("staffManagementModal").style.display = "flex"; }
+    function closeStaffModal() { document.getElementById("staffManagementModal").style.display = "none"; }
 
     /* ADMIN LIVE CHAT FUNCTIONS */
     function openAdminChatModal() {
       document.getElementById("adminChatModal").style.display = "flex";
       renderAdminStaffChatList();
-      adminChatPollInterval = setInterval(syncAllData, 5000);
     }
-
-    function closeAdminChatModal() {
-      document.getElementById("adminChatModal").style.display = "none";
-      if (adminChatPollInterval) clearInterval(adminChatPollInterval);
-    }
+    function closeAdminChatModal() { document.getElementById("adminChatModal").style.display = "none"; }
 
     function renderAdminStaffChatList() {
       const listDiv = document.getElementById("adminStaffChatList");
       let html = '<div style="font-size:12px; font-weight:700; color:#64748b; margin-bottom:8px;">Active Workforce</div>';
-      
       (state.staff || []).forEach(s => {
         const isSelected = selectedChatStaffId === s[0];
         html += `<div onclick="selectChatStaff('${s[0]}', '${s[1]}')" style="padding:10px 12px; border-radius:6px; cursor:pointer; font-size:13px; font-weight:600; margin-bottom:6px; background:${isSelected ? '#e0f2fe' : '#fff'}; color:${isSelected ? '#0369a1' : '#334155'}; border:1px solid ${isSelected ? '#bae6fd' : '#e2e8f0'};">${s[1]}<br><span style="font-size:10px; color:#64748b;">ID: ${s[0]}</span></div>`;
@@ -1169,6 +1103,7 @@
 
     function loadAdminChatMessages() {
       if (!selectedChatStaffId) return;
+      showToast("Syncing chat...", true);
       jsonp(API_ENDPOINT + `?action=getChatMessages&staffId=${encodeURIComponent(selectedChatStaffId)}`, "onAdminChatLoaded");
     }
 
@@ -1183,13 +1118,9 @@
         const isAdmin = m.senderType === "Admin";
         let attachMarkup = "";
         if (m.attachmentUrl) {
-          if (m.attachmentType.includes("image")) {
-            attachMarkup = `<br><a href="${m.attachmentUrl}" target="_blank"><img src="${m.attachmentUrl}" style="max-width:140px; border-radius:6px; margin-top:4px;"></a>`;
-          } else if (m.attachmentType.includes("audio")) {
-            attachMarkup = `<br><audio controls src="${m.attachmentUrl}" style="width:180px; height:32px; margin-top:4px;"></audio>`;
-          } else {
-            attachMarkup = `<br><a href="${m.attachmentUrl}" target="_blank" style="font-weight:bold;">📎 Download File</a>`;
-          }
+          if (m.attachmentType.includes("image")) attachMarkup = `<br><a href="${m.attachmentUrl}" target="_blank"><img src="${m.attachmentUrl}" style="max-width:140px; border-radius:6px; margin-top:4px;"></a>`;
+          else if (m.attachmentType.includes("audio")) attachMarkup = `<br><audio controls src="${m.attachmentUrl}" style="width:180px; height:32px; margin-top:4px;"></audio>`;
+          else attachMarkup = `<br><a href="${m.attachmentUrl}" target="_blank" style="font-weight:bold;">📎 Download File</a>`;
         }
         html += `<div style="max-width:75%; padding:10px 12px; border-radius:8px; font-size:12.5px; line-height:1.4; ${isAdmin ? 'background:#e0f2fe; color:#0369a1; align-self:flex-end;' : 'background:#fff; color:#0f172a; align-self:flex-start; border:1px solid #e2e8f0;'}"><b>${m.staffName}:</b> ${m.messageText}${attachMarkup}<div style="font-size:9px; opacity:0.7; text-align:right; margin-top:2px;">${m.timestamp}</div></div>`;
       });
@@ -1201,11 +1132,7 @@
       if (input.files && input.files[0]) {
         var file = input.files[0];
         var reader = new FileReader();
-        reader.onload = function(e) {
-          adminActiveAttachment.url = e.target.result;
-          adminActiveAttachment.type = file.type;
-          showToast("Attachment ready!", true);
-        };
+        reader.onload = function(e) { adminActiveAttachment.url = e.target.result; adminActiveAttachment.type = file.type; showToast("Attachment ready!", true); };
         reader.readAsDataURL(file);
       }
     }
@@ -1217,29 +1144,13 @@
       if (!text && !adminActiveAttachment.url) return;
 
       const staffObj = (state.staff || []).find(s => s[0] === selectedChatStaffId);
-      const staffName = staffObj ? staffObj[1] : "Admin";
+      const payload = { staffId: selectedChatStaffId, staffName: staffObj ? staffObj[1] : "Admin", senderType: "Admin", messageText: text, attachmentUrl: adminActiveAttachment.url, attachmentType: adminActiveAttachment.type };
 
-      const payload = {
-        staffId: selectedChatStaffId,
-        staffName: staffName,
-        senderType: "Admin",
-        messageText: text,
-        attachmentUrl: adminActiveAttachment.url,
-        attachmentType: adminActiveAttachment.type
-      };
-
-      window.onAdminChatSent = function(res) {
-        input.value = "";
-        adminActiveAttachment = { url: "", type: "" };
-        loadAdminChatMessages();
-      };
-
+      window.onAdminChatSent = function() { input.value = ""; adminActiveAttachment = { url: "", type: "" }; loadAdminChatMessages(); };
       jsonp(API_ENDPOINT + `?action=sendChatMessage&data=${encodeURIComponent(JSON.stringify(payload))}`, "onAdminChatSent");
     }
 
-    function handleAdminChatKey(e) {
-      if (e.key === "Enter") sendAdminChatMessage();
-    }
+    function handleAdminChatKey(e) { if (e.key === "Enter") sendAdminChatMessage(); }
 
     function setTimeFilter(filter, el) {
       activeTimeFilter = filter;
@@ -1257,62 +1168,25 @@
 
     function renderPaymentLedger() {
       const tbody = document.getElementById("recoveryLedgerBody");
-      let totalReceivedAll = 0;
-      let totalPendingAll = 0;
-      let rowsHtml = "";
-
-      const now = new Date();
-      const todayDateStr = now.toISOString().split("T")[0];
+      let totalReceivedAll = 0, totalPendingAll = 0, rowsHtml = "";
+      const now = new Date(), todayDateStr = now.toISOString().split("T")[0];
       let calculatedTodaySales = 0;
 
       (state.clients || []).forEach(c => {
-        const status = String(c[11] || "").trim().toLowerCase();
-        if (status === "cancelled") return;
-
-        const clientId = String(c[0] || "").trim();
-        const clientName = c[1] || "Account";
-        const phone = c[2] || "—";
-        const email = c[3] || "—";
-
-        const oneTime = parseFloat(c[5]) || 0;
-        const monthly = parseFloat(c[7]) || 0;
-        const annual = parseFloat(c[9]) || 0;
+        if (String(c[11] || "").trim().toLowerCase() === "cancelled") return;
+        const clientId = String(c[0] || "").trim(), clientName = c[1] || "Account", phone = c[2] || "—", email = c[3] || "—";
+        const oneTime = parseFloat(c[5]) || 0, monthly = parseFloat(c[7]) || 0, annual = parseFloat(c[9]) || 0;
         const clientBilled = oneTime + monthly + annual;
-
-        const billingDate = String(c[10] || "").substring(0, 10);
-        if (billingDate === todayDateStr) {
-          calculatedTodaySales += clientBilled;
-        }
+        if (String(c[10] || "").substring(0, 10) === todayDateStr) calculatedTodaySales += clientBilled;
 
         let clientPaid = 0;
-        (state.payments || []).forEach(p => {
-          if (String(p[1] || "").trim() === clientId) {
-            clientPaid += parseFloat(p[4]) || 0;
-          }
-        });
-
+        (state.payments || []).forEach(p => { if (String(p[1] || "").trim() === clientId) clientPaid += parseFloat(p[4]) || 0; });
         const pendingDue = Math.max(0, clientBilled - clientPaid);
-        totalReceivedAll += clientPaid;
-        totalPendingAll += pendingDue;
+        totalReceivedAll += clientPaid; totalPendingAll += pendingDue;
 
-        rowsHtml += `
-          <tr>
-            <td><strong>${clientName}</strong><br><span style="font-size:0.75rem; color:#64748b;">${clientId}</span></td>
-            <td>${phone}<br><span style="font-size:0.75rem; color:#64748b;">${email}</span></td>
-            <td><strong>INR ${clientBilled.toFixed(2)}</strong></td>
-            <td style="color:#059669; font-weight:700;">INR ${clientPaid.toFixed(2)}</td>
-            <td style="color:${pendingDue > 0 ? '#ea580c' : '#64748b'}; font-weight:700;">INR ${pendingDue.toFixed(2)}</td>
-            <td style="text-align: right; white-space: nowrap;">
-              <button class="btn-profile" onclick="openCustomerProfileModal('${clientId}')">View Passbook</button>
-              <button class="btn-adjust" onclick="openPaymentAdjustmentModal('${clientId}')">Adjust Payment</button>
-              ${pendingDue > 0 ? `<button class="btn-reminder" onclick="sendPaymentReminderMail('${clientId}', '${pendingDue.toFixed(2)}')">Send Reminder</button>` : `<span style="font-size:0.75rem; color:#059669; font-weight:700; margin-left:6px;">Settled</span>`}
-            </td>
-          </tr>
-        `;
+        rowsHtml += `<tr><td><strong>${clientName}</strong><br><span style="font-size:0.75rem; color:#64748b;">${clientId}</span></td><td>${phone}<br><span style="font-size:0.75rem; color:#64748b;">${email}</span></td><td><strong>INR ${clientBilled.toFixed(2)}</strong></td><td style="color:#059669; font-weight:700;">INR ${clientPaid.toFixed(2)}</td><td style="color:${pendingDue > 0 ? '#ea580c' : '#64748b'}; font-weight:700;">INR ${pendingDue.toFixed(2)}</td><td style="text-align: right; white-space: nowrap;"><button class="btn-profile" onclick="openCustomerProfileModal('${clientId}')">View Passbook</button> <button class="btn-adjust" onclick="openPaymentAdjustmentModal('${clientId}')">Adjust</button> ${pendingDue > 0 ? `<button class="btn-reminder" onclick="sendPaymentReminderMail('${clientId}', '${pendingDue.toFixed(2)}')">Reminder</button>` : `<span style="font-size:0.75rem; color:#059669; font-weight:700;">Settled</span>`}</td></tr>`;
       });
-
-      tbody.innerHTML = rowsHtml || '<tr><td colspan="6" style="text-align:center;">No active accounts available in ledger.</td></tr>';
-      
+      tbody.innerHTML = rowsHtml || '<tr><td colspan="6" style="text-align:center;">No accounts available.</td></tr>';
       document.getElementById("todaySales").innerText = "INR " + calculatedTodaySales.toFixed(2);
       document.getElementById("kpiTotalPaid").innerText = "INR " + totalReceivedAll.toFixed(2);
       document.getElementById("kpiTotalPending").innerText = "INR " + totalPendingAll.toFixed(2);
@@ -1321,165 +1195,84 @@
     function openCustomerProfileModal(clientId) {
       const c = (state.clients || []).find(item => String(item[0]).trim() === String(clientId).trim());
       if (!c) return;
-
-      const oneTime = parseFloat(c[5]) || 0;
-      const monthly = parseFloat(c[7]) || 0;
-      const annual = parseFloat(c[9]) || 0;
+      const oneTime = parseFloat(c[5]) || 0, monthly = parseFloat(c[7]) || 0, annual = parseFloat(c[9]) || 0;
       const clientBilled = oneTime + monthly + annual;
-
-      let clientPaid = 0;
-      let historyRows = "";
-
+      let clientPaid = 0, historyRows = "";
       (state.payments || []).forEach(p => {
         if (String(p[1] || "").trim() === String(clientId).trim()) {
-          const amt = parseFloat(p[4]) || 0;
-          clientPaid += amt;
-          historyRows += `
-            <tr>
-              <td>${p[5] ? String(p[5]).substring(0, 10) : "—"}</td>
-              <td><span class="status-badge" style="${amt < 0 ? 'background:#fee2e2; color:#dc2626;' : ''}">${p[3] || 'Installment'}</span></td>
-              <td style="font-weight:700; color:${amt < 0 ? '#dc2626' : '#059669'};">INR ${amt.toFixed(2)}</td>
-              <td style="font-size:0.78rem; color:#64748b;">${p[6] || '—'}</td>
-            </tr>
-          `;
+          const amt = parseFloat(p[4]) || 0; clientPaid += amt;
+          historyRows += `<tr><td>${p[5] ? String(p[5]).substring(0, 10) : "—"}</td><td>${p[3]}</td><td style="font-weight:700; color:${amt < 0 ? '#dc2626' : '#059669'};">INR ${amt.toFixed(2)}</td><td>${p[6] || '—'}</td></tr>`;
         }
       });
-
-      const pendingDue = Math.max(0, clientBilled - clientPaid);
-
-      document.getElementById("profClientName").innerText = `${c[1]}`;
-      document.getElementById("profClientDetails").innerText = `Client ID: ${c[0]} | Phone: ${c[2] || '—'} | Email: ${c[3] || '—'}`;
-      document.getElementById("profBilledAmt").innerText = `INR ${clientBilled.toFixed(2)}`;
-      document.getElementById("profReceivedAmt").innerText = `INR ${clientPaid.toFixed(2)}`;
-      document.getElementById("profPendingAmt").innerText = `INR ${pendingDue.toFixed(2)}`;
-      document.getElementById("profPaymentsHistoryBody").innerHTML = historyRows || '<tr><td colspan="4" style="text-align:center;">No payment records found.</td></tr>';
-
+      document.getElementById("profClientName").innerText = c[1];
+      document.getElementById("profClientDetails").innerText = `Client ID: ${c[0]} | Phone: ${c[2] || '—'}`;
+      document.getElementById("profBilledAmt").innerText = "INR " + clientBilled.toFixed(2);
+      document.getElementById("profReceivedAmt").innerText = "INR " + clientPaid.toFixed(2);
+      document.getElementById("profPendingAmt").innerText = "INR " + Math.max(0, clientBilled - clientPaid).toFixed(2);
+      document.getElementById("profPaymentsHistoryBody").innerHTML = historyRows || '<tr><td colspan="4" style="text-align:center;">No payments found.</td></tr>';
       document.getElementById("customerProfileModal").style.display = "flex";
     }
-
-    function closeCustomerProfileModal() {
-      document.getElementById("customerProfileModal").style.display = "none";
-    }
+    function closeCustomerProfileModal() { document.getElementById("customerProfileModal").style.display = "none"; }
 
     function openPaymentAdjustmentModal(clientId) {
       const c = (state.clients || []).find(item => String(item[0]).trim() === String(clientId).trim());
       if (!c) return;
-
-      const oneTime = parseFloat(c[5]) || 0;
-      const monthly = parseFloat(c[7]) || 0;
-      const annual = parseFloat(c[9]) || 0;
-      const clientBilled = oneTime + monthly + annual;
-
-      let clientPaid = 0;
-      (state.payments || []).forEach(p => {
-        if (String(p[1] || "").trim() === String(clientId).trim()) {
-          clientPaid += parseFloat(p[4]) || 0;
-        }
-      });
-
       document.getElementById("adjClientId").value = c[0];
       document.getElementById("adjClientName").innerText = `${c[1]} (${c[0]})`;
-      document.getElementById("adjBilledVal").innerText = `INR ${clientBilled.toFixed(2)}`;
-      document.getElementById("adjCurrentPaidVal").innerText = `INR ${clientPaid.toFixed(2)}`;
-      document.getElementById("adjActionType").value = "add";
-      document.getElementById("adjAmount").value = "";
-      document.getElementById("adjRemark").value = "";
-
       document.getElementById("paymentAdjustmentModal").style.display = "flex";
     }
-
-    function closePaymentAdjustmentModal() {
-      document.getElementById("paymentAdjustmentModal").style.display = "none";
-    }
+    function closePaymentAdjustmentModal() { document.getElementById("paymentAdjustmentModal").style.display = "none"; }
 
     function savePaymentAdjustment() {
       const clientId = document.getElementById("adjClientId").value;
       const amount = parseFloat(document.getElementById("adjAmount").value) || 0;
-      const type = document.getElementById("adjActionType").value;
-      const remark = document.getElementById("adjRemark").value.trim();
-
-      if (amount <= 0) { showToast("Please enter a valid amount greater than 0."); return; }
-
-      const btn = document.getElementById("btnSaveAdjustment");
-      btn.disabled = true; btn.innerText = "Saving Adjustment...";
-
-      window.onAdjustmentSaved = function(res) {
-        btn.disabled = false; btn.innerText = "Save Adjustment & Recalculate";
-        if (res && res.success) {
-          showToast("Adjustment recorded.");
-          closePaymentAdjustmentModal();
-          syncAllData();
-        } else {
-          showToast("Failed to save adjustment.");
-        }
-      };
-
-      jsonp(API_ENDPOINT + `?action=adjustClientPayment&clientId=${encodeURIComponent(clientId)}&amount=${encodeURIComponent(amount)}&type=${encodeURIComponent(type)}&remark=${encodeURIComponent(remark)}`, "onAdjustmentSaved");
+      if (amount <= 0) { showToast("Enter valid amount."); return; }
+      jsonp(API_ENDPOINT + `?action=adjustClientPayment&clientId=${encodeURIComponent(clientId)}&amount=${encodeURIComponent(amount)}&type=${encodeURIComponent(document.getElementById("adjActionType").value)}&remark=${encodeURIComponent(document.getElementById("adjRemark").value)}`, "onAdjSaved");
     }
+    window.onAdjSaved = function() { showToast("Adjustment saved."); closePaymentAdjustmentModal(); syncAllData(); };
 
     function cancelClientService(clientId) {
-      showCustomConfirm("Cancel Service", "Are you sure you want to cancel service for client " + clientId + "?", function() {
-        showToast("Processing cancellation...");
-        window.onServiceCancelled = function(res) {
-          if (res && res.success) { showToast("Service cancelled."); syncAllData(); }
-          else { showToast("Failed."); }
-        };
+      showCustomConfirm("Cancel Service", "Cancel service for client " + clientId + "?", function() {
+        window.onServiceCancelled = function(res) { if (res && res.success) { showToast("Cancelled."); syncAllData(); } else { showToast("Failed."); } };
         jsonp(API_ENDPOINT + `?action=deactivateClient&clientId=${encodeURIComponent(clientId)}`, "onServiceCancelled");
       });
     }
 
     function deleteClientRecord(id) {
-      showCustomConfirm("Delete Client", "Are you sure you want to delete client " + id + "?", function() {
-        showToast("Deleting client...");
-        window.onClientDeleted = function(res) {
-          if (res && res.success) { showToast("Client removed."); syncAllData(); }
-          else { showToast("Failed."); }
-        };
+      showCustomConfirm("Delete Client", "Delete client " + id + "?", function() {
+        window.onClientDeleted = function(res) { if (res && res.success) { showToast("Deleted."); syncAllData(); } else { showToast("Failed."); } };
         jsonp(API_ENDPOINT + `?action=deleteClient&clientId=${encodeURIComponent(id)}`, "onClientDeleted");
       });
     }
 
     function sendPaymentReminderMail(clientId, dueAmt) {
-      showToast("Dispatching reminder...");
+      showToast("Sending reminder...");
       jsonp(API_ENDPOINT + `?action=sendPaymentReminder&clientId=${encodeURIComponent(clientId)}&amount=${encodeURIComponent(dueAmt)}`, "onReminderDispatched");
     }
-
-    window.onReminderDispatched = function(res) {
-      showToast(res && res.success ? res.message : "Failed.", res && res.success);
-    };
+    window.onReminderDispatched = function(res) { showToast(res && res.success ? res.message : "Failed."); };
 
     function renderMetaAnalytics() {
-      const now = new Date();
-      let filterStartDate = null;
+      const now = new Date(); let filterStartDate = null;
       if (activeTimeFilter === "today") filterStartDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       else if (activeTimeFilter === "7d") filterStartDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
       else if (activeTimeFilter === "30d") filterStartDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
       else if (activeTimeFilter === "month") filterStartDate = new Date(now.getFullYear(), now.getMonth(), 1);
 
-      let totalCollected = 0;
-      const timelineBuckets = {};
+      let totalCollected = 0, timelineBuckets = {};
       (state.payments || []).forEach(p => {
-        const pDateStr = String(p[5] || "").substring(0, 10);
-        const pDate = new Date(pDateStr);
-        const amt = parseFloat(p[4]) || 0;
-        if (!filterStartDate || pDate >= filterStartDate) {
-          totalCollected += amt;
-          timelineBuckets[pDateStr] = (timelineBuckets[pDateStr] || 0) + amt;
-        }
+        const pDateStr = String(p[5] || "").substring(0, 10), pDate = new Date(pDateStr), amt = parseFloat(p[4]) || 0;
+        if (!filterStartDate || pDate >= filterStartDate) { totalCollected += amt; timelineBuckets[pDateStr] = (timelineBuckets[pDateStr] || 0) + amt; }
       });
 
       let totalGross = 0, totalMrr = 0, oneTimeSum = 0, monthlySum = 0, annualSum = 0, activeAccounts = 0;
       (state.clients || []).forEach(c => {
         if (String(c[11] || "").trim().toLowerCase() === "cancelled") return;
         const ot = parseFloat(c[5]) || 0, mo = parseFloat(c[7]) || 0, an = parseFloat(c[9]) || 0;
-        oneTimeSum += ot; monthlySum += mo; annualSum += an;
-        totalGross += (ot + mo + an); totalMrr += mo; activeAccounts++;
+        oneTimeSum += ot; monthlySum += mo; annualSum += an; totalGross += (ot + mo + an); totalMrr += mo; activeAccounts++;
       });
 
       const outstandingDue = Math.max(0, totalGross - totalCollected);
-      let tasksTotal = (state.tasks || []).length;
-      let tasksDone = (state.tasks || []).filter(t => t[6] === "Approved").length;
-      let fulfillmentPct = tasksTotal > 0 ? Math.round((tasksDone / tasksTotal) * 100) : 100;
+      let tasksTotal = (state.tasks || []).length, tasksDone = (state.tasks || []).filter(t => t[6] === "Approved").length;
 
       document.getElementById("metaKpiGross").innerText = "INR " + totalGross.toLocaleString("en-IN");
       document.getElementById("metaKpiMrr").innerText = "INR " + totalMrr.toLocaleString("en-IN");
@@ -1487,8 +1280,7 @@
       document.getElementById("metaKpiDue").innerText = "INR " + outstandingDue.toLocaleString("en-IN");
       document.getElementById("metaKpiClients").innerText = activeAccounts;
       document.getElementById("metaKpiClientsSub").innerText = activeAccounts + " active accounts";
-      document.getElementById("metaKpiFulfillment").innerText = fulfillmentPct + "%";
-      document.getElementById("metaKpiFulfillmentSub").innerText = tasksDone + " of " + tasksTotal + " done";
+      document.getElementById("metaKpiFulfillment").innerText = (tasksTotal > 0 ? Math.round((tasksDone / tasksTotal) * 100) : 100) + "%";
 
       let collectionEff = totalGross > 0 ? Math.min(100, Math.round((totalCollected / totalGross) * 100)) : 100;
       document.getElementById("collectionPercentText").innerText = collectionEff + "%";
@@ -1499,42 +1291,22 @@
     }
 
     function renderTimelineChart(buckets) {
-      const canvas = document.getElementById("revenueLineChart");
-      if (!canvas) return;
-      const ctx = canvas.getContext("2d");
-      let labels = Object.keys(buckets).sort();
-      let data = labels.map(k => buckets[k]);
+      const canvas = document.getElementById("revenueLineChart"); if (!canvas) return;
+      const ctx = canvas.getContext("2d"); let labels = Object.keys(buckets).sort(), data = labels.map(k => buckets[k]);
       if (labels.length === 0) { labels = ["Current"]; data = [0]; }
       if (lineChartInstance) lineChartInstance.destroy();
-
-      lineChartInstance = new Chart(ctx, {
-        type: "line",
-        data: { labels: labels, datasets: [{ data: data, borderColor: "#1877f2", borderWidth: 2, fill: true, backgroundColor: "rgba(24,119,242,0.1)", tension: 0.3 }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { ticks: { font: { size: 10 } } } } }
-      });
+      lineChartInstance = new Chart(ctx, { type: "line", data: { labels: labels, datasets: [{ data: data, borderColor: "#1877f2", borderWidth: 2, fill: true, backgroundColor: "rgba(24,119,242,0.1)", tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
     }
 
     function renderServiceMixChart(ot, mo, an) {
-      const canvas = document.getElementById("serviceMixChart");
-      if (!canvas) return;
-      const ctx = canvas.getContext("2d");
-      const hasData = (ot + mo + an) > 0;
+      const canvas = document.getElementById("serviceMixChart"); if (!canvas) return;
+      const ctx = canvas.getContext("2d"); const hasData = (ot + mo + an) > 0;
       if (mixChartInstance) mixChartInstance.destroy();
-
-      mixChartInstance = new Chart(ctx, {
-        type: "doughnut",
-        data: {
-          labels: ["One-Time", "Monthly", "Annual"],
-          datasets: [{ data: hasData ? [ot, mo, an] : [1, 1, 1], backgroundColor: hasData ? ["#f25c3b", "#1877f2", "#10b981"] : ["#e2e8f0", "#e2e8f0", "#e2e8f0"] }]
-        },
-        options: { responsive: true, maintainAspectRatio: false, cutout: "70%", plugins: { legend: { position: "right", labels: { boxWidth: 8, font: { size: 9 } } } } }
-      });
+      mixChartInstance = new Chart(ctx, { type: "doughnut", data: { labels: ["One-Time", "Monthly", "Annual"], datasets: [{ data: hasData ? [ot, mo, an] : [1, 1, 1], backgroundColor: hasData ? ["#f25c3b", "#1877f2", "#10b981"] : ["#e2e8f0", "#e2e8f0", "#e2e8f0"] }] }, options: { responsive: true, maintainAspectRatio: false, cutout: "70%", plugins: { legend: { position: "right", labels: { boxWidth: 8, font: { size: 9 } } } } } });
     }
 
     function renderAdminDashboard() {
-      const clientBody = document.getElementById("clientTableBody");
-      let cHtml = "";
-      
+      const clientBody = document.getElementById("clientTableBody"); let cHtml = "";
       (state.clients || []).forEach(c => {
         if (String(c[11] || "").trim().toLowerCase() === "cancelled") return;
         const otAmt = parseFloat(c[5]) || 0, moAmt = parseFloat(c[7]) || 0, anAmt = parseFloat(c[9]) || 0;
@@ -1548,51 +1320,14 @@
         if (activeClientCategory === "all" || activeClientCategory === "annual") { if (c[8] && anAmt > 0) serv.push(`Annual: ${c[8]} (INR ${anAmt})`); }
         if (serv.length === 0 && activeClientCategory !== "all") return;
 
-        cHtml += `
-          <tr>
-            <td><strong>${c[0]}</strong></td>
-            <td><strong>${c[1]}</strong></td>
-            <td>${c[2]}<br><span style="font-size:0.75rem; color:#64748b;">${c[3]}</span></td>
-            <td>${serv.join("<br>") || "—"}</td>
-            <td><strong>${c[10] ? c[10].substring(0,10) : "—"}</strong></td>
-            <td style="text-align: right; white-space: nowrap;">
-              <button class="btn-bill" onclick="openInvoiceModal('${c[0]}')">Generate Bill</button>
-              <button class="btn-cancel-service" onclick="cancelClientService('${c[0]}')">Cancel Service</button>
-              <button class="btn-edit" onclick="editClientRecord('${c[0]}')">Edit</button>
-              <button class="btn-del" onclick="deleteClientRecord('${c[0]}')">Delete</button>
-            </td>
-          </tr>
-        `;
+        cHtml += `<tr><td><strong>${c[0]}</strong></td><td><strong>${c[1]}</strong></td><td>${c[2]}<br><span style="font-size:0.75rem; color:#64748b;">${c[3]}</span></td><td>${serv.join("<br>") || "—"}</td><td><strong>${c[10] ? c[10].substring(0,10) : "—"}</strong></td><td style="text-align: right; white-space: nowrap;"><button class="btn-bill" onclick="openInvoiceModal('${c[0]}')">Generate Bill</button> <button class="btn-cancel-service" onclick="cancelClientService('${c[0]}')">Cancel</button> <button class="btn-edit" onclick="editClientRecord('${c[0]}')">Edit</button> <button class="btn-del" onclick="deleteClientRecord('${c[0]}')">Delete</button></td></tr>`;
       });
       clientBody.innerHTML = cHtml || '<tr><td colspan="6" style="text-align:center;">No accounts found.</td></tr>';
-
-      const staffBody = document.getElementById("staffTableBody");
-      let sTableHtml = "", sOptions = '<option value="">Choose Staff Profile</option>';
-      (state.staff || []).forEach(s => {
-        sTableHtml += `<tr><td><strong>${s[0]}</strong></td><td><strong>${s[1]}</strong></td><td>${s[2]}</td><td>${s[3] || "—"}</td><td><span class="status-badge">${s[4] || "Active"}</span></td><td style="text-align: right;"><button class="btn-edit" onclick="editStaffRecord('${s[0]}')">Edit</button> <button class="btn-del" onclick="deleteStaffRecord('${s[0]}')">Delete</button></td></tr>`;
-        sOptions += `<option value="${s[0]}" data-email="${s[2]}" data-name="${s[1]}">${s[1]} (${s[0]})</option>`;
-      });
-      staffBody.innerHTML = sTableHtml || '<tr><td colspan="6" style="text-align:center;">No staff found.</td></tr>';
-      document.getElementById("staffSelect").innerHTML = sOptions;
-
-      const taskBody = document.getElementById("taskApprovalBody");
-      let tHtml = "";
-      (state.tasks || []).forEach(t => {
-        if (t[6] === "Pending Approval") {
-          tHtml += `<tr><td><strong>${t[3]}</strong></td><td>${t[2]}</td><td>${t[7] || "—"}</td><td><span class="status-badge" style="background:#fef3c7; color:#b45309;">${t[6]}</span></td><td><button class="btn-primary" style="background:#10b981; padding: 4px 10px;" onclick="approveTask('${t[0]}')">Approve</button></td></tr>`;
-        }
-      });
-      taskBody.innerHTML = tHtml || '<tr><td colspan="5" style="text-align:center;">No tasks pending approval.</td></tr>';
     }
 
     function saveClientRecord() {
       const id = document.getElementById("clientId").value;
-      const client = {
-        id: id, name: document.getElementById("custName").value.trim(), phone: document.getElementById("custPhone").value.trim(), email: document.getElementById("custEmail").value.trim(), nextBillingDate: document.getElementById("custDate").value,
-        oneTimeService: document.getElementById("oneTimeTitle").value.trim(), oneTimeAmount: document.getElementById("oneTimeAmt").value,
-        monthlyService: document.getElementById("monthlyTitle").value.trim(), monthlyAmount: document.getElementById("monthlyAmt").value,
-        annualService: document.getElementById("annualTitle").value.trim(), annualAmount: document.getElementById("annualAmt").value
-      };
+      const client = { id: id, name: document.getElementById("custName").value.trim(), phone: document.getElementById("custPhone").value.trim(), email: document.getElementById("custEmail").value.trim(), nextBillingDate: document.getElementById("custDate").value, oneTimeService: document.getElementById("oneTimeTitle").value.trim(), oneTimeAmount: document.getElementById("oneTimeAmt").value, monthlyService: document.getElementById("monthlyTitle").value.trim(), monthlyAmount: document.getElementById("monthlyAmt").value, annualService: document.getElementById("annualTitle").value.trim(), annualAmount: document.getElementById("annualAmt").value };
       if (!client.name) { showToast("Client name is required."); return; }
       jsonp(API_ENDPOINT + `?action=${id ? 'editClient' : 'addClient'}&data=${encodeURIComponent(JSON.stringify(client))}`, "onClientSaved");
     }
@@ -1601,21 +1336,16 @@
     function editClientRecord(id) {
       const c = (state.clients || []).find(item => String(item[0]).trim() === String(id).trim());
       if (!c) return;
-      document.getElementById("clientId").value = c[0];
-      document.getElementById("custName").value = c[1] || ""; document.getElementById("custPhone").value = c[2] || ""; document.getElementById("custEmail").value = c[3] || ""; document.getElementById("custDate").value = c[10] ? c[10].substring(0,10) : "";
-      document.getElementById("oneTimeTitle").value = c[4] || ""; document.getElementById("oneTimeAmt").value = c[5] || "";
-      document.getElementById("monthlyTitle").value = c[6] || ""; document.getElementById("monthlyAmt").value = c[7] || "";
-      document.getElementById("annualTitle").value = c[8] || ""; document.getElementById("annualAmt").value = c[9] || "";
-      document.getElementById("formTitle").innerText = "Edit Client: " + c[1];
-      document.getElementById("btnCancelEdit").style.display = "inline-block";
+      document.getElementById("clientId").value = c[0]; document.getElementById("custName").value = c[1] || ""; document.getElementById("custPhone").value = c[2] || ""; document.getElementById("custEmail").value = c[3] || ""; document.getElementById("custDate").value = c[10] ? c[10].substring(0,10) : "";
+      document.getElementById("oneTimeTitle").value = c[4] || ""; document.getElementById("oneTimeAmt").value = c[5] || ""; document.getElementById("monthlyTitle").value = c[6] || ""; document.getElementById("monthlyAmt").value = c[7] || ""; document.getElementById("annualTitle").value = c[8] || ""; document.getElementById("annualAmt").value = c[9] || "";
+      document.getElementById("formTitle").innerText = "Edit Client: " + c[1]; document.getElementById("btnCancelEdit").style.display = "inline-block";
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
     function cancelClientEdit() {
       document.getElementById("clientId").value = ""; document.getElementById("custName").value = ""; document.getElementById("custPhone").value = ""; document.getElementById("custEmail").value = ""; document.getElementById("custDate").value = "";
       document.getElementById("oneTimeTitle").value = ""; document.getElementById("oneTimeAmt").value = ""; document.getElementById("monthlyTitle").value = ""; document.getElementById("monthlyAmt").value = ""; document.getElementById("annualTitle").value = ""; document.getElementById("annualAmt").value = "";
-      document.getElementById("formTitle").innerText = "Register Client & Setup Multi-Tier Services";
-      document.getElementById("btnCancelEdit").style.display = "none";
+      document.getElementById("formTitle").innerText = "Register Client & Setup Multi-Tier Services"; document.getElementById("btnCancelEdit").style.display = "none";
     }
 
     function saveStaffRecord() {
@@ -1640,13 +1370,6 @@
       document.getElementById("stfName").value = ""; document.getElementById("stfEmail").value = ""; document.getElementById("stfRole").value = "";
       document.getElementById("staffFormTitle").innerText = "Add New Workforce / Staff Member"; document.getElementById("btnSaveStaff").innerText = "Commit Associate Record"; document.getElementById("btnCancelStaffEdit").style.display = "none";
     }
-
-    function deleteStaffRecord(id) {
-      showCustomConfirm("Delete Staff", "Purge staff " + id + "?", function() {
-        jsonp(API_ENDPOINT + `?action=deleteStaff&staffId=${encodeURIComponent(id)}`, "onStaffPurged");
-      });
-    }
-    window.onStaffPurged = function() { showToast("Staff purged."); syncAllData(); };
 
     function assignStaffTask() {
       const sel = document.getElementById("staffSelect");
