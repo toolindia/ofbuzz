@@ -69,7 +69,7 @@
     .kpi-title { font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); }
     .kpi-val { font-size: 1.5rem; font-weight: 800; margin-top: 6px; color: var(--text); }
 
-    /* ON-DEMAND META ANALYTICS DRAWER */
+    /* PROFESSIONAL INSTAGRAM / META BUSINESS INSIGHTS DASHBOARD */
     #analyticsPanel {
       display: none;
       background: #ffffff;
@@ -81,11 +81,11 @@
     }
     .meta-analytics-header {
       display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;
-      gap: 12px; margin-bottom: 18px;
+      gap: 12px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 14px;
     }
     .meta-live-badge {
-      display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 700;
-      color: #059669; background: #ecfdf5; padding: 4px 10px; border-radius: 20px; border: 1px solid #d1fae5;
+      display: inline-flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: 800;
+      color: #0f172a; background: #f1f5f9; padding: 6px 14px; border-radius: 20px; border: 1px solid #cbd5e1;
     }
     .time-filter-group { display: flex; gap: 4px; background: #f1f5f9; padding: 4px; border-radius: 10px; }
     .time-pill {
@@ -94,19 +94,24 @@
     }
     .time-pill.active { background: #ffffff; color: var(--text); box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
 
-    .meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 20px; }
-    .meta-tile {
-      background: var(--bg); padding: 16px 18px; border-radius: var(--radius);
-      border: 1px solid var(--border);
+    /* INSTAGRAM INSIGHTS METRICS GRID */
+    .ig-insights-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .ig-insight-card {
+      background: #f8fafc; border: 1px solid var(--border); border-radius: 14px; padding: 18px;
+      position: relative; overflow: hidden; transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
-    .meta-tile-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-    .meta-tile-label { font-size: 0.72rem; text-transform: uppercase; font-weight: 800; color: var(--text-muted); }
-    .meta-tile-pill { font-size: 0.68rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
-    .pill-green { background: #d1fae5; color: #065f46; }
-    .pill-orange { background: #ffedd5; color: #9a3412; }
-    .pill-blue { background: #e0f2fe; color: #0369a1; }
-    .meta-tile-val { font-size: 1.45rem; font-weight: 800; color: var(--text); }
-    .meta-tile-sub { font-size: 0.72rem; color: #94a3b8; margin-top: 4px; }
+    .ig-insight-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.04); }
+    .ig-card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .ig-card-title { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.03em; }
+    .ig-growth-badge { font-size: 0.7rem; font-weight: 800; padding: 3px 8px; border-radius: 20px; display: inline-flex; align-items: center; gap: 3px; }
+    .badge-positive { background: #dcfce7; color: #166534; }
+    .badge-neutral { background: #e0f2fe; color: #0369a1; }
+    .ig-card-value { font-size: 1.6rem; font-weight: 800; color: #0f172a; margin-bottom: 6px; letter-spacing: -0.02em; }
+    .ig-card-sub { font-size: 0.72rem; color: var(--text-muted); font-weight: 500; }
+    
+    .ig-progress-container { margin-top: 10px; }
+    .ig-progress-bar { width: 100%; height: 6px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin-top: 4px; }
+    .ig-progress-fill { height: 100%; background: var(--meta-blue); border-radius: 4px; width: 0%; transition: width 0.6s ease; }
 
     .charts-grid { display: grid; grid-template-columns: 2fr 1.1fr; gap: 18px; margin-bottom: 20px; }
     @media (max-width: 900px) { .charts-grid { grid-template-columns: 1fr; } }
@@ -256,7 +261,7 @@
     .inv-bottom-notes { margin-top: 16px; padding-top: 10px; border-top: 1px solid #f1f5f9; display: grid; grid-template-columns: 1fr auto; gap: 14px; align-items: flex-end; }
     .notes-block h5 { font-size: 0.78rem; font-weight: 800; color: #0f172a; margin-bottom: 2px; }
     .notes-block p { font-size: 0.72rem; color: #64748b; line-height: 1.3; margin-bottom: 8px; }
-    .qr-container-box { text-align: center; background: #fafbfc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 10px; }
+    .qr-container-box { text-align: center; background: #fafbfc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; }
   </style>
 </head>
 <body>
@@ -322,11 +327,11 @@
       </div>
     </div>
 
-    <!-- ON-DEMAND META ANALYTICS DRAWER -->
+    <!-- UPGRADED PROFESSIONAL META / INSTAGRAM STYLE ANALYTICS DASHBOARD -->
     <div id="analyticsPanel">
       <div class="meta-analytics-header">
         <div class="meta-live-badge">
-          Live Business Insights & Revenue Stream
+          📊 Business Insights & Growth Dashboard
         </div>
         <div class="time-filter-group">
           <button class="time-pill" onclick="setTimeFilter('today', this)">Today</button>
@@ -337,54 +342,90 @@
         </div>
       </div>
 
-      <div class="meta-grid">
-        <div class="meta-tile">
-          <div class="meta-tile-top">
-            <span class="meta-tile-label">Gross Revenue</span>
-            <span class="meta-tile-pill pill-green">Pipeline</span>
+      <!-- IG INSIGHTS STYLE METRICS CARDS -->
+      <div class="ig-insights-grid">
+        <!-- Card 1: Gross Revenue -->
+        <div class="ig-insight-card">
+          <div class="ig-card-top">
+            <span class="ig-card-title">Gross Revenue</span>
+            <span class="ig-growth-badge badge-positive" id="badgeGross">📈 +100%</span>
           </div>
-          <div class="meta-tile-val" id="metaKpiGross">INR 0</div>
-          <div class="meta-tile-sub">Total contracted value</div>
+          <div class="ig-card-value" id="metaKpiGross">INR 0</div>
+          <div class="ig-card-sub">Total contracted business value</div>
+          <div class="ig-progress-container">
+            <div style="display:flex; justify-content:space-between; font-size:10px; color:#64748b; font-weight:700;"><span>Pipeline Ratio</span><span>Active</span></div>
+            <div class="ig-progress-bar"><div class="ig-progress-fill" style="width: 100%; background:#f25c3b;"></div></div>
+          </div>
         </div>
-        <div class="meta-tile">
-          <div class="meta-tile-top">
-            <span class="meta-tile-label">MRR (Monthly)</span>
-            <span class="meta-tile-pill pill-blue">Recurring</span>
+
+        <!-- Card 2: MRR (Monthly) -->
+        <div class="ig-insight-card">
+          <div class="ig-card-top">
+            <span class="ig-card-title">MRR (Monthly)</span>
+            <span class="ig-growth-badge badge-positive" id="badgeMrr">⚡ Retainer</span>
           </div>
-          <div class="meta-tile-val" id="metaKpiMrr">INR 0</div>
-          <div class="meta-tile-sub">Active retainer velocity</div>
+          <div class="ig-card-value" id="metaKpiMrr">INR 0</div>
+          <div class="ig-card-sub">Recurring monthly velocity</div>
+          <div class="ig-progress-container">
+            <div style="display:flex; justify-content:space-between; font-size:10px; color:#64748b; font-weight:700;"><span>Recurring Share</span><span id="mrrRatioText">0%</span></div>
+            <div class="ig-progress-bar"><div class="ig-progress-fill" id="mrrProgressBar" style="width: 0%; background:#1877f2;"></div></div>
+          </div>
         </div>
-        <div class="meta-tile">
-          <div class="meta-tile-top">
-            <span class="meta-tile-label">Collections</span>
-            <span class="meta-tile-pill pill-green">Realized</span>
+
+        <!-- Card 3: Realized Collections -->
+        <div class="ig-insight-card">
+          <div class="ig-card-top">
+            <span class="ig-card-title">Collections</span>
+            <span class="ig-growth-badge badge-positive" id="badgePaid">💰 Realized</span>
           </div>
-          <div class="meta-tile-val" id="metaKpiPaid" style="color: #059669;">INR 0</div>
-          <div class="meta-tile-sub">Cash received in bank</div>
+          <div class="ig-card-value" id="metaKpiPaid" style="color: #059669;">INR 0</div>
+          <div class="ig-card-sub">Cash secured in bank</div>
+          <div class="ig-progress-container">
+            <div style="display:flex; justify-content:space-between; font-size:10px; color:#64748b; font-weight:700;"><span>Collection Rate</span><span id="collectionRateText">0%</span></div>
+            <div class="ig-progress-bar"><div class="ig-progress-fill" id="collectionRateBar" style="width: 0%; background:#10b981;"></div></div>
+          </div>
         </div>
-        <div class="meta-tile">
-          <div class="meta-tile-top">
-            <span class="meta-tile-label">Outstanding Due</span>
-            <span class="meta-tile-pill pill-orange">Pending</span>
+
+        <!-- Card 4: Outstanding Due -->
+        <div class="ig-insight-card">
+          <div class="ig-card-top">
+            <span class="ig-card-title">Outstanding Due</span>
+            <span class="ig-growth-badge badge-neutral" id="badgeDue">⚠️ Pending</span>
           </div>
-          <div class="meta-tile-val" id="metaKpiDue" style="color: #ea580c;">INR 0</div>
-          <div class="meta-tile-sub">Receivables to collect</div>
+          <div class="ig-card-value" id="metaKpiDue" style="color: #ea580c;">INR 0</div>
+          <div class="ig-card-sub">Receivables to collect</div>
+          <div class="ig-progress-container">
+            <div style="display:flex; justify-content:space-between; font-size:10px; color:#64748b; font-weight:700;"><span>Pending Ratio</span><span id="pendingRateText">0%</span></div>
+            <div class="ig-progress-bar"><div class="ig-progress-fill" id="pendingRateBar" style="width: 0%; background:#ea580c;"></div></div>
+          </div>
         </div>
-        <div class="meta-tile">
-          <div class="meta-tile-top">
-            <span class="meta-tile-label">Enterprise Accounts</span>
-            <span class="meta-tile-pill pill-blue">Active</span>
+
+        <!-- Card 5: Enterprise Accounts -->
+        <div class="ig-insight-card">
+          <div class="ig-card-top">
+            <span class="ig-card-title">Active Accounts</span>
+            <span class="ig-growth-badge badge-positive">🏢 Clients</span>
           </div>
-          <div class="meta-tile-val" id="metaKpiClients">0</div>
-          <div class="meta-tile-sub" id="metaKpiClientsSub">0 active accounts in scope</div>
+          <div class="ig-card-value" id="metaKpiClients">0</div>
+          <div class="ig-card-sub" id="metaKpiClientsSub">0 active accounts in scope</div>
+          <div class="ig-progress-container">
+            <div style="display:flex; justify-content:space-between; font-size:10px; color:#64748b; font-weight:700;"><span>Client Base</span><span>Healthy</span></div>
+            <div class="ig-progress-bar"><div class="ig-progress-fill" style="width: 100%; background:#8b5cf6;"></div></div>
+          </div>
         </div>
-        <div class="meta-tile">
-          <div class="meta-tile-top">
-            <span class="meta-tile-label">Fulfillment Rate</span>
-            <span class="meta-tile-pill pill-green">Delivery</span>
+
+        <!-- Card 6: Fulfillment Rate -->
+        <div class="ig-insight-card">
+          <div class="ig-card-top">
+            <span class="ig-card-title">Task Fulfillment</span>
+            <span class="ig-growth-badge badge-positive" id="badgeFulfillment">🎯 Delivery</span>
           </div>
-          <div class="meta-tile-val" id="metaKpiFulfillment">0%</div>
-          <div class="meta-tile-sub" id="metaKpiFulfillmentSub">0 of 0 tasks complete</div>
+          <div class="ig-card-value" id="metaKpiFulfillment">0%</div>
+          <div class="ig-card-sub" id="metaKpiFulfillmentSub">0 of 0 tasks complete</div>
+          <div class="ig-progress-container">
+            <div style="display:flex; justify-content:space-between; font-size:10px; color:#64748b; font-weight:700;"><span>Completion</span><span id="fulfillmentRatioText">0%</span></div>
+            <div class="ig-progress-bar"><div class="ig-progress-fill" id="fulfillmentRatioBar" style="width: 0%; background:#0ea5e9;"></div></div>
+          </div>
         </div>
       </div>
 
@@ -392,7 +433,7 @@
         <div class="chart-card">
           <div class="chart-card-head">
             <div class="chart-title">Revenue & Cashflow Timeline</div>
-            <span style="font-size:0.75rem; color:#64748b;">Historical Trend</span>
+            <span style="font-size:0.75rem; color:#64748b;">Historical Growth Trend</span>
           </div>
           <div style="height: 230px; position: relative;">
             <canvas id="revenueLineChart"></canvas>
@@ -402,14 +443,14 @@
         <div class="chart-card">
           <div class="chart-card-head">
             <div class="chart-title">Service Revenue Mix</div>
-            <span style="font-size:0.75rem; color:#64748b;">Tier Split</span>
+            <span style="font-size:0.75rem; color:#64748b;">Tier Breakdown</span>
           </div>
           <div style="height: 160px; position: relative;">
             <canvas id="serviceMixChart"></canvas>
           </div>
           <div class="collection-meter-box">
             <div style="display:flex; justify-content:space-between; font-size:0.75rem; font-weight:700;">
-              <span style="color:#64748b;">Collection Efficiency</span>
+              <span style="color:#64748b;">Collection Efficiency Rate</span>
               <span id="collectionPercentText" style="color:#059669;">0%</span>
             </div>
             <div class="meter-bar-track">
@@ -1277,8 +1318,25 @@
       document.getElementById("metaKpiPaid").innerText = "INR " + totalCollected.toLocaleString("en-IN");
       document.getElementById("metaKpiDue").innerText = "INR " + outstandingDue.toLocaleString("en-IN");
       document.getElementById("metaKpiClients").innerText = activeAccounts;
-      document.getElementById("metaKpiClientsSub").innerText = activeAccounts + " active accounts";
-      document.getElementById("metaKpiFulfillment").innerText = (tasksTotal > 0 ? Math.round((tasksDone / tasksTotal) * 100) : 100) + "%";
+      document.getElementById("metaKpiClientsSub").innerText = activeAccounts + " active accounts in scope";
+      
+      let fulfillmentPct = tasksTotal > 0 ? Math.round((tasksDone / tasksTotal) * 100) : 100;
+      document.getElementById("metaKpiFulfillment").innerText = fulfillmentPct + "%";
+      document.getElementById("metaKpiFulfillmentSub").innerText = tasksDone + " of " + tasksTotal + " tasks complete";
+      document.getElementById("fulfillmentRatioText").innerText = fulfillmentPct + "%";
+      document.getElementById("fulfillmentRatioBar").style.width = fulfillmentPct + "%";
+
+      let mrrRatio = totalGross > 0 ? Math.round((totalMrr / totalGross) * 100) : 0;
+      document.getElementById("mrrRatioText").innerText = mrrRatio + "%";
+      document.getElementById("mrrProgressBar").style.width = mrrRatio + "%";
+
+      let collectionRatio = totalGross > 0 ? Math.round((totalCollected / totalGross) * 100) : 100;
+      document.getElementById("collectionRateText").innerText = collectionRatio + "%";
+      document.getElementById("collectionRateBar").style.width = collectionRatio + "%";
+
+      let pendingRatio = totalGross > 0 ? Math.round((outstandingDue / totalGross) * 100) : 0;
+      document.getElementById("pendingRateText").innerText = pendingRatio + "%";
+      document.getElementById("pendingRateBar").style.width = pendingRatio + "%";
 
       let collectionEff = totalGross > 0 ? Math.min(100, Math.round((totalCollected / totalGross) * 100)) : 100;
       document.getElementById("collectionPercentText").innerText = collectionEff + "%";
@@ -1293,7 +1351,7 @@
       const ctx = canvas.getContext("2d"); let labels = Object.keys(buckets).sort(), data = labels.map(k => buckets[k]);
       if (labels.length === 0) { labels = ["Current"]; data = [0]; }
       if (lineChartInstance) lineChartInstance.destroy();
-      lineChartInstance = new Chart(ctx, { type: "line", data: { labels: labels, datasets: [{ data: data, borderColor: "#1877f2", borderWidth: 2, fill: true, backgroundColor: "rgba(24,119,242,0.1)", tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
+      lineChartInstance = new Chart(ctx, { type: "line", data: { labels: labels, datasets: [{ data: data, borderColor: "#1877f2", borderWidth: 2.5, fill: true, backgroundColor: "rgba(24,119,242,0.15)", tension: 0.35 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
     }
 
     function renderServiceMixChart(ot, mo, an) {
