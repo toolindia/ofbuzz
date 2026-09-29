@@ -69,7 +69,7 @@
     .kpi-title { font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); }
     .kpi-val { font-size: 1.5rem; font-weight: 800; margin-top: 6px; color: var(--text); }
 
-    /* PROFESSIONAL INSTAGRAM / META BUSINESS INSIGHTS DASHBOARD */
+    /* PROFESSIONAL META / INSTAGRAM STYLE ANALYTICS DASHBOARD */
     #analyticsPanel {
       display: none;
       background: #ffffff;
@@ -94,7 +94,7 @@
     }
     .time-pill.active { background: #ffffff; color: var(--text); box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
 
-    /* INSTAGRAM INSIGHTS METRICS GRID */
+    /* IG INSIGHTS STYLE METRICS CARDS */
     .ig-insights-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; margin-bottom: 24px; }
     .ig-insight-card {
       background: #f8fafc; border: 1px solid var(--border); border-radius: 14px; padding: 18px;
@@ -331,7 +331,7 @@
     <div id="analyticsPanel">
       <div class="meta-analytics-header">
         <div class="meta-live-badge">
-          📊 Business Insights & Growth Dashboard
+          Business Insights & Growth Dashboard
         </div>
         <div class="time-filter-group">
           <button class="time-pill" onclick="setTimeFilter('today', this)">Today</button>
@@ -348,7 +348,7 @@
         <div class="ig-insight-card">
           <div class="ig-card-top">
             <span class="ig-card-title">Gross Revenue</span>
-            <span class="ig-growth-badge badge-positive" id="badgeGross">📈 +100%</span>
+            <span class="ig-growth-badge badge-positive" id="badgeGross">Pipeline</span>
           </div>
           <div class="ig-card-value" id="metaKpiGross">INR 0</div>
           <div class="ig-card-sub">Total contracted business value</div>
@@ -362,7 +362,7 @@
         <div class="ig-insight-card">
           <div class="ig-card-top">
             <span class="ig-card-title">MRR (Monthly)</span>
-            <span class="ig-growth-badge badge-positive" id="badgeMrr">⚡ Retainer</span>
+            <span class="ig-growth-badge badge-positive" id="badgeMrr">Retainer</span>
           </div>
           <div class="ig-card-value" id="metaKpiMrr">INR 0</div>
           <div class="ig-card-sub">Recurring monthly velocity</div>
@@ -376,7 +376,7 @@
         <div class="ig-insight-card">
           <div class="ig-card-top">
             <span class="ig-card-title">Collections</span>
-            <span class="ig-growth-badge badge-positive" id="badgePaid">💰 Realized</span>
+            <span class="ig-growth-badge badge-positive" id="badgePaid">Realized</span>
           </div>
           <div class="ig-card-value" id="metaKpiPaid" style="color: #059669;">INR 0</div>
           <div class="ig-card-sub">Cash secured in bank</div>
@@ -390,7 +390,7 @@
         <div class="ig-insight-card">
           <div class="ig-card-top">
             <span class="ig-card-title">Outstanding Due</span>
-            <span class="ig-growth-badge badge-neutral" id="badgeDue">⚠️ Pending</span>
+            <span class="ig-growth-badge badge-neutral" id="badgeDue">Pending</span>
           </div>
           <div class="ig-card-value" id="metaKpiDue" style="color: #ea580c;">INR 0</div>
           <div class="ig-card-sub">Receivables to collect</div>
@@ -404,7 +404,7 @@
         <div class="ig-insight-card">
           <div class="ig-card-top">
             <span class="ig-card-title">Active Accounts</span>
-            <span class="ig-growth-badge badge-positive">🏢 Clients</span>
+            <span class="ig-growth-badge badge-positive">Clients</span>
           </div>
           <div class="ig-card-value" id="metaKpiClients">0</div>
           <div class="ig-card-sub" id="metaKpiClientsSub">0 active accounts in scope</div>
@@ -418,7 +418,7 @@
         <div class="ig-insight-card">
           <div class="ig-card-top">
             <span class="ig-card-title">Task Fulfillment</span>
-            <span class="ig-growth-badge badge-positive" id="badgeFulfillment">🎯 Delivery</span>
+            <span class="ig-growth-badge badge-positive" id="badgeFulfillment">Delivery</span>
           </div>
           <div class="ig-card-value" id="metaKpiFulfillment">0%</div>
           <div class="ig-card-sub" id="metaKpiFulfillmentSub">0 of 0 tasks complete</div>
@@ -576,7 +576,7 @@
       <div class="modal-header">
         <h3 style="font-size: 1.1rem; font-weight: 800;">Admin Live Support & Chat Dashboard</h3>
         <div style="display:flex; gap:6px; align-items:center;">
-          <button onclick="loadAdminChatMessages()" style="width:auto; padding:5px 10px; background:#0284c7; color:#fff; font-size:11px; border-radius:6px; border:none; cursor:pointer;" title="Manual Sync">🔄 Refresh</button>
+          <button onclick="loadAdminChatMessages()" style="width:auto; padding:5px 10px; background:#0284c7; color:#fff; font-size:11px; border-radius:6px; border:none; cursor:pointer;" title="Manual Sync">Refresh</button>
           <button class="btn-del" onclick="closeAdminChatModal()">Close</button>
         </div>
       </div>
@@ -591,7 +591,7 @@
           </div>
           <div style="display:flex; gap:8px; margin-top:10px; align-items:center;">
             <input type="file" id="adminChatFilePicker" style="display:none;" onchange="handleAdminAttachment(this)">
-            <button onclick="document.getElementById('adminChatFilePicker').click()" style="width:38px; padding:8px; background:#64748b; margin:0;" title="Attach File">📎</button>
+            <button onclick="document.getElementById('adminChatFilePicker').click()" style="width:38px; padding:8px; background:#64748b; margin:0;" title="Attach File">Attach</button>
             <input type="text" id="adminChatInput" placeholder="Type reply as Admin..." style="flex:1; margin:0;" onkeypress="handleAdminChatKey(event)">
             <button class="btn-primary" onclick="sendAdminChatMessage()" style="width:75px; margin:0;">Send</button>
           </div>
@@ -1160,7 +1160,7 @@
         if (m.attachmentUrl) {
           if (m.attachmentType.includes("image")) attachMarkup = `<br><a href="${m.attachmentUrl}" target="_blank"><img src="${m.attachmentUrl}" style="max-width:140px; border-radius:6px; margin-top:4px;"></a>`;
           else if (m.attachmentType.includes("audio")) attachMarkup = `<br><audio controls src="${m.attachmentUrl}" style="width:180px; height:32px; margin-top:4px;"></audio>`;
-          else attachMarkup = `<br><a href="${m.attachmentUrl}" target="_blank" style="font-weight:bold;">📎 Download File</a>`;
+          else attachMarkup = `<br><a href="${m.attachmentUrl}" target="_blank" style="font-weight:bold;">Download File</a>`;
         }
         html += `<div style="max-width:75%; padding:10px 12px; border-radius:8px; font-size:12.5px; line-height:1.4; ${isAdmin ? 'background:#e0f2fe; color:#0369a1; align-self:flex-end;' : 'background:#fff; color:#0f172a; align-self:flex-start; border:1px solid #e2e8f0;'}"><b>${senderLabel}:</b> ${m.messageText}${attachMarkup}<div style="font-size:9px; opacity:0.7; text-align:right; margin-top:2px;">${m.timestamp}</div></div>`;
       });
@@ -1546,7 +1546,7 @@
       const taxR = parseFloat(document.getElementById("invTaxRate").value) || 0, discR = parseFloat(document.getElementById("invDiscountRate").value) || 0;
       const discAmt = sub * (discR / 100), taxAmt = (sub - discAmt) * (taxR / 100);
       const total = (sub - discAmt) + taxAmt, due = Math.max(0, total - paid);
-      currentInvoice.financials = { subtotal: sub.toFixed(2), total: total.toFixed(2), paid: paid.toFixed(2), balanceDue: due.toFixed(2) };
+      currentInvoice.financials = { subtotal: sub.toFixed(2), total: total.toFixed(2), paid: paid.deposited ? paid.toFixed(2) : paid.toFixed(2), balanceDue: due.toFixed(2) };
 
       document.getElementById("prevSubtotal").innerText = sub.toFixed(2);
       document.getElementById("prevTotal").innerText = "INR " + total.toFixed(2);
