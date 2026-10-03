@@ -1029,6 +1029,38 @@
     let selectedChatStaffId = null, adminActiveAttachment = { url: "", type: "" };
     let lineChartInstance = null, mixChartInstance = null;
 
+    /* AUTOMATIC RECURRING BILL CALCULATOR HELPER */
+    function calculateClientBilledDetails(c) {
+      const oneTime = parseFloat(c[5]) || 0;
+      const monthly = parseFloat(c[7]) || 0;
+      const annual = parseFloat(c[9]) || 0;
+
+      let elapsedMonths = 1;
+      let elapsedYears = 1;
+
+      // c[10] holds NextBillingDate / Onboarding Date
+      const dateStr = String(c[10] || "").substring(0, 10);
+      if (dateStr && !isNaN(new Date(dateStr).getTime())) {
+        const startDate = new Date(dateStr);
+        const now = new Date();
+        
+        let mDiff = (now.getFullYear() - startDate.getFullYear()) * 12 + (now.getMonth() - startDate.getMonth());
+        if (now.getDate() >= startDate.getDate()) {
+          mDiff += 1;
+        }
+        elapsedMonths = Math.max(1, mDiff);
+
+        let yDiff = now.getFullYear() - startDate.getFullYear();
+        if (now.getMonth() > startDate.getMonth() || (now.getMonth() === startDate.getMonth() && now.getDate() >= startDate.getDate())) {
+          yDiff += 1;
+        }
+        elapsedYears = Math.max(1, yDiff);
+      }
+
+      const totalBilled = oneTime + (monthly * elapsedMonths) + (annual * elapsedYears);
+      return { totalBilled, oneTime, monthly, annual, elapsedMonths, elapsedYears };
+    }
+
     function validateAdminPin() {
       const input = document.getElementById("adminPinInput");
       const errorMsg = document.getElementById("authErrorMsg");
@@ -1214,9 +1246,12 @@
       (state.clients || []).forEach(c => {
         if (String(c[11] || "").trim().toLowerCase() === "cancelled") return;
         const clientId = String(c[0] || "").trim(), clientName = c[1] || "Account", phone = c[2] || "—", email = c[3] || "—";
-        const oneTime = parseFloat(c[5]) || 0, monthly = parseFloat(c[7]) || 0, annual = parseFloat(c[9]) || 0;
-        const clientBilled = oneTime + monthly + annual;
-        if (String(c[10] || "").substring(0, 10) === todayDateStr) calculatedTodaySales += clientBilled;
+        
+        // Automatic billing calculation including recurring months/years
+        const billedCalc = calculateClientBilledDetails(c);
+        const clientBilled = billedCalc.totalBilled;
+
+        if (String(c[10] || "").substring(0, 10) === todayDateStr) calculatedTodaySales += (billedCalc.oneTime + billedCalc.monthly + billedCalc.annual);
 
         let clientPaid = 0;
         (state.payments || []).forEach(p => { if (String(p[1] || "").trim() === clientId) clientPaid += parseFloat(p[4]) || 0; });
@@ -1234,8 +1269,8 @@
     function openCustomerProfileModal(clientId) {
       const c = (state.clients || []).find(item => String(item[0]).trim() === String(clientId).trim());
       if (!c) return;
-      const oneTime = parseFloat(c[5]) || 0, monthly = parseFloat(c[7]) || 0, annual = parseFloat(c[9]) || 0;
-      const clientBilled = oneTime + monthly + annual;
+      const billedCalc = calculateClientBilledDetails(c);
+      const clientBilled = billedCalc.totalBilled;
       let clientPaid = 0, historyRows = "";
       (state.payments || []).forEach(p => {
         if (String(p[1] || "").trim() === String(clientId).trim()) {
@@ -1256,8 +1291,17 @@
     function openPaymentAdjustmentModal(clientId) {
       const c = (state.clients || []).find(item => String(item[0]).trim() === String(clientId).trim());
       if (!c) return;
+      const billedCalc = calculateClientBilledDetails(c);
+      let currentPaid = 0;
+      (state.payments || []).forEach(p => {
+        if (String(p[1] || "").trim() === String(clientId).trim()) {
+          currentPaid += parseFloat(p[4]) || 0;
+        }
+      });
       document.getElementById("adjClientId").value = c[0];
       document.getElementById("adjClientName").innerText = `${c[1]} (${c[0]})`;
+      document.getElementById("adjBilledVal").innerText = "INR " + billedCalc.totalBilled.toFixed(2);
+      document.getElementById("adjCurrentPaidVal").innerText = "INR " + currentPaid.toFixed(2);
       document.getElementById("paymentAdjustmentModal").style.display = "flex";
     }
     function closePaymentAdjustmentModal() { document.getElementById("paymentAdjustmentModal").style.display = "none"; }
@@ -1306,8 +1350,13 @@
       let totalGross = 0, totalMrr = 0, oneTimeSum = 0, monthlySum = 0, annualSum = 0, activeAccounts = 0;
       (state.clients || []).forEach(c => {
         if (String(c[11] || "").trim().toLowerCase() === "cancelled") return;
-        const ot = parseFloat(c[5]) || 0, mo = parseFloat(c[7]) || 0, an = parseFloat(c[9]) || 0;
-        oneTimeSum += ot; monthlySum += mo; annualSum += an; totalGross += (ot + mo + an); totalMrr += mo; activeAccounts++;
+        const b = calculateClientBilledDetails(c);
+        oneTimeSum += b.oneTime; 
+        monthlySum += (b.monthly * b.elapsedMonths); 
+        annualSum += (b.annual * b.elapsedYears); 
+        totalGross += b.totalBilled; 
+        totalMrr += b.monthly; 
+        activeAccounts++;
       });
 
       const outstandingDue = Math.max(0, totalGross - totalCollected);
