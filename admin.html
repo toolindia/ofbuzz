@@ -87,12 +87,15 @@
       display: inline-flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: 800;
       color: #0f172a; background: #f1f5f9; padding: 6px 14px; border-radius: 20px; border: 1px solid #cbd5e1;
     }
+    .analytics-control-bar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
     .time-filter-group { display: flex; gap: 4px; background: #f1f5f9; padding: 4px; border-radius: 10px; }
     .time-pill {
       padding: 6px 14px; border: none; background: transparent; font-size: 0.78rem;
       font-weight: 700; color: #64748b; border-radius: 8px; cursor: pointer; transition: all 0.2s;
     }
     .time-pill.active { background: #ffffff; color: var(--text); box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+    .custom-range-inputs { display: inline-flex; align-items: center; gap: 6px; background: #f1f5f9; padding: 4px 8px; border-radius: 8px; font-size: 0.75rem; }
+    .custom-range-inputs input[type="date"] { padding: 4px 6px; font-size: 0.75rem; border: 1px solid var(--border); border-radius: 6px; }
 
     /* IG INSIGHTS STYLE METRICS CARDS */
     .ig-insights-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; margin-bottom: 24px; }
@@ -182,6 +185,13 @@
     .btn-chat-mgmt:hover { background: #7c3aed; }
     .btn-logout { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); }
     .btn-logout:hover { background: var(--danger); color: #fff; }
+
+    .badge-link {
+      display: inline-block; padding: 4px 8px; background: #e0f2fe; color: #0284c7;
+      border-radius: 6px; font-weight: 700; font-size: 0.78rem; text-decoration: none; cursor: pointer;
+      font-family: 'JetBrains Mono', monospace; border: 1px solid #bae6fd; transition: all 0.2s;
+    }
+    .badge-link:hover { background: #0284c7; color: #ffffff; }
 
     .table-box { overflow-x: auto; margin-top: 12px; }
     table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
@@ -314,15 +324,15 @@
     <!-- TOP OVERVIEW STRIP -->
     <div class="kpi-grid">
       <div class="kpi-card">
-        <div class="kpi-title">Today's Transactions</div>
+        <div class="kpi-title">Current Month Demand</div>
         <div class="kpi-val" id="todaySales">INR 0.00</div>
       </div>
       <div class="kpi-card" style="border-left-color: #10b981;">
-        <div class="kpi-title">Total Cash Received</div>
+        <div class="kpi-title">Current Month Collected</div>
         <div class="kpi-val" id="kpiTotalPaid" style="color: #10b981;">INR 0.00</div>
       </div>
       <div class="kpi-card" style="border-left-color: #ea580c;">
-        <div class="kpi-title">Total Pending Balance</div>
+        <div class="kpi-title">Current Month Due</div>
         <div class="kpi-val" id="kpiTotalPending" style="color: #ea580c;">INR 0.00</div>
       </div>
     </div>
@@ -333,12 +343,20 @@
         <div class="meta-live-badge">
           Business Insights & Growth Dashboard
         </div>
-        <div class="time-filter-group">
-          <button class="time-pill" onclick="setTimeFilter('today', this)">Today</button>
-          <button class="time-pill" onclick="setTimeFilter('7d', this)">7D</button>
-          <button class="time-pill" onclick="setTimeFilter('30d', this)">30D</button>
-          <button class="time-pill" onclick="setTimeFilter('month', this)">This Month</button>
-          <button class="time-pill active" onclick="setTimeFilter('all', this)">All Time</button>
+        <div class="analytics-control-bar">
+          <div class="time-filter-group">
+            <button class="time-pill" onclick="setTimeFilter('today', this)">Today</button>
+            <button class="time-pill" onclick="setTimeFilter('7d', this)">7D</button>
+            <button class="time-pill" onclick="setTimeFilter('30d', this)">30D</button>
+            <button class="time-pill" onclick="setTimeFilter('month', this)">This Month</button>
+            <button class="time-pill active" onclick="setTimeFilter('all', this)">All Time</button>
+          </div>
+          <div class="custom-range-inputs">
+            <span>From:</span>
+            <input type="date" id="analyticsFromDate" onchange="applyCustomAnalyticsDate()">
+            <span>To:</span>
+            <input type="date" id="analyticsToDate" onchange="applyCustomAnalyticsDate()">
+          </div>
         </div>
       </div>
 
@@ -348,12 +366,12 @@
         <div class="ig-insight-card">
           <div class="ig-card-top">
             <span class="ig-card-title">Gross Revenue</span>
-            <span class="ig-growth-badge badge-positive" id="badgeGross">Pipeline</span>
+            <span class="ig-growth-badge badge-positive" id="badgeGross">Contracted</span>
           </div>
           <div class="ig-card-value" id="metaKpiGross">INR 0</div>
           <div class="ig-card-sub" id="metaKpiGrossSub">Total contracted business value</div>
           <div class="ig-progress-container">
-            <div style="display:flex; justify-content:space-between; font-size:10px; color:#64748b; font-weight:700;"><span>Pipeline Ratio</span><span>Active</span></div>
+            <div style="display:flex; justify-content:space-between; font-size:10px; color:#64748b; font-weight:700;"><span>Scope Target</span><span>Active</span></div>
             <div class="ig-progress-bar"><div class="ig-progress-fill" style="width: 100%; background:#f25c3b;"></div></div>
           </div>
         </div>
@@ -365,7 +383,7 @@
             <span class="ig-growth-badge badge-positive" id="badgeMrr">Retainer</span>
           </div>
           <div class="ig-card-value" id="metaKpiMrr">INR 0</div>
-          <div class="ig-card-sub">Recurring monthly velocity</div>
+          <div class="ig-card-sub">Monthly retainer velocity</div>
           <div class="ig-progress-container">
             <div style="display:flex; justify-content:space-between; font-size:10px; color:#64748b; font-weight:700;"><span>Recurring Share</span><span id="mrrRatioText">0%</span></div>
             <div class="ig-progress-bar"><div class="ig-progress-fill" id="mrrProgressBar" style="width: 0%; background:#1877f2;"></div></div>
@@ -379,9 +397,9 @@
             <span class="ig-growth-badge badge-positive" id="badgePaid">Realized</span>
           </div>
           <div class="ig-card-value" id="metaKpiPaid" style="color: #059669;">INR 0</div>
-          <div class="ig-card-sub" id="metaKpiPaidSub">Cash secured in bank</div>
+          <div class="ig-card-sub" id="metaKpiPaidSub">Actual collections in window</div>
           <div class="ig-progress-container">
-            <div style="display:flex; justify-content:space-between; font-size:10px; color:#64748b; font-weight:700;"><span>Collection Rate</span><span id="collectionRateText">0%</span></div>
+            <div style="display:flex; justify-content:space-between; font-size:10px; color:#64748b; font-weight:700;"><span>Collection Efficiency</span><span id="collectionRateText">0%</span></div>
             <div class="ig-progress-bar"><div class="ig-progress-fill" id="collectionRateBar" style="width: 0%; background:#10b981;"></div></div>
           </div>
         </div>
@@ -393,7 +411,7 @@
             <span class="ig-growth-badge badge-neutral" id="badgeDue">Pending</span>
           </div>
           <div class="ig-card-value" id="metaKpiDue" style="color: #ea580c;">INR 0</div>
-          <div class="ig-card-sub" id="metaKpiDueSub">Receivables to collect</div>
+          <div class="ig-card-sub" id="metaKpiDueSub">Current uncollected receivables</div>
           <div class="ig-progress-container">
             <div style="display:flex; justify-content:space-between; font-size:10px; color:#64748b; font-weight:700;"><span>Pending Ratio</span><span id="pendingRateText">0%</span></div>
             <div class="ig-progress-bar"><div class="ig-progress-fill" id="pendingRateBar" style="width: 0%; background:#ea580c;"></div></div>
@@ -409,7 +427,7 @@
           <div class="ig-card-value" id="metaKpiClients">0</div>
           <div class="ig-card-sub" id="metaKpiClientsSub">0 active accounts in scope</div>
           <div class="ig-progress-container">
-            <div style="display:flex; justify-content:space-between; font-size:10px; color:#64748b; font-weight:700;"><span>Client Base</span><span>Healthy</span></div>
+            <div style="display:flex; justify-content:space-between; font-size:10px; color:#64748b; font-weight:700;"><span>Client Retention</span><span>Healthy</span></div>
             <div class="ig-progress-bar"><div class="ig-progress-fill" style="width: 100%; background:#8b5cf6;"></div></div>
           </div>
         </div>
@@ -433,7 +451,7 @@
         <div class="chart-card">
           <div class="chart-card-head">
             <div class="chart-title">Revenue & Cashflow Timeline</div>
-            <span style="font-size:0.75rem; color:#64748b;" id="chartTimelineSubtitle">Historical Growth Trend</span>
+            <span style="font-size:0.75rem; color:#64748b;" id="chartTimelineSubtitle">All Time Trend</span>
           </div>
           <div style="height: 230px; position: relative;">
             <canvas id="revenueLineChart"></canvas>
@@ -464,22 +482,23 @@
     <!-- PAYMENT & RECEIVABLES LEDGER -->
     <div class="section-card">
       <div class="section-head">
-        <span>Payment & Receivables Ledger</span>
+        <span>Payment & Receivables Ledger (Current Active Cycle)</span>
       </div>
       <div class="table-box">
         <table>
           <thead>
             <tr>
-              <th>Client Account</th>
+              <th>Client ID</th>
+              <th>Customer Name</th>
               <th>Contact Details</th>
-              <th>Total Deal Billed</th>
-              <th>Advance Received</th>
+              <th>Active Cycle Demand</th>
+              <th>Received (Current Cycle)</th>
               <th>Pending Due</th>
               <th style="text-align: right;">Action</th>
             </tr>
           </thead>
           <tbody id="recoveryLedgerBody">
-            <tr><td colspan="6" style="text-align:center;">Calculating ledger balances...</td></tr>
+            <tr><td colspan="7" style="text-align:center;">Calculating ledger balances...</td></tr>
           </tbody>
         </table>
       </div>
@@ -554,7 +573,7 @@
         <table>
           <thead>
             <tr>
-              <th>Client ID</th>
+              <th>Client ID (View Directory)</th>
               <th>Customer Name</th>
               <th>Contact Info</th>
               <th>Active Services (Filtered)</th>
@@ -704,12 +723,12 @@
     </div>
   </div>
 
-  <!-- CUSTOMER PASSBOOK MODAL -->
+  <!-- CUSTOMER PASSBOOK & DIRECTORY MODAL -->
   <div class="modal-backdrop" id="customerProfileModal">
     <div class="modal-window" style="max-width: 680px;">
       <div class="modal-header">
         <div>
-          <h3 style="font-size: 1.1rem; font-weight: 800;" id="profClientName">Customer Passbook</h3>
+          <h3 style="font-size: 1.1rem; font-weight: 800;" id="profClientName">Customer Passbook & Master Directory</h3>
           <p style="font-size: 0.75rem; color: var(--text-muted);" id="profClientDetails">Client ID & Contact</p>
         </div>
         <button class="btn-del" onclick="closeCustomerProfileModal()">Close</button>
@@ -717,21 +736,21 @@
       <div class="modal-body">
         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px;">
           <div style="background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:14px; text-align:center;">
-            <span style="font-size:0.72rem; text-transform:uppercase; color:#64748b; font-weight:700;">Total Deal Billed</span>
+            <span style="font-size:0.72rem; text-transform:uppercase; color:#64748b; font-weight:700;">Total Lifetime Billed</span>
             <div style="font-size:1.25rem; font-weight:800; color:#0f172a; margin-top:4px;" id="profBilledAmt">INR 0.00</div>
           </div>
           <div style="background:#ecfdf5; border:1px solid #d1fae5; border-radius:10px; padding:14px; text-align:center;">
-            <span style="font-size:0.72rem; text-transform:uppercase; color:#065f46; font-weight:700;">Total Received</span>
+            <span style="font-size:0.72rem; text-transform:uppercase; color:#065f46; font-weight:700;">Lifetime Paid</span>
             <div style="font-size:1.25rem; font-weight:800; color:#059669; margin-top:4px;" id="profReceivedAmt">INR 0.00</div>
           </div>
           <div style="background:#fff7ed; border:1px solid #ffedd5; border-radius:10px; padding:14px; text-align:center;">
-            <span style="font-size:0.72rem; text-transform:uppercase; color:#9a3412; font-weight:700;">Balance Pending</span>
+            <span style="font-size:0.72rem; text-transform:uppercase; color:#9a3412; font-weight:700;">Active Pending Due</span>
             <div style="font-size:1.25rem; font-weight:800; color:#ea580c; margin-top:4px;" id="profPendingAmt">INR 0.00</div>
           </div>
         </div>
 
         <div style="background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:16px;">
-          <h4 style="font-size:0.85rem; font-weight:800; color:#0f172a; margin-bottom:10px;">Installment / Payment Timeline</h4>
+          <h4 style="font-size:0.85rem; font-weight:800; color:#0f172a; margin-bottom:10px;">Payment & Installment Timeline</h4>
           <div class="table-box" style="margin-top:0;">
             <table>
               <thead>
@@ -765,8 +784,8 @@
           <span style="font-size: 0.75rem; color: #64748b; font-weight: 700;">Account:</span>
           <strong id="adjClientName" style="display: block; font-size: 0.95rem; color: #0f172a; margin-top: 2px;"></strong>
           <div style="display:flex; justify-content:space-between; margin-top: 6px; font-size: 0.8rem;">
-            <span>Total Billed: <strong id="adjBilledVal">INR 0.00</strong></span>
-            <span>Current Received: <strong id="adjCurrentPaidVal" style="color:#059669;">INR 0.00</strong></span>
+            <span>Current Cycle: <strong id="adjBilledVal">INR 0.00</strong></span>
+            <span>Current Paid: <strong id="adjCurrentPaidVal" style="color:#059669;">INR 0.00</strong></span>
           </div>
         </div>
 
@@ -1026,47 +1045,11 @@
     let state = { clients: [], staff: [], tasks: [], payments: [], chats: [] };
     let currentInvoice = { client: null, lineItems: [], customItems: [], advances: [], calculatedNextDue: "", financials: {} };
     let activeTimeFilter = "all", activeClientCategory = "all";
+    let customFilterStartDate = null, customFilterEndDate = null;
     let selectedChatStaffId = null, adminActiveAttachment = { url: "", type: "" };
     let lineChartInstance = null, mixChartInstance = null;
 
-    /* RECURRING BILL CALCULATOR HELPER */
-    function calculateClientBilledDetails(c) {
-      const oneTime = parseFloat(c[5]) || 0;
-      const monthly = parseFloat(c[7]) || 0;
-      const annual = parseFloat(c[9]) || 0;
-
-      let elapsedMonths = 1;
-      let elapsedYears = 1;
-
-      const dateStr = String(c[10] || "").substring(0, 10);
-      if (dateStr && !isNaN(new Date(dateStr).getTime())) {
-        const parts = dateStr.split('-');
-        let startDate;
-        if (parts.length === 3) {
-          startDate = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
-        } else {
-          startDate = new Date(dateStr);
-        }
-        
-        const now = new Date();
-        let mDiff = (now.getFullYear() - startDate.getFullYear()) * 12 + (now.getMonth() - startDate.getMonth());
-        if (now.getDate() >= startDate.getDate()) {
-          mDiff += 1;
-        }
-        elapsedMonths = Math.max(1, mDiff);
-
-        let yDiff = now.getFullYear() - startDate.getFullYear();
-        if (now.getMonth() > startDate.getMonth() || (now.getMonth() === startDate.getMonth() && now.getDate() >= startDate.getDate())) {
-          yDiff += 1;
-        }
-        elapsedYears = Math.max(1, yDiff);
-      }
-
-      const totalBilled = oneTime + (monthly * elapsedMonths) + (annual * elapsedYears);
-      return { totalBilled, oneTime, monthly, annual, elapsedMonths, elapsedYears };
-    }
-
-    /* SAFE DATE PARSER FOR ANALYTICS */
+    /* SAFE DATE PARSER */
     function parseLocalDate(val) {
       if (!val) return null;
       let str = String(val).trim();
@@ -1079,6 +1062,87 @@
       const parsed = new Date(str);
       if (isNaN(parsed.getTime())) return null;
       return new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate(), 0, 0, 0, 0);
+    }
+
+    /* RECURRING CYCLE HELPER (ISOLATES ACTIVE MONTH/YEAR OR LIFETIME) */
+    function calculateClientCycleMetrics(c, payments) {
+      const clientId = String(c[0] || "").trim();
+      const oneTime = parseFloat(c[5]) || 0;
+      const monthly = parseFloat(c[7]) || 0;
+      const annual = parseFloat(c[9]) || 0;
+      const now = new Date();
+
+      const curYear = now.getFullYear();
+      const curMonth = now.getMonth();
+      const startOfCurrentMonth = new Date(curYear, curMonth, 1, 0, 0, 0, 0);
+      const startOfCurrentYear = new Date(curYear, 0, 1, 0, 0, 0, 0);
+
+      // 1. Calculate Active Cycle Demand
+      let activeCycleDemand = 0;
+      let isRecurring = false;
+
+      if (monthly > 0) {
+        activeCycleDemand += monthly;
+        isRecurring = true;
+      }
+      if (annual > 0) {
+        activeCycleDemand += annual;
+        isRecurring = true;
+      }
+      if (!isRecurring) {
+        activeCycleDemand = oneTime;
+      }
+
+      // 2. Calculate Active Cycle Received
+      let activeCycleReceived = 0;
+      let lifetimeReceived = 0;
+
+      (payments || []).forEach(p => {
+        if (String(p[1] || "").trim() === clientId) {
+          const amt = parseFloat(p[4]) || 0;
+          lifetimeReceived += amt;
+          const pDate = parseLocalDate(p[5]);
+
+          if (isRecurring) {
+            if (monthly > 0 && pDate && pDate >= startOfCurrentMonth) {
+              activeCycleReceived += amt;
+            } else if (annual > 0 && monthly <= 0 && pDate && pDate >= startOfCurrentYear) {
+              activeCycleReceived += amt;
+            }
+          } else {
+            // One-time project: lifetime = current cycle
+            activeCycleReceived += amt;
+          }
+        }
+      });
+
+      // Active Pending Due resets for current cycle
+      const activePendingDue = Math.max(0, activeCycleDemand - activeCycleReceived);
+
+      // Lifetime Cumulative calculations for directory
+      let elapsedMonths = 1, elapsedYears = 1;
+      const dateStr = String(c[10] || "").substring(0, 10);
+      if (dateStr && !isNaN(new Date(dateStr).getTime())) {
+        const parts = dateStr.split('-');
+        let startDate = parts.length === 3 ? new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10)) : new Date(dateStr);
+        let mDiff = (now.getFullYear() - startDate.getFullYear()) * 12 + (now.getMonth() - startDate.getMonth());
+        if (now.getDate() >= startDate.getDate()) mDiff += 1;
+        elapsedMonths = Math.max(1, mDiff);
+
+        let yDiff = now.getFullYear() - startDate.getFullYear();
+        if (now.getMonth() > startDate.getMonth() || (now.getMonth() === startDate.getMonth() && now.getDate() >= startDate.getDate())) yDiff += 1;
+        elapsedYears = Math.max(1, yDiff);
+      }
+      const lifetimeBilled = oneTime + (monthly * elapsedMonths) + (annual * elapsedYears);
+
+      return {
+        activeCycleDemand,
+        activeCycleReceived,
+        activePendingDue,
+        lifetimeBilled,
+        lifetimeReceived,
+        lifetimeDue: Math.max(0, lifetimeBilled - lifetimeReceived)
+      };
     }
 
     function validateAdminPin() {
@@ -1245,9 +1309,26 @@
 
     function setTimeFilter(filter, el) {
       activeTimeFilter = filter;
+      customFilterStartDate = null;
+      customFilterEndDate = null;
+      document.getElementById("analyticsFromDate").value = "";
+      document.getElementById("analyticsToDate").value = "";
       document.querySelectorAll(".time-pill").forEach(btn => btn.classList.remove("active"));
       if (el) el.classList.add("active");
       renderMetaAnalytics();
+    }
+
+    function applyCustomAnalyticsDate() {
+      const fromVal = document.getElementById("analyticsFromDate").value;
+      const toVal = document.getElementById("analyticsToDate").value;
+      if (fromVal && toVal) {
+        customFilterStartDate = parseLocalDate(fromVal);
+        const endParsed = parseLocalDate(toVal);
+        customFilterEndDate = new Date(endParsed.getFullYear(), endParsed.getMonth(), endParsed.getDate(), 23, 59, 59, 999);
+        activeTimeFilter = "custom";
+        document.querySelectorAll(".time-pill").forEach(btn => btn.classList.remove("active"));
+        renderMetaAnalytics();
+      }
     }
 
     function setClientCategoryFilter(cat, el) {
@@ -1257,52 +1338,69 @@
       renderAdminDashboard();
     }
 
+    /* RENDER PAYMENT & RECEIVABLES LEDGER (ROLLING ACTIVE CYCLE) */
     function renderPaymentLedger() {
       const tbody = document.getElementById("recoveryLedgerBody");
-      let totalReceivedAll = 0, totalPendingAll = 0, rowsHtml = "";
-      const now = new Date(), todayDateStr = now.toISOString().split("T")[0];
-      let calculatedTodaySales = 0;
+      let totalDemandMonth = 0, totalPaidMonth = 0, totalPendingMonth = 0, rowsHtml = "";
 
       (state.clients || []).forEach(c => {
         if (String(c[11] || "").trim().toLowerCase() === "cancelled") return;
-        const clientId = String(c[0] || "").trim(), clientName = c[1] || "Account", phone = c[2] || "—", email = c[3] || "—";
+        const clientId = String(c[0] || "").trim();
+        const clientName = c[1] || "Account";
+        const phone = c[2] || "—";
+        const email = c[3] || "—";
         
-        const billedCalc = calculateClientBilledDetails(c);
-        const clientBilled = billedCalc.totalBilled;
+        const m = calculateClientCycleMetrics(c, state.payments);
+        totalDemandMonth += m.activeCycleDemand;
+        totalPaidMonth += m.activeCycleReceived;
+        totalPendingMonth += m.activePendingDue;
 
-        if (String(c[10] || "").substring(0, 10) === todayDateStr) calculatedTodaySales += (billedCalc.oneTime + billedCalc.monthly + billedCalc.annual);
-
-        let clientPaid = 0;
-        (state.payments || []).forEach(p => { if (String(p[1] || "").trim() === clientId) clientPaid += parseFloat(p[4]) || 0; });
-        const pendingDue = Math.max(0, clientBilled - clientPaid);
-        totalReceivedAll += clientPaid; totalPendingAll += pendingDue;
-
-        rowsHtml += `<tr><td><strong>${clientName}</strong><br><span style="font-size:0.75rem; color:#64748b;">${clientId}</span></td><td>${phone}<br><span style="font-size:0.75rem; color:#64748b;">${email}</span></td><td><strong>INR ${clientBilled.toFixed(2)}</strong></td><td style="color:#059669; font-weight:700;">INR ${clientPaid.toFixed(2)}</td><td style="color:${pendingDue > 0 ? '#ea580c' : '#64748b'}; font-weight:700;">INR ${pendingDue.toFixed(2)}</td><td style="text-align: right; white-space: nowrap;"><button class="btn-profile" onclick="openCustomerProfileModal('${clientId}')">View Passbook</button> <button class="btn-adjust" onclick="openPaymentAdjustmentModal('${clientId}')">Adjust</button> ${pendingDue > 0 ? `<button class="btn-reminder" onclick="sendPaymentReminderMail('${clientId}', '${pendingDue.toFixed(2)}')">Reminder</button>` : `<span style="font-size:0.75rem; color:#059669; font-weight:700;">Settled</span>`}</td></tr>`;
+        rowsHtml += `<tr>
+          <td><span class="badge-link" onclick="openCustomerProfileModal('${clientId}')" title="Click to view full payment directory">${clientId}</span></td>
+          <td><strong>${clientName}</strong></td>
+          <td>${phone}<br><span style="font-size:0.75rem; color:#64748b;">${email}</span></td>
+          <td><strong>INR ${m.activeCycleDemand.toFixed(2)}</strong></td>
+          <td style="color:#059669; font-weight:700;">INR ${m.activeCycleReceived.toFixed(2)}</td>
+          <td style="color:${m.activePendingDue > 0 ? '#ea580c' : '#64748b'}; font-weight:700;">INR ${m.activePendingDue.toFixed(2)}</td>
+          <td style="text-align: right; white-space: nowrap;">
+            <button class="btn-profile" onclick="openCustomerProfileModal('${clientId}')">Directory</button> 
+            <button class="btn-adjust" onclick="openPaymentAdjustmentModal('${clientId}')">Adjust</button> 
+            ${m.activePendingDue > 0 ? `<button class="btn-reminder" onclick="sendPaymentReminderMail('${clientId}', '${m.activePendingDue.toFixed(2)}')">Reminder</button>` : `<span style="font-size:0.75rem; color:#059669; font-weight:700;">Settled</span>`}
+          </td>
+        </tr>`;
       });
-      tbody.innerHTML = rowsHtml || '<tr><td colspan="6" style="text-align:center;">No accounts available.</td></tr>';
-      document.getElementById("todaySales").innerText = "INR " + calculatedTodaySales.toFixed(2);
-      document.getElementById("kpiTotalPaid").innerText = "INR " + totalReceivedAll.toFixed(2);
-      document.getElementById("kpiTotalPending").innerText = "INR " + totalPendingAll.toFixed(2);
+
+      tbody.innerHTML = rowsHtml || '<tr><td colspan="7" style="text-align:center;">No accounts available.</td></tr>';
+      document.getElementById("todaySales").innerText = "INR " + totalDemandMonth.toFixed(2);
+      document.getElementById("kpiTotalPaid").innerText = "INR " + totalPaidMonth.toFixed(2);
+      document.getElementById("kpiTotalPending").innerText = "INR " + totalPendingMonth.toFixed(2);
     }
 
+    /* CUSTOMER PASSBOOK & FULL DIRECTORY */
     function openCustomerProfileModal(clientId) {
       const c = (state.clients || []).find(item => String(item[0]).trim() === String(clientId).trim());
       if (!c) return;
-      const billedCalc = calculateClientBilledDetails(c);
-      const clientBilled = billedCalc.totalBilled;
-      let clientPaid = 0, historyRows = "";
+      const m = calculateClientCycleMetrics(c, state.payments);
+      let historyRows = "";
+      
       (state.payments || []).forEach(p => {
         if (String(p[1] || "").trim() === String(clientId).trim()) {
-          const amt = parseFloat(p[4]) || 0; clientPaid += amt;
-          historyRows += `<tr><td>${p[5] ? String(p[5]).substring(0, 10) : "—"}</td><td>${p[3]}</td><td style="font-weight:700; color:${amt < 0 ? '#dc2626' : '#059669'};">INR ${amt.toFixed(2)}</td><td>${p[6] || '—'}</td></tr>`;
+          const amt = parseFloat(p[4]) || 0;
+          historyRows += `<tr>
+            <td>${p[5] ? String(p[5]).substring(0, 10) : "—"}</td>
+            <td>${p[3]}</td>
+            <td style="font-weight:700; color:${amt < 0 ? '#dc2626' : '#059669'};">INR ${amt.toFixed(2)}</td>
+            <td>${p[6] || '—'}</td>
+          </tr>`;
         }
       });
+
       document.getElementById("profClientName").innerText = c[1];
-      document.getElementById("profClientDetails").innerText = `Client ID: ${c[0]} | Phone: ${c[2] || '—'}`;
-      document.getElementById("profBilledAmt").innerText = "INR " + clientBilled.toFixed(2);
-      document.getElementById("profReceivedAmt").innerText = "INR " + clientPaid.toFixed(2);
-      document.getElementById("profPendingAmt").innerText = "INR " + Math.max(0, clientBilled - clientPaid).toFixed(2);
-      document.getElementById("profPaymentsHistoryBody").innerHTML = historyRows || '<tr><td colspan="4" style="text-align:center;">No payments found.</td></tr>';
+      document.getElementById("profClientDetails").innerText = `Client ID: ${c[0]} | Phone: ${c[2] || '—'} | Email: ${c[3] || '—'}`;
+      document.getElementById("profBilledAmt").innerText = "INR " + m.lifetimeBilled.toFixed(2);
+      document.getElementById("profReceivedAmt").innerText = "INR " + m.lifetimeReceived.toFixed(2);
+      document.getElementById("profPendingAmt").innerText = "INR " + m.activePendingDue.toFixed(2);
+      document.getElementById("profPaymentsHistoryBody").innerHTML = historyRows || '<tr><td colspan="4" style="text-align:center;">No payment records found.</td></tr>';
       document.getElementById("customerProfileModal").style.display = "flex";
     }
     function closeCustomerProfileModal() { document.getElementById("customerProfileModal").style.display = "none"; }
@@ -1310,17 +1408,11 @@
     function openPaymentAdjustmentModal(clientId) {
       const c = (state.clients || []).find(item => String(item[0]).trim() === String(clientId).trim());
       if (!c) return;
-      const billedCalc = calculateClientBilledDetails(c);
-      let currentPaid = 0;
-      (state.payments || []).forEach(p => {
-        if (String(p[1] || "").trim() === String(clientId).trim()) {
-          currentPaid += parseFloat(p[4]) || 0;
-        }
-      });
+      const m = calculateClientCycleMetrics(c, state.payments);
       document.getElementById("adjClientId").value = c[0];
       document.getElementById("adjClientName").innerText = `${c[1]} (${c[0]})`;
-      document.getElementById("adjBilledVal").innerText = "INR " + billedCalc.totalBilled.toFixed(2);
-      document.getElementById("adjCurrentPaidVal").innerText = "INR " + currentPaid.toFixed(2);
+      document.getElementById("adjBilledVal").innerText = "INR " + m.activeCycleDemand.toFixed(2);
+      document.getElementById("adjCurrentPaidVal").innerText = "INR " + m.activeCycleReceived.toFixed(2);
       document.getElementById("paymentAdjustmentModal").style.display = "flex";
     }
     function closePaymentAdjustmentModal() { document.getElementById("paymentAdjustmentModal").style.display = "none"; }
@@ -1353,7 +1445,7 @@
     }
     window.onReminderDispatched = function(res) { showToast(res && res.success ? res.message : "Failed."); };
 
-    /* 100% COMPLETE & BULLETPROOF ANALYTICS ENGINE */
+    /* ANALYTICS ENGINE WITH CUSTOM DATE RANGE */
     function renderMetaAnalytics() {
       const now = new Date();
       const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
@@ -1361,33 +1453,33 @@
 
       let filterStartDate = null;
       let filterEndDate = todayEnd;
-      let subPeriodTitle = "All Time Velocity";
+      let subPeriodTitle = "All Time Pipeline";
 
       if (activeTimeFilter === "today") {
         filterStartDate = todayStart;
-        subPeriodTitle = "Today's Performance";
+        subPeriodTitle = "Today";
       } else if (activeTimeFilter === "7d") {
-        // Last 7 full calendar days including today
         filterStartDate = new Date(todayStart.getTime() - (6 * 24 * 60 * 60 * 1000));
-        subPeriodTitle = "Last 7 Days (Rolling)";
+        subPeriodTitle = "Last 7 Days";
       } else if (activeTimeFilter === "30d") {
-        // Last 30 full calendar days including today
         filterStartDate = new Date(todayStart.getTime() - (29 * 24 * 60 * 60 * 1000));
-        subPeriodTitle = "Last 30 Days (Rolling)";
+        subPeriodTitle = "Last 30 Days";
       } else if (activeTimeFilter === "month") {
-        // Current Calendar Month
         filterStartDate = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
-        subPeriodTitle = "This Month Performance";
+        subPeriodTitle = "This Month";
+      } else if (activeTimeFilter === "custom" && customFilterStartDate && customFilterEndDate) {
+        filterStartDate = customFilterStartDate;
+        filterEndDate = customFilterEndDate;
+        subPeriodTitle = "Custom Range (" + filterStartDate.toISOString().substring(0,10) + " to " + filterEndDate.toISOString().substring(0,10) + ")";
       }
 
       document.getElementById("chartTimelineSubtitle").innerText = subPeriodTitle;
 
-      // 1. FILTER PAYMENTS PRECISELY
+      // 1. Filter Collections & Build Buckets
       let totalCollected = 0;
       let timelineBuckets = {};
 
-      // Initialize buckets for 7D / 30D so graph is continuous even with 0 sales
-      if (activeTimeFilter === "7d" || activeTimeFilter === "today" || activeTimeFilter === "30d") {
+      if (filterStartDate) {
         let runner = new Date(filterStartDate.getTime());
         while (runner <= filterEndDate) {
           const y = runner.getFullYear();
@@ -1413,39 +1505,36 @@
         }
       });
 
-      // 2. CLIENT BASE & REVENUE CALCULATIONS
-      let totalGross = 0, totalMrr = 0, oneTimeSum = 0, monthlySum = 0, annualSum = 0, activeAccounts = 0;
+      // 2. Client Metrics & Contracted Volumes
+      let lifetimeGross = 0, totalMrr = 0, activeAccounts = 0;
+      let activeCycleDemandTotal = 0, activeCycleDueTotal = 0;
+      let oneTimeSum = 0, monthlySum = 0, annualSum = 0;
+
       (state.clients || []).forEach(c => {
         if (String(c[11] || "").trim().toLowerCase() === "cancelled") return;
-        const b = calculateClientBilledDetails(c);
-        oneTimeSum += b.oneTime;
-        monthlySum += (b.monthly * b.elapsedMonths);
-        annualSum += (b.annual * b.elapsedYears);
-        totalGross += b.totalBilled;
-        totalMrr += b.monthly;
+        const ot = parseFloat(c[5]) || 0, mo = parseFloat(c[7]) || 0, an = parseFloat(c[9]) || 0;
+        oneTimeSum += ot; monthlySum += mo; annualSum += an;
+        totalMrr += mo;
         activeAccounts++;
+
+        const m = calculateClientCycleMetrics(c, state.payments);
+        lifetimeGross += m.lifetimeBilled;
+        activeCycleDemandTotal += m.activeCycleDemand;
+        activeCycleDueTotal += m.activePendingDue;
       });
 
-      // If filtered by time period, Gross Revenue card shows the contracted volume in this filter frame
-      let displayGross = totalGross;
-      if (activeTimeFilter === "today") displayGross = totalCollected > 0 ? totalCollected : totalMrr / 30;
-      else if (activeTimeFilter === "7d") displayGross = (totalMrr / 4.3);
-      else if (activeTimeFilter === "30d" || activeTimeFilter === "month") displayGross = totalMrr;
+      let displayTarget = activeTimeFilter === "all" ? lifetimeGross : activeCycleDemandTotal;
+      let displayDue = activeTimeFilter === "all" ? Math.max(0, lifetimeGross - totalCollected) : activeCycleDueTotal;
 
-      // Ensure Outstanding Due stays realistic per selection
-      const outstandingDue = activeTimeFilter === "all" ? Math.max(0, totalGross - totalCollected) : Math.max(0, displayGross - totalCollected);
-
-      // Tasks metrics
       let tasksTotal = (state.tasks || []).length;
       let tasksDone = (state.tasks || []).filter(t => t[6] === "Approved").length;
 
-      // Update KPI Cards UI
-      document.getElementById("metaKpiGross").innerText = "INR " + Math.round(displayGross).toLocaleString("en-IN");
-      document.getElementById("metaKpiGrossSub").innerText = activeTimeFilter === "all" ? "Total contracted business value" : "Target for " + subPeriodTitle;
+      document.getElementById("metaKpiGross").innerText = "INR " + Math.round(displayTarget).toLocaleString("en-IN");
+      document.getElementById("metaKpiGrossSub").innerText = activeTimeFilter === "all" ? "Total contracted value" : "Demand in " + subPeriodTitle;
       document.getElementById("metaKpiMrr").innerText = "INR " + totalMrr.toLocaleString("en-IN");
       document.getElementById("metaKpiPaid").innerText = "INR " + totalCollected.toLocaleString("en-IN");
-      document.getElementById("metaKpiPaidSub").innerText = "Collected in " + subPeriodTitle;
-      document.getElementById("metaKpiDue").innerText = "INR " + Math.round(outstandingDue).toLocaleString("en-IN");
+      document.getElementById("metaKpiPaidSub").innerText = "Realized in " + subPeriodTitle;
+      document.getElementById("metaKpiDue").innerText = "INR " + Math.round(displayDue).toLocaleString("en-IN");
       document.getElementById("metaKpiClients").innerText = activeAccounts;
       document.getElementById("metaKpiClientsSub").innerText = activeAccounts + " active accounts in scope";
       
@@ -1455,21 +1544,20 @@
       document.getElementById("fulfillmentRatioText").innerText = fulfillmentPct + "%";
       document.getElementById("fulfillmentRatioBar").style.width = fulfillmentPct + "%";
 
-      let mrrRatio = totalGross > 0 ? Math.round((totalMrr / totalGross) * 100) : 0;
+      let mrrRatio = displayTarget > 0 ? Math.round((totalMrr / displayTarget) * 100) : 0;
       document.getElementById("mrrRatioText").innerText = mrrRatio + "%";
-      document.getElementById("mrrProgressBar").style.width = mrrRatio + "%";
+      document.getElementById("mrrProgressBar").style.width = Math.min(100, mrrRatio) + "%";
 
-      let collectionRatio = displayGross > 0 ? Math.min(100, Math.round((totalCollected / displayGross) * 100)) : (totalCollected > 0 ? 100 : 0);
+      let collectionRatio = displayTarget > 0 ? Math.min(100, Math.round((totalCollected / displayTarget) * 100)) : (totalCollected > 0 ? 100 : 0);
       document.getElementById("collectionRateText").innerText = collectionRatio + "%";
       document.getElementById("collectionRateBar").style.width = collectionRatio + "%";
 
-      let pendingRatio = displayGross > 0 ? Math.min(100, Math.round((outstandingDue / displayGross) * 100)) : 0;
+      let pendingRatio = displayTarget > 0 ? Math.min(100, Math.round((displayDue / displayTarget) * 100)) : 0;
       document.getElementById("pendingRateText").innerText = pendingRatio + "%";
       document.getElementById("pendingRateBar").style.width = pendingRatio + "%";
 
-      let collectionEff = collectionRatio;
-      document.getElementById("collectionPercentText").innerText = collectionEff + "%";
-      document.getElementById("collectionProgressBar").style.width = collectionEff + "%";
+      document.getElementById("collectionPercentText").innerText = collectionRatio + "%";
+      document.getElementById("collectionProgressBar").style.width = collectionRatio + "%";
 
       renderTimelineChart(timelineBuckets);
       renderServiceMixChart(oneTimeSum, monthlySum, annualSum);
@@ -1482,7 +1570,6 @@
       let labels = Object.keys(buckets).sort();
       let data = labels.map(k => buckets[k]);
 
-      // Nicely format the X-axis labels (e.g., "24 Sep")
       const formattedLabels = labels.map(dateStr => {
         const p = dateStr.split('-');
         if (p.length === 3) {
@@ -1555,7 +1642,19 @@
         if (activeClientCategory === "all" || activeClientCategory === "annual") { if (c[8] && anAmt > 0) serv.push(`Annual: ${c[8]} (INR ${anAmt})`); }
         if (serv.length === 0 && activeClientCategory !== "all") return;
 
-        cHtml += `<tr><td><strong>${c[0]}</strong></td><td><strong>${c[1]}</strong></td><td>${c[2]}<br><span style="font-size:0.75rem; color:#64748b;">${c[3]}</span></td><td>${serv.join("<br>") || "—"}</td><td><strong>${c[10] ? c[10].substring(0,10) : "—"}</strong></td><td style="text-align: right; white-space: nowrap;"><button class="btn-bill" onclick="openInvoiceModal('${c[0]}')">Generate Bill</button> <button class="btn-cancel-service" onclick="cancelClientService('${c[0]}')">Cancel</button> <button class="btn-edit" onclick="editClientRecord('${c[0]}')">Edit</button> <button class="btn-del" onclick="deleteClientRecord('${c[0]}')">Delete</button></td></tr>`;
+        cHtml += `<tr>
+          <td><span class="badge-link" onclick="openCustomerProfileModal('${c[0]}')" title="Click to view full directory">${c[0]}</span></td>
+          <td><strong>${c[1]}</strong></td>
+          <td>${c[2]}<br><span style="font-size:0.75rem; color:#64748b;">${c[3]}</span></td>
+          <td>${serv.join("<br>") || "—"}</td>
+          <td><strong>${c[10] ? c[10].substring(0,10) : "—"}</strong></td>
+          <td style="text-align: right; white-space: nowrap;">
+            <button class="btn-bill" onclick="openInvoiceModal('${c[0]}')">Generate Bill</button> 
+            <button class="btn-cancel-service" onclick="cancelClientService('${c[0]}')">Cancel</button> 
+            <button class="btn-edit" onclick="editClientRecord('${c[0]}')">Edit</button> 
+            <button class="btn-del" onclick="deleteClientRecord('${c[0]}')">Delete</button>
+          </td>
+        </tr>`;
       });
       clientBody.innerHTML = cHtml || '<tr><td colspan="6" style="text-align:center;">No accounts found.</td></tr>';
     }
@@ -1725,7 +1824,7 @@
       const taxR = parseFloat(document.getElementById("invTaxRate").value) || 0, discR = parseFloat(document.getElementById("invDiscountRate").value) || 0;
       const discAmt = sub * (discR / 100), taxAmt = (sub - discAmt) * (taxR / 100);
       const total = (sub - discAmt) + taxAmt, due = Math.max(0, total - paid);
-      currentInvoice.financials = { subtotal: sub.toFixed(2), total: total.toFixed(2), paid: paid.deposited ? paid.toFixed(2) : paid.toFixed(2), balanceDue: due.toFixed(2) };
+      currentInvoice.financials = { subtotal: sub.toFixed(2), total: total.toFixed(2), paid: paid.toFixed(2), balanceDue: due.toFixed(2) };
 
       document.getElementById("prevSubtotal").innerText = sub.toFixed(2);
       document.getElementById("prevTotal").innerText = "INR " + total.toFixed(2);
