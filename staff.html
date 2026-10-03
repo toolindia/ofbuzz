@@ -106,15 +106,16 @@
     /* ACTION CONTROLS / CLOCK-IN SUITE */
     .terminal-actions-grid {
       display: grid;
-      grid-template-columns: 1.5fr 1fr 1fr;
+      grid-template-columns: 1.2fr 1.2fr 1fr 1fr;
       gap: 12px;
       margin-top: 16px;
       align-items: center;
     }
-    @media (max-width: 720px) { .terminal-actions-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 768px) { .terminal-actions-grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 480px) { .terminal-actions-grid { grid-template-columns: 1fr; } }
 
     button {
-      padding: 12px 18px;
+      padding: 12px 14px;
       border: none;
       border-radius: 8px;
       font-weight: 700;
@@ -125,28 +126,38 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
+      text-align: center;
     }
     button:active { transform: translateY(1px); }
-    button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    button:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none !important; }
 
-    .btn-attendance {
+    .btn-punch-in {
       background: var(--navy);
       color: #ffffff;
       box-shadow: 0 4px 12px rgba(15,23,42,0.15);
     }
-    .btn-attendance:hover { background: #1e293b; }
+    .btn-punch-in:hover:not(:disabled) { background: #1e293b; }
+
+    .btn-punch-out {
+      background: #fee2e2;
+      color: #b91c1c;
+      border: 1px solid #fecaca;
+    }
+    .btn-punch-out:hover:not(:disabled) { background: #ef4444; color: #ffffff; }
+
     .btn-fetch {
       background: #f1f5f9;
       color: var(--navy);
       border: 1px solid var(--border-dark);
     }
-    .btn-fetch:hover { background: #e2e8f0; }
+    .btn-fetch:hover:not(:disabled) { background: #e2e8f0; }
+
     .btn-chat-open {
       background: rgba(2, 132, 199, 0.1);
       color: var(--info);
       border: 1px solid rgba(2, 132, 199, 0.3);
     }
-    .btn-chat-open:hover { background: var(--info); color: #fff; }
+    .btn-chat-open:hover:not(:disabled) { background: var(--info); color: #fff; }
 
     /* ATTENDANCE RECEIPT STRIP */
     .attendance-log-strip {
@@ -154,14 +165,13 @@
       margin-top: 14px;
       padding: 12px 16px;
       border-radius: 8px;
-      background: #ecfdf5;
-      border: 1px solid #d1fae5;
-      color: #065f46;
       font-size: 0.8rem;
       font-weight: 600;
       justify-content: space-between;
       align-items: center;
     }
+    .strip-in { background: #ecfdf5; border: 1px solid #d1fae5; color: #065f46; }
+    .strip-out { background: #fef2f2; border: 1px solid #fee2e2; color: #991b1b; }
 
     /* DELIVERABLES BOARD */
     .board-card {
@@ -404,7 +414,7 @@
     <section class="auth-banner-card">
       <div class="strip-title">
         <span>Associate Verification & Terminal Controls</span>
-        <span style="font-size:0.7rem; color:var(--text-muted); font-family:'JetBrains Mono', monospace;">Session State: Ready</span>
+        <span style="font-size:0.7rem; color:var(--text-muted); font-family:'JetBrains Mono', monospace;" id="shiftStatusIndicator">Status: Offline</span>
       </div>
 
       <div class="input-row">
@@ -419,8 +429,11 @@
       </div>
 
       <div class="terminal-actions-grid">
-        <button class="btn-attendance" id="btnAttendance" onclick="logAttendance()">
-          Log Daily Shift Attendance
+        <button class="btn-punch-in" id="btnPunchIn" onclick="handlePunch('Punch In')">
+          Punch In
+        </button>
+        <button class="btn-punch-out" id="btnPunchOut" onclick="handlePunch('Punch Out')" disabled>
+          Punch Out
         </button>
         <button class="btn-fetch" id="btnFetchTasks" onclick="retrieveTasks()">
           Sync Deliverables
@@ -431,7 +444,7 @@
       </div>
 
       <div class="attendance-log-strip" id="attendanceReceiptBox">
-        <span id="attendanceReceiptText">Attendance logged for today.</span>
+        <span id="attendanceReceiptText">Attendance status.</span>
         <span style="font-family:'JetBrains Mono', monospace; font-size:0.72rem;" id="attendanceTimestamp">--:--</span>
       </div>
     </section>
@@ -510,36 +523,62 @@
       script.onload = function() { script.remove(); };
     }
 
-    function logAttendance() {
+    // PUNCH IN & PUNCH OUT CONTROLLER
+    function handlePunch(type) {
       var id = document.getElementById("workforceId").value.trim();
       var name = document.getElementById("workforceName").value.trim();
-      var btn = document.getElementById("btnAttendance");
+      var btnIn = document.getElementById("btnPunchIn");
+      var btnOut = document.getElementById("btnPunchOut");
 
       if (!id || !name) {
         showToast("Both Associate ID and Legal Name are required.", false);
         return;
       }
 
-      btn.disabled = true;
-      btn.innerText = "Recording Shift...";
+      var targetBtn = (type === "Punch In") ? btnIn : btnOut;
+      var originalText = targetBtn.innerText;
+      targetBtn.disabled = true;
+      targetBtn.innerText = (type === "Punch In") ? "Punching In..." : "Punching Out...";
 
-      window.onAttDone = function(res) {
-        btn.disabled = false;
-        btn.innerText = "Log Daily Shift Attendance";
+      window.onPunchDone = function(res) {
+        targetBtn.innerText = originalText;
         var isOk = res && res.success;
-        showToast(isOk ? res.message : "Attendance transmission failed.", isOk);
+        showToast(isOk ? res.message : type + " transmission failed.", isOk);
 
         if (isOk) {
           var receipt = document.getElementById("attendanceReceiptBox");
           var receiptText = document.getElementById("attendanceReceiptText");
           var timeSpan = document.getElementById("attendanceTimestamp");
+          var shiftIndicator = document.getElementById("shiftStatusIndicator");
+
           receipt.style.display = "flex";
-          receiptText.innerText = "Shift attendance verified for " + name + " (" + id + ")";
           timeSpan.innerText = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+
+          if (type === "Punch In") {
+            btnIn.disabled = true;
+            btnOut.disabled = false;
+            receipt.className = "attendance-log-strip strip-in";
+            receiptText.innerText = "Punch In verified for " + name + " (" + id + ")";
+            shiftIndicator.innerText = "Status: Active Shift (Punched In)";
+            shiftIndicator.style.color = "var(--success)";
+          } else {
+            btnIn.disabled = false;
+            btnOut.disabled = true;
+            receipt.className = "attendance-log-strip strip-out";
+            receiptText.innerText = "Punch Out recorded for " + name + " (" + id + ")";
+            shiftIndicator.innerText = "Status: Shift Ended (Punched Out)";
+            shiftIndicator.style.color = "var(--text-muted)";
+          }
+        } else {
+          targetBtn.disabled = false;
         }
       };
 
-      jsonp(API_ENDPOINT + "?action=markAttendance&staffId=" + encodeURIComponent(id) + "&staffName=" + encodeURIComponent(name), "onAttDone");
+      // action parameter aur type bheja gaya hai backend ke liye
+      var queryUrl = API_ENDPOINT + "?action=markAttendance&staffId=" + encodeURIComponent(id) + 
+                     "&staffName=" + encodeURIComponent(name) + 
+                     "&punchType=" + encodeURIComponent(type);
+      jsonp(queryUrl, "onPunchDone");
     }
 
     function retrieveTasks() {
@@ -605,7 +644,7 @@
         retrieveTasks();
       };
 
-      jsonp(API_ENDPOINT + "?action=submitTaskCompletion&taskId=" + encodeURIComponent(taskId) + "&remark=" + encodeURIComponent(remarkValue), "onCompleteDone");
+      jsonp(API_ENDPOINT + "?action=submitTaskComplete&taskId=" + encodeURIComponent(taskId) + "&remark=" + encodeURIComponent(remarkValue), "onCompleteDone");
     }
 
     function openStaffChat() {
