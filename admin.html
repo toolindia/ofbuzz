@@ -23,6 +23,7 @@
       --text-muted: #64748b;
       --accent: #10b981;
       --danger: #ef4444;
+      --warning: #f59e0b;
       --radius: 12px;
     }
 
@@ -109,6 +110,10 @@
     .ig-growth-badge { font-size: 0.7rem; font-weight: 800; padding: 3px 8px; border-radius: 20px; display: inline-flex; align-items: center; gap: 3px; }
     .badge-positive { background: #dcfce7; color: #166534; }
     .badge-neutral { background: #e0f2fe; color: #0369a1; }
+    .badge-danger { background: #fee2e2; color: #991b1b; }
+    .badge-alert { background: #ffedd5; color: #c2410c; font-weight: 800; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; border: 1px solid #fed7aa; }
+    .badge-severe { background: #fef2f2; color: #b91c1c; font-weight: 800; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; border: 1px solid #fecaca; }
+
     .ig-card-value { font-size: 1.6rem; font-weight: 800; color: #0f172a; margin-bottom: 6px; letter-spacing: -0.02em; }
     .ig-card-sub { font-size: 0.72rem; color: var(--text-muted); font-weight: 500; }
     
@@ -187,8 +192,8 @@
     .btn-logout:hover { background: var(--danger); color: #fff; }
 
     .badge-link {
-      display: inline-block; padding: 4px 8px; background: #e0f2fe; color: #0284c7;
-      border-radius: 6px; font-weight: 700; font-size: 0.78rem; text-decoration: none; cursor: pointer;
+      display: inline-block; padding: 5px 9px; background: #e0f2fe; color: #0284c7;
+      border-radius: 6px; font-weight: 700; font-size: 0.8rem; text-decoration: none; cursor: pointer;
       font-family: 'JetBrains Mono', monospace; border: 1px solid #bae6fd; transition: all 0.2s;
     }
     .badge-link:hover { background: #0284c7; color: #ffffff; }
@@ -399,7 +404,7 @@
           <div class="ig-card-value" id="metaKpiPaid" style="color: #059669;">INR 0</div>
           <div class="ig-card-sub" id="metaKpiPaidSub">Actual collections in window</div>
           <div class="ig-progress-container">
-            <div style="display:flex; justify-content:space-between; font-size:10px; color:#64748b; font-weight:700;"><span>Collection Efficiency</span><span id="collectionRateText">0%</span></div>
+            <div style="display:flex; justify-content:space-between; font-size:10px; color:#64748b; font-weight:700;"><span>Collection Rate</span><span id="collectionRateText">0%</span></div>
             <div class="ig-progress-bar"><div class="ig-progress-fill" id="collectionRateBar" style="width: 0%; background:#10b981;"></div></div>
           </div>
         </div>
@@ -411,7 +416,7 @@
             <span class="ig-growth-badge badge-neutral" id="badgeDue">Pending</span>
           </div>
           <div class="ig-card-value" id="metaKpiDue" style="color: #ea580c;">INR 0</div>
-          <div class="ig-card-sub" id="metaKpiDueSub">Current uncollected receivables</div>
+          <div class="ig-card-sub" id="metaKpiDueSub">Receivables to collect</div>
           <div class="ig-progress-container">
             <div style="display:flex; justify-content:space-between; font-size:10px; color:#64748b; font-weight:700;"><span>Pending Ratio</span><span id="pendingRateText">0%</span></div>
             <div class="ig-progress-bar"><div class="ig-progress-fill" id="pendingRateBar" style="width: 0%; background:#ea580c;"></div></div>
@@ -427,7 +432,7 @@
           <div class="ig-card-value" id="metaKpiClients">0</div>
           <div class="ig-card-sub" id="metaKpiClientsSub">0 active accounts in scope</div>
           <div class="ig-progress-container">
-            <div style="display:flex; justify-content:space-between; font-size:10px; color:#64748b; font-weight:700;"><span>Client Retention</span><span>Healthy</span></div>
+            <div style="display:flex; justify-content:space-between; font-size:10px; color:#64748b; font-weight:700;"><span>Client Base</span><span>Healthy</span></div>
             <div class="ig-progress-bar"><div class="ig-progress-fill" style="width: 100%; background:#8b5cf6;"></div></div>
           </div>
         </div>
@@ -479,10 +484,10 @@
       </div>
     </div>
 
-    <!-- PAYMENT & RECEIVABLES LEDGER -->
+    <!-- PAYMENT & RECEIVABLES LEDGER WITH AGING OVERDUE ALERTS -->
     <div class="section-card">
       <div class="section-head">
-        <span>Payment & Receivables Ledger (Current Active Cycle)</span>
+        <span>Payment & Receivables Ledger (Active Status & Overdue Cycle Alerts)</span>
       </div>
       <div class="table-box">
         <table>
@@ -491,14 +496,15 @@
               <th>Client ID</th>
               <th>Customer Name</th>
               <th>Contact Details</th>
-              <th>Active Cycle Demand</th>
-              <th>Received (Current Cycle)</th>
+              <th>Active Demand</th>
+              <th>Cycle Received</th>
               <th>Pending Due</th>
+              <th>Aging Cycle Status</th>
               <th style="text-align: right;">Action</th>
             </tr>
           </thead>
           <tbody id="recoveryLedgerBody">
-            <tr><td colspan="7" style="text-align:center;">Calculating ledger balances...</td></tr>
+            <tr><td colspan="8" style="text-align:center;">Calculating ledger balances...</td></tr>
           </tbody>
         </table>
       </div>
@@ -573,7 +579,7 @@
         <table>
           <thead>
             <tr>
-              <th>Client ID (View Directory)</th>
+              <th>Client ID (Open Master Dossier)</th>
               <th>Customer Name</th>
               <th>Contact Info</th>
               <th>Active Services (Filtered)</th>
@@ -723,42 +729,62 @@
     </div>
   </div>
 
-  <!-- CUSTOMER PASSBOOK & DIRECTORY MODAL -->
+  <!-- COMPLETE CUSTOMER MASTER DOSSIER & DIRECTORY MODAL -->
   <div class="modal-backdrop" id="customerProfileModal">
-    <div class="modal-window" style="max-width: 680px;">
+    <div class="modal-window" style="max-width: 880px;">
       <div class="modal-header">
         <div>
-          <h3 style="font-size: 1.1rem; font-weight: 800;" id="profClientName">Customer Passbook & Master Directory</h3>
-          <p style="font-size: 0.75rem; color: var(--text-muted);" id="profClientDetails">Client ID & Contact</p>
+          <h3 style="font-size: 1.15rem; font-weight: 800;" id="profClientName">Customer Master Dossier & Directory</h3>
+          <p style="font-size: 0.78rem; color: var(--text-muted);" id="profClientDetails">Client ID & Account Ledger</p>
         </div>
         <button class="btn-del" onclick="closeCustomerProfileModal()">Close</button>
       </div>
       <div class="modal-body">
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px;">
-          <div style="background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:14px; text-align:center;">
-            <span style="font-size:0.72rem; text-transform:uppercase; color:#64748b; font-weight:700;">Total Lifetime Billed</span>
-            <div style="font-size:1.25rem; font-weight:800; color:#0f172a; margin-top:4px;" id="profBilledAmt">INR 0.00</div>
-          </div>
-          <div style="background:#ecfdf5; border:1px solid #d1fae5; border-radius:10px; padding:14px; text-align:center;">
-            <span style="font-size:0.72rem; text-transform:uppercase; color:#065f46; font-weight:700;">Lifetime Paid</span>
-            <div style="font-size:1.25rem; font-weight:800; color:#059669; margin-top:4px;" id="profReceivedAmt">INR 0.00</div>
-          </div>
-          <div style="background:#fff7ed; border:1px solid #ffedd5; border-radius:10px; padding:14px; text-align:center;">
-            <span style="font-size:0.72rem; text-transform:uppercase; color:#9a3412; font-weight:700;">Active Pending Due</span>
-            <div style="font-size:1.25rem; font-weight:800; color:#ea580c; margin-top:4px;" id="profPendingAmt">INR 0.00</div>
+        <!-- ACCOUNT INFORMATION HEADER STRIP -->
+        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:16px; margin-bottom:16px;">
+          <h4 style="font-size:0.8rem; text-transform:uppercase; color:#64748b; font-weight:800; margin-bottom:10px;">Client Account Profile</h4>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px; font-size:0.82rem;">
+            <div><span style="color:#64748b;">Account ID:</span> <strong id="profAccId" style="font-family:'JetBrains Mono'; color:#0f172a;">—</strong></div>
+            <div><span style="color:#64748b;">Phone / WhatsApp:</span> <strong id="profAccPhone" style="color:#0f172a;">—</strong></div>
+            <div><span style="color:#64748b;">Billing Email:</span> <strong id="profAccEmail" style="color:#0f172a;">—</strong></div>
+            <div><span style="color:#64748b;">Onboarding Date:</span> <strong id="profAccDate" style="color:#0f172a;">—</strong></div>
           </div>
         </div>
 
+        <!-- CONTRACTED SERVICES BREAKDOWN -->
+        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:16px; margin-bottom:16px;">
+          <h4 style="font-size:0.8rem; text-transform:uppercase; color:#64748b; font-weight:800; margin-bottom:10px;">Contracted Services & Billing Parameters</h4>
+          <div id="profServicesBreakdown" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:12px; font-size:0.82rem;"></div>
+        </div>
+
+        <!-- FINANCIAL AGING SUMMARY CARDS -->
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px;">
+          <div style="background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:16px; text-align:center;">
+            <span style="font-size:0.72rem; text-transform:uppercase; color:#64748b; font-weight:700;">Total Lifetime Demand</span>
+            <div style="font-size:1.35rem; font-weight:800; color:#0f172a; margin-top:4px;" id="profBilledAmt">INR 0.00</div>
+          </div>
+          <div style="background:#ecfdf5; border:1px solid #d1fae5; border-radius:10px; padding:16px; text-align:center;">
+            <span style="font-size:0.72rem; text-transform:uppercase; color:#065f46; font-weight:700;">Lifetime Realized</span>
+            <div style="font-size:1.35rem; font-weight:800; color:#059669; margin-top:4px;" id="profReceivedAmt">INR 0.00</div>
+          </div>
+          <div style="background:#fff7ed; border:1px solid #ffedd5; border-radius:10px; padding:16px; text-align:center;">
+            <span style="font-size:0.72rem; text-transform:uppercase; color:#9a3412; font-weight:700;">Active Pending Due</span>
+            <div style="font-size:1.35rem; font-weight:800; color:#ea580c; margin-top:4px;" id="profPendingAmt">INR 0.00</div>
+            <div id="profPendingAlertTag" style="margin-top:6px;"></div>
+          </div>
+        </div>
+
+        <!-- COMPLETE PAYMENT TIMELINE -->
         <div style="background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:16px;">
-          <h4 style="font-size:0.85rem; font-weight:800; color:#0f172a; margin-bottom:10px;">Payment & Installment Timeline</h4>
+          <h4 style="font-size:0.85rem; font-weight:800; color:#0f172a; margin-bottom:10px;">Itemized Payment & Settlement Directory</h4>
           <div class="table-box" style="margin-top:0;">
             <table>
               <thead>
                 <tr>
-                  <th>Payment Date</th>
-                  <th>Type / Mode</th>
-                  <th>Amount</th>
-                  <th>Installment Note</th>
+                  <th>Receipt Date</th>
+                  <th>Payment Gateway / Method</th>
+                  <th>Amount Realized</th>
+                  <th>Reference & Installment Notes</th>
                 </tr>
               </thead>
               <tbody id="profPaymentsHistoryBody">
@@ -1064,7 +1090,7 @@
       return new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate(), 0, 0, 0, 0);
     }
 
-    /* RECURRING CYCLE HELPER (ISOLATES ACTIVE MONTH/YEAR OR LIFETIME) */
+    /* ADVANCED RECURRING CYCLE & OVERDUE AGING CALCULATOR */
     function calculateClientCycleMetrics(c, payments) {
       const clientId = String(c[0] || "").trim();
       const oneTime = parseFloat(c[5]) || 0;
@@ -1077,23 +1103,16 @@
       const startOfCurrentMonth = new Date(curYear, curMonth, 1, 0, 0, 0, 0);
       const startOfCurrentYear = new Date(curYear, 0, 1, 0, 0, 0, 0);
 
-      // 1. Calculate Active Cycle Demand
+      // 1. Identify Active Cycle Demand
       let activeCycleDemand = 0;
-      let isRecurring = false;
+      let isMonthly = monthly > 0;
+      let isAnnual = annual > 0;
 
-      if (monthly > 0) {
-        activeCycleDemand += monthly;
-        isRecurring = true;
-      }
-      if (annual > 0) {
-        activeCycleDemand += annual;
-        isRecurring = true;
-      }
-      if (!isRecurring) {
-        activeCycleDemand = oneTime;
-      }
+      if (isMonthly) activeCycleDemand += monthly;
+      if (isAnnual) activeCycleDemand += annual;
+      if (!isMonthly && !isAnnual) activeCycleDemand = oneTime;
 
-      // 2. Calculate Active Cycle Received
+      // 2. Aggregate Payments (Current Cycle vs Lifetime)
       let activeCycleReceived = 0;
       let lifetimeReceived = 0;
 
@@ -1103,23 +1122,17 @@
           lifetimeReceived += amt;
           const pDate = parseLocalDate(p[5]);
 
-          if (isRecurring) {
-            if (monthly > 0 && pDate && pDate >= startOfCurrentMonth) {
-              activeCycleReceived += amt;
-            } else if (annual > 0 && monthly <= 0 && pDate && pDate >= startOfCurrentYear) {
-              activeCycleReceived += amt;
-            }
+          if (isMonthly) {
+            if (pDate && pDate >= startOfCurrentMonth) activeCycleReceived += amt;
+          } else if (isAnnual) {
+            if (pDate && pDate >= startOfCurrentYear) activeCycleReceived += amt;
           } else {
-            // One-time project: lifetime = current cycle
             activeCycleReceived += amt;
           }
         }
       });
 
-      // Active Pending Due resets for current cycle
-      const activePendingDue = Math.max(0, activeCycleDemand - activeCycleReceived);
-
-      // Lifetime Cumulative calculations for directory
+      // 3. Calculate Elapsed Cycles from Renewal/Start Date
       let elapsedMonths = 1, elapsedYears = 1;
       const dateStr = String(c[10] || "").substring(0, 10);
       if (dateStr && !isNaN(new Date(dateStr).getTime())) {
@@ -1133,7 +1146,56 @@
         if (now.getMonth() > startDate.getMonth() || (now.getMonth() === startDate.getMonth() && now.getDate() >= startDate.getDate())) yDiff += 1;
         elapsedYears = Math.max(1, yDiff);
       }
+
       const lifetimeBilled = oneTime + (monthly * elapsedMonths) + (annual * elapsedYears);
+      const lifetimeDue = Math.max(0, lifetimeBilled - lifetimeReceived);
+
+      // 4. Overdue Aging Detection (+1, +2, +3 Alert Counts)
+      let overdueCycleCount = 0;
+      let statusLabel = "";
+      let statusClass = "badge-neutral";
+
+      if (isMonthly) {
+        let netRecurringDue = Math.max(0, (monthly * elapsedMonths) - Math.max(0, lifetimeReceived - oneTime));
+        overdueCycleCount = Math.floor(netRecurringDue / monthly);
+        if (netRecurringDue > 0 && overdueCycleCount === 0) overdueCycleCount = 1;
+
+        if (overdueCycleCount >= 2) {
+          statusLabel = `+${overdueCycleCount} Months Overdue`;
+          statusClass = "badge-severe";
+        } else if (overdueCycleCount === 1) {
+          statusLabel = `+1 Month Due`;
+          statusClass = "badge-alert";
+        } else {
+          statusLabel = "Settled";
+          statusClass = "badge-positive";
+        }
+      } else if (isAnnual) {
+        let netAnnualDue = Math.max(0, (annual * elapsedYears) - Math.max(0, lifetimeReceived - oneTime));
+        overdueCycleCount = Math.floor(netAnnualDue / annual);
+        if (netAnnualDue > 0 && overdueCycleCount === 0) overdueCycleCount = 1;
+
+        if (overdueCycleCount >= 2) {
+          statusLabel = `+${overdueCycleCount} Years Overdue`;
+          statusClass = "badge-severe";
+        } else if (overdueCycleCount === 1) {
+          statusLabel = `+1 Year Due`;
+          statusClass = "badge-alert";
+        } else {
+          statusLabel = "Settled";
+          statusClass = "badge-positive";
+        }
+      } else {
+        if (lifetimeDue > 0) {
+          statusLabel = "Unpaid Project";
+          statusClass = "badge-alert";
+        } else {
+          statusLabel = "Settled";
+          statusClass = "badge-positive";
+        }
+      }
+
+      const activePendingDue = isMonthly || isAnnual ? (overdueCycleCount > 0 ? (isMonthly ? monthly * overdueCycleCount : annual * overdueCycleCount) : 0) : lifetimeDue;
 
       return {
         activeCycleDemand,
@@ -1141,7 +1203,10 @@
         activePendingDue,
         lifetimeBilled,
         lifetimeReceived,
-        lifetimeDue: Math.max(0, lifetimeBilled - lifetimeReceived)
+        lifetimeDue,
+        overdueCycleCount,
+        statusLabel,
+        statusClass
       };
     }
 
@@ -1338,7 +1403,7 @@
       renderAdminDashboard();
     }
 
-    /* RENDER PAYMENT & RECEIVABLES LEDGER (ROLLING ACTIVE CYCLE) */
+    /* RENDER PAYMENT & RECEIVABLES LEDGER (WITH AGING OVERDUE ALERTS) */
     function renderPaymentLedger() {
       const tbody = document.getElementById("recoveryLedgerBody");
       let totalDemandMonth = 0, totalPaidMonth = 0, totalPendingMonth = 0, rowsHtml = "";
@@ -1356,12 +1421,13 @@
         totalPendingMonth += m.activePendingDue;
 
         rowsHtml += `<tr>
-          <td><span class="badge-link" onclick="openCustomerProfileModal('${clientId}')" title="Click to view full payment directory">${clientId}</span></td>
+          <td><span class="badge-link" onclick="openCustomerProfileModal('${clientId}')" title="Click to view full client dossier">${clientId}</span></td>
           <td><strong>${clientName}</strong></td>
           <td>${phone}<br><span style="font-size:0.75rem; color:#64748b;">${email}</span></td>
           <td><strong>INR ${m.activeCycleDemand.toFixed(2)}</strong></td>
           <td style="color:#059669; font-weight:700;">INR ${m.activeCycleReceived.toFixed(2)}</td>
           <td style="color:${m.activePendingDue > 0 ? '#ea580c' : '#64748b'}; font-weight:700;">INR ${m.activePendingDue.toFixed(2)}</td>
+          <td><span class="${m.statusClass}">${m.statusLabel}</span></td>
           <td style="text-align: right; white-space: nowrap;">
             <button class="btn-profile" onclick="openCustomerProfileModal('${clientId}')">Directory</button> 
             <button class="btn-adjust" onclick="openPaymentAdjustmentModal('${clientId}')">Adjust</button> 
@@ -1370,37 +1436,55 @@
         </tr>`;
       });
 
-      tbody.innerHTML = rowsHtml || '<tr><td colspan="7" style="text-align:center;">No accounts available.</td></tr>';
+      tbody.innerHTML = rowsHtml || '<tr><td colspan="8" style="text-align:center;">No accounts available.</td></tr>';
       document.getElementById("todaySales").innerText = "INR " + totalDemandMonth.toFixed(2);
       document.getElementById("kpiTotalPaid").innerText = "INR " + totalPaidMonth.toFixed(2);
       document.getElementById("kpiTotalPending").innerText = "INR " + totalPendingMonth.toFixed(2);
     }
 
-    /* CUSTOMER PASSBOOK & FULL DIRECTORY */
+    /* COMPLETE CUSTOMER MASTER DOSSIER & DIRECTORY MODAL */
     function openCustomerProfileModal(clientId) {
       const c = (state.clients || []).find(item => String(item[0]).trim() === String(clientId).trim());
       if (!c) return;
       const m = calculateClientCycleMetrics(c, state.payments);
-      let historyRows = "";
       
+      // Populate Account Profile Header
+      document.getElementById("profClientName").innerText = `${c[1]} — Master Dossier`;
+      document.getElementById("profClientDetails").innerText = `Client ID: ${c[0]} | Billing Ledger & Lifetime Payment Timeline`;
+      document.getElementById("profAccId").innerText = c[0];
+      document.getElementById("profAccPhone").innerText = c[2] || "Not Specified";
+      document.getElementById("profAccEmail").innerText = c[3] || "Not Specified";
+      document.getElementById("profAccDate").innerText = c[10] ? String(c[10]).substring(0, 10) : "N/A";
+
+      // Populate Services Breakdown
+      const sBox = document.getElementById("profServicesBreakdown");
+      let servHtml = "";
+      if (c[4] && parseFloat(c[5]) > 0) servHtml += `<div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px;"><span style="color:#64748b; font-size:0.72rem; text-transform:uppercase; font-weight:700; display:block;">One-Time Contract</span><strong style="color:#0f172a;">${c[4]}</strong><div style="font-weight:800; color:#f25c3b; margin-top:2px;">INR ${parseFloat(c[5]).toFixed(2)}</div></div>`;
+      if (c[6] && parseFloat(c[7]) > 0) servHtml += `<div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px;"><span style="color:#64748b; font-size:0.72rem; text-transform:uppercase; font-weight:700; display:block;">Monthly Retainer</span><strong style="color:#0f172a;">${c[6]}</strong><div style="font-weight:800; color:#1877f2; margin-top:2px;">INR ${parseFloat(c[7]).toFixed(2)} / month</div></div>`;
+      if (c[8] && parseFloat(c[9]) > 0) servHtml += `<div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px;"><span style="color:#64748b; font-size:0.72rem; text-transform:uppercase; font-weight:700; display:block;">Annual Support</span><strong style="color:#0f172a;">${c[8]}</strong><div style="font-weight:800; color:#10b981; margin-top:2px;">INR ${parseFloat(c[9]).toFixed(2)} / year</div></div>`;
+      sBox.innerHTML = servHtml || '<div style="color:#64748b;">No active services configured.</div>';
+
+      // Summary KPIs
+      document.getElementById("profBilledAmt").innerText = "INR " + m.lifetimeBilled.toFixed(2);
+      document.getElementById("profReceivedAmt").innerText = "INR " + m.lifetimeReceived.toFixed(2);
+      document.getElementById("profPendingAmt").innerText = "INR " + m.activePendingDue.toFixed(2);
+      document.getElementById("profPendingAlertTag").innerHTML = `<span class="${m.statusClass}">${m.statusLabel}</span>`;
+
+      // Itemized Payment History
+      let historyRows = "";
       (state.payments || []).forEach(p => {
         if (String(p[1] || "").trim() === String(clientId).trim()) {
           const amt = parseFloat(p[4]) || 0;
           historyRows += `<tr>
             <td>${p[5] ? String(p[5]).substring(0, 10) : "—"}</td>
-            <td>${p[3]}</td>
+            <td><strong>${p[3]}</strong></td>
             <td style="font-weight:700; color:${amt < 0 ? '#dc2626' : '#059669'};">INR ${amt.toFixed(2)}</td>
             <td>${p[6] || '—'}</td>
           </tr>`;
         }
       });
-
-      document.getElementById("profClientName").innerText = c[1];
-      document.getElementById("profClientDetails").innerText = `Client ID: ${c[0]} | Phone: ${c[2] || '—'} | Email: ${c[3] || '—'}`;
-      document.getElementById("profBilledAmt").innerText = "INR " + m.lifetimeBilled.toFixed(2);
-      document.getElementById("profReceivedAmt").innerText = "INR " + m.lifetimeReceived.toFixed(2);
-      document.getElementById("profPendingAmt").innerText = "INR " + m.activePendingDue.toFixed(2);
-      document.getElementById("profPaymentsHistoryBody").innerHTML = historyRows || '<tr><td colspan="4" style="text-align:center;">No payment records found.</td></tr>';
+      document.getElementById("profPaymentsHistoryBody").innerHTML = historyRows || '<tr><td colspan="4" style="text-align:center; padding:16px;">No transaction records found for this account.</td></tr>';
+      
       document.getElementById("customerProfileModal").style.display = "flex";
     }
     function closeCustomerProfileModal() { document.getElementById("customerProfileModal").style.display = "none"; }
@@ -1445,7 +1529,7 @@
     }
     window.onReminderDispatched = function(res) { showToast(res && res.success ? res.message : "Failed."); };
 
-    /* ANALYTICS ENGINE WITH CUSTOM DATE RANGE */
+    /* ANALYTICS ENGINE WITH ACCURATE DATA & CUSTOM RANGE */
     function renderMetaAnalytics() {
       const now = new Date();
       const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
