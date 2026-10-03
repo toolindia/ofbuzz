@@ -85,8 +85,7 @@
       justify-content: space-between;
       align-items: center;
     }
-    .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-    @media (max-width: 640px) { .input-row { grid-template-columns: 1fr; } }
+    .input-row { display: grid; grid-template-columns: 1fr; gap: 14px; }
     .field-group { display: flex; flex-direction: column; gap: 6px; }
     .field-group label { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); }
     .field-input {
@@ -422,10 +421,6 @@
           <label>Associate Identifier (Staff ID)</label>
           <input type="text" id="workforceId" class="field-input mono-input" placeholder="e.g. STF01">
         </div>
-        <div class="field-group">
-          <label>Full Legal Name</label>
-          <input type="text" id="workforceName" class="field-input" placeholder="e.g. Satyam Pandey">
-        </div>
       </div>
 
       <div class="terminal-actions-grid">
@@ -526,12 +521,11 @@
     // PUNCH IN & PUNCH OUT CONTROLLER
     function handlePunch(type) {
       var id = document.getElementById("workforceId").value.trim();
-      var name = document.getElementById("workforceName").value.trim();
       var btnIn = document.getElementById("btnPunchIn");
       var btnOut = document.getElementById("btnPunchOut");
 
-      if (!id || !name) {
-        showToast("Both Associate ID and Legal Name are required.", false);
+      if (!id) {
+        showToast("Associate ID is required.", false);
         return;
       }
 
@@ -558,14 +552,14 @@
             btnIn.disabled = true;
             btnOut.disabled = false;
             receipt.className = "attendance-log-strip strip-in";
-            receiptText.innerText = "Punch In verified for " + name + " (" + id + ")";
+            receiptText.innerText = "Punch In verified for " + id;
             shiftIndicator.innerText = "Status: Active Shift (Punched In)";
             shiftIndicator.style.color = "var(--success)";
           } else {
             btnIn.disabled = false;
             btnOut.disabled = true;
             receipt.className = "attendance-log-strip strip-out";
-            receiptText.innerText = "Punch Out recorded for " + name + " (" + id + ")";
+            receiptText.innerText = "Punch Out recorded for " + id;
             shiftIndicator.innerText = "Status: Shift Ended (Punched Out)";
             shiftIndicator.style.color = "var(--text-muted)";
           }
@@ -574,9 +568,7 @@
         }
       };
 
-      // action parameter aur type bheja gaya hai backend ke liye
       var queryUrl = API_ENDPOINT + "?action=markAttendance&staffId=" + encodeURIComponent(id) + 
-                     "&staffName=" + encodeURIComponent(name) + 
                      "&punchType=" + encodeURIComponent(type);
       jsonp(queryUrl, "onPunchDone");
     }
@@ -676,7 +668,7 @@
         res.data.forEach(function(m) {
           var isStaff = m.senderType === "Staff";
           var bubbleClass = isStaff ? "msg-staff" : "msg-admin";
-          var senderLabel = isStaff ? m.staffName : "Administration";
+          var senderLabel = isStaff ? (m.staffName || m.staffId || "Staff") : "Administration";
           var attachMarkup = "";
 
           if (m.attachmentUrl) {
@@ -717,7 +709,6 @@
 
     function sendChatMessage() {
       var id = document.getElementById("workforceId").value.trim();
-      var name = document.getElementById("workforceName").value.trim() || "Associate";
       var textInput = document.getElementById("chatTextInput");
       var text = textInput.value.trim();
 
@@ -725,7 +716,7 @@
 
       var payload = {
         staffId: id,
-        staffName: name,
+        staffName: id,
         senderType: "Staff",
         messageText: text,
         attachmentUrl: activeAttachment.url,
