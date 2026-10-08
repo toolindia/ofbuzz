@@ -740,7 +740,6 @@
         <button class="btn-del" onclick="closeCustomerProfileModal()">Close</button>
       </div>
       <div class="modal-body">
-        <!-- ACCOUNT INFORMATION HEADER STRIP -->
         <div style="background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:16px; margin-bottom:16px;">
           <h4 style="font-size:0.8rem; text-transform:uppercase; color:#64748b; font-weight:800; margin-bottom:10px;">Client Account Profile</h4>
           <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px; font-size:0.82rem;">
@@ -751,13 +750,11 @@
           </div>
         </div>
 
-        <!-- CONTRACTED SERVICES BREAKDOWN -->
         <div style="background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:16px; margin-bottom:16px;">
           <h4 style="font-size:0.8rem; text-transform:uppercase; color:#64748b; font-weight:800; margin-bottom:10px;">Contracted Services & Billing Parameters</h4>
           <div id="profServicesBreakdown" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:12px; font-size:0.82rem;"></div>
         </div>
 
-        <!-- FINANCIAL AGING SUMMARY CARDS -->
         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px;">
           <div style="background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:16px; text-align:center;">
             <span style="font-size:0.72rem; text-transform:uppercase; color:#64748b; font-weight:700;">Total Lifetime Demand</span>
@@ -774,7 +771,6 @@
           </div>
         </div>
 
-        <!-- COMPLETE PAYMENT TIMELINE -->
         <div style="background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:16px;">
           <h4 style="font-size:0.85rem; font-weight:800; color:#0f172a; margin-bottom:10px;">Itemized Payment & Settlement Directory</h4>
           <div class="table-box" style="margin-top:0;">
@@ -1103,7 +1099,6 @@
       const startOfCurrentMonth = new Date(curYear, curMonth, 1, 0, 0, 0, 0);
       const startOfCurrentYear = new Date(curYear, 0, 1, 0, 0, 0, 0);
 
-      // 1. Identify Active Cycle Demand
       let activeCycleDemand = 0;
       let isMonthly = monthly > 0;
       let isAnnual = annual > 0;
@@ -1112,7 +1107,6 @@
       if (isAnnual) activeCycleDemand += annual;
       if (!isMonthly && !isAnnual) activeCycleDemand = oneTime;
 
-      // 2. Aggregate Payments (Current Cycle vs Lifetime)
       let activeCycleReceived = 0;
       let lifetimeReceived = 0;
 
@@ -1132,7 +1126,6 @@
         }
       });
 
-      // 3. Calculate Elapsed Cycles from Renewal/Start Date
       let elapsedMonths = 1, elapsedYears = 1;
       const dateStr = String(c[10] || "").substring(0, 10);
       if (dateStr && !isNaN(new Date(dateStr).getTime())) {
@@ -1150,7 +1143,6 @@
       const lifetimeBilled = oneTime + (monthly * elapsedMonths) + (annual * elapsedYears);
       const lifetimeDue = Math.max(0, lifetimeBilled - lifetimeReceived);
 
-      // 4. Overdue Aging Detection (+1, +2, +3 Alert Counts)
       let overdueCycleCount = 0;
       let statusLabel = "";
       let statusClass = "badge-neutral";
@@ -1282,6 +1274,8 @@
         renderAdminDashboard();
         renderPaymentLedger();
         renderMetaAnalytics();
+        renderStaffDirectory();
+        renderTaskApprovals();
         if (selectedChatStaffId) loadAdminChatMessages();
         showToast("Synchronized successfully.");
       } else { showToast("Error retrieving records."); }
@@ -1294,8 +1288,95 @@
       else { panel.style.display = "block"; btn.innerText = "Close Analytics"; renderMetaAnalytics(); }
     }
 
-    function openStaffModal() { document.getElementById("staffManagementModal").style.display = "flex"; }
+    function openStaffModal() { 
+      document.getElementById("staffManagementModal").style.display = "flex"; 
+      renderStaffDirectory();
+      renderTaskApprovals();
+    }
     function closeStaffModal() { document.getElementById("staffManagementModal").style.display = "none"; }
+
+    /* WORKFORCE & STAFF RENDERING LOGIC */
+    function renderStaffDirectory() {
+      const sBody = document.getElementById("staffTableBody");
+      const sSelect = document.getElementById("staffSelect");
+      if (!sBody) return;
+
+      let html = "";
+      let optHtml = '<option value="">Choose Staff Profile</option>';
+
+      const staffList = state.staff || [];
+      if (staffList.length === 0) {
+        sBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No staff members found.</td></tr>';
+        if (sSelect) sSelect.innerHTML = optHtml;
+        return;
+      }
+
+      staffList.forEach(s => {
+        const id = Array.isArray(s) ? s[0] : (s.staffId || s.id);
+        const name = Array.isArray(s) ? s[1] : (s.staffName || s.name);
+        const email = Array.isArray(s) ? s[2] : s.email;
+        const role = Array.isArray(s) ? s[3] : s.role;
+        const status = Array.isArray(s) ? (s[4] || "Active") : (s.status || "Active");
+
+        if (!id && !name) return;
+
+        html += `<tr>
+          <td><strong>${id}</strong></td>
+          <td>${name}</td>
+          <td>${email || '—'}</td>
+          <td>${role || 'Associate'}</td>
+          <td><span class="status-badge">${status}</span></td>
+          <td style="text-align: right; white-space: nowrap;">
+            <button class="btn-edit" onclick="editStaffRecord('${id}')">Edit</button> 
+            <button class="btn-del" onclick="deleteStaffRecord('${id}')">Delete</button>
+          </td>
+        </tr>`;
+
+        optHtml += `<option value="${id}" data-name="${name}">${name} (${id} - ${role || 'Staff'})</option>`;
+      });
+
+      sBody.innerHTML = html || '<tr><td colspan="6" style="text-align:center;">No staff found.</td></tr>';
+      if (sSelect) sSelect.innerHTML = optHtml;
+    }
+
+    function renderTaskApprovals() {
+      const tBody = document.getElementById("taskApprovalBody");
+      if (!tBody) return;
+
+      let html = "";
+      (state.tasks || []).forEach(t => {
+        const tId = Array.isArray(t) ? t[0] : (t.taskId || t.id);
+        const sName = Array.isArray(t) ? t[2] : (t.staffName || t.name);
+        const title = Array.isArray(t) ? t[3] : (t.taskTitle || t.title);
+        const status = Array.isArray(t) ? t[6] : t.status;
+        const remark = Array.isArray(t) ? (t[7] || "—") : (t.staffRemark || "—");
+
+        if (status === "Pending Approval" || status === "Assigned") {
+          html += `<tr>
+            <td><strong>${title}</strong></td>
+            <td>${sName}</td>
+            <td>${remark}</td>
+            <td><span class="status-badge" style="background:${status === 'Pending Approval' ? '#fef3c7' : '#e0f2fe'}; color:${status === 'Pending Approval' ? '#d97706' : '#0284c7'};">${status}</span></td>
+            <td>
+              ${status === 'Pending Approval' ? `<button class="btn-primary" style="padding:4px 10px; font-size:11px;" onclick="approveTask('${tId}')">Approve</button>` : `<span style="font-size:11px; color:#64748b;">In Progress</span>`}
+            </td>
+          </tr>`;
+        }
+      });
+
+      tBody.innerHTML = html || '<tr><td colspan="5" style="text-align:center;">No deliverables awaiting approval.</td></tr>';
+    }
+
+    function deleteStaffRecord(id) {
+      showCustomConfirm("Delete Staff", "Are you sure you want to remove staff profile " + id + "?", function() {
+        showToast("Deleting staff...");
+        jsonp(API_ENDPOINT + `?action=deleteStaff&staffId=${encodeURIComponent(id)}`, "onStaffDeleted");
+      });
+    }
+    window.onStaffDeleted = function(res) {
+      if (res && res.success) { showToast("Staff deleted."); syncAllData(); }
+      else { showToast("Failed to delete staff."); }
+    };
 
     /* ADMIN LIVE CHAT FUNCTIONS */
     function openAdminChatModal() {
@@ -1308,8 +1389,10 @@
       const listDiv = document.getElementById("adminStaffChatList");
       let html = '<div style="font-size:12px; font-weight:700; color:#64748b; margin-bottom:8px;">Active Workforce</div>';
       (state.staff || []).forEach(s => {
-        const isSelected = selectedChatStaffId === s[0];
-        html += `<div onclick="selectChatStaff('${s[0]}', '${s[1]}')" style="padding:10px 12px; border-radius:6px; cursor:pointer; font-size:13px; font-weight:600; margin-bottom:6px; background:${isSelected ? '#e0f2fe' : '#fff'}; color:${isSelected ? '#0369a1' : '#334155'}; border:1px solid ${isSelected ? '#bae6fd' : '#e2e8f0'};">${s[1]}<br><span style="font-size:10px; color:#64748b;">ID: ${s[0]}</span></div>`;
+        const id = Array.isArray(s) ? s[0] : (s.staffId || s.id);
+        const name = Array.isArray(s) ? s[1] : (s.staffName || s.name);
+        const isSelected = selectedChatStaffId === id;
+        html += `<div onclick="selectChatStaff('${id}', '${name}')" style="padding:10px 12px; border-radius:6px; cursor:pointer; font-size:13px; font-weight:600; margin-bottom:6px; background:${isSelected ? '#e0f2fe' : '#fff'}; color:${isSelected ? '#0369a1' : '#334155'}; border:1px solid ${isSelected ? '#bae6fd' : '#e2e8f0'};">${name}<br><span style="font-size:10px; color:#64748b;">ID: ${id}</span></div>`;
       });
       listDiv.innerHTML = html || '<div style="font-size:12px; color:#64748b;">No staff found.</div>';
     }
@@ -1403,7 +1486,6 @@
       renderAdminDashboard();
     }
 
-    /* RENDER PAYMENT & RECEIVABLES LEDGER (WITH AGING OVERDUE ALERTS) */
     function renderPaymentLedger() {
       const tbody = document.getElementById("recoveryLedgerBody");
       let totalDemandMonth = 0, totalPaidMonth = 0, totalPendingMonth = 0, rowsHtml = "";
@@ -1442,13 +1524,11 @@
       document.getElementById("kpiTotalPending").innerText = "INR " + totalPendingMonth.toFixed(2);
     }
 
-    /* COMPLETE CUSTOMER MASTER DOSSIER & DIRECTORY MODAL */
     function openCustomerProfileModal(clientId) {
       const c = (state.clients || []).find(item => String(item[0]).trim() === String(clientId).trim());
       if (!c) return;
       const m = calculateClientCycleMetrics(c, state.payments);
       
-      // Populate Account Profile Header
       document.getElementById("profClientName").innerText = `${c[1]} — Master Dossier`;
       document.getElementById("profClientDetails").innerText = `Client ID: ${c[0]} | Billing Ledger & Lifetime Payment Timeline`;
       document.getElementById("profAccId").innerText = c[0];
@@ -1456,7 +1536,6 @@
       document.getElementById("profAccEmail").innerText = c[3] || "Not Specified";
       document.getElementById("profAccDate").innerText = c[10] ? String(c[10]).substring(0, 10) : "N/A";
 
-      // Populate Services Breakdown
       const sBox = document.getElementById("profServicesBreakdown");
       let servHtml = "";
       if (c[4] && parseFloat(c[5]) > 0) servHtml += `<div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px;"><span style="color:#64748b; font-size:0.72rem; text-transform:uppercase; font-weight:700; display:block;">One-Time Contract</span><strong style="color:#0f172a;">${c[4]}</strong><div style="font-weight:800; color:#f25c3b; margin-top:2px;">INR ${parseFloat(c[5]).toFixed(2)}</div></div>`;
@@ -1464,13 +1543,11 @@
       if (c[8] && parseFloat(c[9]) > 0) servHtml += `<div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px;"><span style="color:#64748b; font-size:0.72rem; text-transform:uppercase; font-weight:700; display:block;">Annual Support</span><strong style="color:#0f172a;">${c[8]}</strong><div style="font-weight:800; color:#10b981; margin-top:2px;">INR ${parseFloat(c[9]).toFixed(2)} / year</div></div>`;
       sBox.innerHTML = servHtml || '<div style="color:#64748b;">No active services configured.</div>';
 
-      // Summary KPIs
       document.getElementById("profBilledAmt").innerText = "INR " + m.lifetimeBilled.toFixed(2);
       document.getElementById("profReceivedAmt").innerText = "INR " + m.lifetimeReceived.toFixed(2);
       document.getElementById("profPendingAmt").innerText = "INR " + m.activePendingDue.toFixed(2);
       document.getElementById("profPendingAlertTag").innerHTML = `<span class="${m.statusClass}">${m.statusLabel}</span>`;
 
-      // Itemized Payment History
       let historyRows = "";
       (state.payments || []).forEach(p => {
         if (String(p[1] || "").trim() === String(clientId).trim()) {
@@ -1529,7 +1606,6 @@
     }
     window.onReminderDispatched = function(res) { showToast(res && res.success ? res.message : "Failed."); };
 
-    /* ANALYTICS ENGINE WITH ACCURATE DATA & CUSTOM RANGE */
     function renderMetaAnalytics() {
       const now = new Date();
       const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
@@ -1559,7 +1635,6 @@
 
       document.getElementById("chartTimelineSubtitle").innerText = subPeriodTitle;
 
-      // 1. Filter Collections & Build Buckets
       let totalCollected = 0;
       let timelineBuckets = {};
 
@@ -1589,7 +1664,6 @@
         }
       });
 
-      // 2. Client Metrics & Contracted Volumes
       let lifetimeGross = 0, totalMrr = 0, activeAccounts = 0;
       let activeCycleDemandTotal = 0, activeCycleDueTotal = 0;
       let oneTimeSum = 0, monthlySum = 0, annualSum = 0;
@@ -1691,7 +1765,7 @@
                 }
               }
             }
-          },
+          }, 
           scales: {
             y: {
               beginAtZero: true,
@@ -1775,11 +1849,22 @@
     window.onStaffSaved = function() { showToast("Staff saved."); cancelStaffEdit(); syncAllData(); };
 
     function editStaffRecord(id) {
-      const s = (state.staff || []).find(item => String(item[0]).trim() === String(id).trim());
+      const s = (state.staff || []).find(item => (Array.isArray(item) ? item[0] : (item.staffId || item.id)) === String(id).trim());
       if (!s) return;
-      document.getElementById("staffEditId").value = s[0]; document.getElementById("stfId").value = s[0]; document.getElementById("stfId").readOnly = true;
-      document.getElementById("stfName").value = s[1] || ""; document.getElementById("stfEmail").value = s[2] || ""; document.getElementById("stfRole").value = s[3] || "";
-      document.getElementById("staffFormTitle").innerText = "Edit Staff: " + s[1]; document.getElementById("btnSaveStaff").innerText = "Update Staff"; document.getElementById("btnCancelStaffEdit").style.display = "inline-block";
+      const sid = Array.isArray(s) ? s[0] : (s.staffId || s.id);
+      const name = Array.isArray(s) ? s[1] : (s.staffName || s.name);
+      const email = Array.isArray(s) ? s[2] : s.email;
+      const role = Array.isArray(s) ? s[3] : s.role;
+
+      document.getElementById("staffEditId").value = sid; 
+      document.getElementById("stfId").value = sid; 
+      document.getElementById("stfId").readOnly = true;
+      document.getElementById("stfName").value = name || ""; 
+      document.getElementById("stfEmail").value = email || ""; 
+      document.getElementById("stfRole").value = role || "";
+      document.getElementById("staffFormTitle").innerText = "Edit Staff: " + name; 
+      document.getElementById("btnSaveStaff").innerText = "Update Staff"; 
+      document.getElementById("btnCancelStaffEdit").style.display = "inline-block";
       openStaffModal();
     }
 
