@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Staff Portal & Operations — Ofbuzz Technology</title>
+  <title>Workforce & Staff Admin Console — Ofbuzz Technology</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,8 +11,9 @@
 
   <style>
     :root {
-      --primary: #0ea5e9;
-      --primary-dark: #0284c7;
+      --primary: #f25c3b;
+      --primary-dark: #d94827;
+      --meta-blue: #1877f2;
       --bg: #f8fafc;
       --surface: #ffffff;
       --border: #e2e8f0;
@@ -26,29 +27,27 @@
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
     body { background: var(--bg); color: var(--text); padding: 20px 16px 80px; }
-    .container { max-width: 1000px; margin: 0 auto; }
+    .container { max-width: 1100px; margin: 0 auto; }
 
-    /* AUTH / LOGIN OVERLAY */
-    #staffAuthOverlay {
+    /* AUTH OVERLAY (PIN: 1312) */
+    #authOverlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: #0f172a; z-index: 9999; display: flex;
       align-items: center; justify-content: center; padding: 20px;
     }
     .auth-card {
-      background: #ffffff; width: 100%; max-width: 400px; border-radius: 16px;
+      background: #ffffff; width: 100%; max-width: 380px; border-radius: 16px;
       padding: 32px 28px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); text-align: center;
     }
     .auth-logo { width: 64px; height: 64px; border-radius: 12px; object-fit: cover; margin-bottom: 12px; }
     .auth-title { font-size: 1.25rem; font-weight: 800; color: #0f172a; margin-bottom: 4px; }
     .auth-sub { font-size: 0.8rem; color: #64748b; margin-bottom: 20px; }
-    .auth-select, .auth-input {
-      width: 100%; padding: 12px; font-size: 0.95rem; border: 2px solid #e2e8f0;
-      border-radius: 10px; outline: none; margin-bottom: 14px; transition: all 0.2s;
+    .auth-input {
+      width: 100%; padding: 12px; font-size: 1.2rem; text-align: center;
+      letter-spacing: 6px; border: 2px solid #e2e8f0; border-radius: 10px;
+      outline: none; margin-bottom: 16px; transition: all 0.2s; font-family: 'JetBrains Mono', monospace;
     }
-    .auth-select:focus, .auth-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2); }
-    .auth-pin-input {
-      letter-spacing: 4px; text-align: center; font-size: 1.1rem; font-family: 'JetBrains Mono', monospace;
-    }
+    .auth-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(242, 92, 59, 0.2); }
     .auth-btn { width: 100%; padding: 12px; font-size: 0.95rem; font-weight: 700; border-radius: 10px; background: var(--primary); color: #fff; border: none; cursor: pointer; }
     .auth-btn:hover { background: var(--primary-dark); }
     .auth-error { color: var(--danger); font-size: 0.8rem; margin-top: 10px; font-weight: 600; display: none; }
@@ -66,7 +65,7 @@
     .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
     .kpi-card { background: var(--surface); padding: 18px; border-radius: var(--radius); border: 1px solid var(--border); border-left: 4px solid var(--primary); }
     .kpi-title { font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); }
-    .kpi-val { font-size: 1.4rem; font-weight: 800; margin-top: 6px; color: var(--text); }
+    .kpi-val { font-size: 1.45rem; font-weight: 800; margin-top: 6px; color: var(--text); }
 
     .section-card {
       background: var(--surface); border: 1px solid var(--border);
@@ -75,30 +74,30 @@
     }
     .section-head { font-size: 1rem; font-weight: 700; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
 
-    button { padding: 8px 14px; border: none; border-radius: 8px; font-weight: 700; font-size: 0.82rem; cursor: pointer; transition: all 0.2s; }
+    .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+    .input-group { display: flex; flex-direction: column; gap: 6px; }
+    label { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); }
+    input, select {
+      padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px;
+      font-size: 0.85rem; outline: none; transition: all 0.2s; background: #fff;
+    }
+    input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(242, 92, 59, 0.15); }
+
+    button { padding: 9px 15px; border: none; border-radius: 8px; font-weight: 700; font-size: 0.82rem; cursor: pointer; transition: all 0.2s; }
     .btn-primary { background: var(--primary); color: #fff; }
     .btn-primary:hover { background: var(--primary-dark); }
-    .btn-attendance { background: #10b981; color: #fff; }
-    .btn-attendance:hover { background: #059669; }
-    .btn-chat { background: #8b5cf6; color: #fff; }
-    .btn-chat:hover { background: #7c3aed; }
-    .btn-logout { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+    .btn-edit { background: rgba(245, 158, 11, 0.1); color: #d97706; }
+    .btn-edit:hover { background: #d97706; color: #fff; }
+    .btn-del { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+    .btn-del:hover { background: var(--danger); color: #fff; }
+    .btn-logout { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); }
     .btn-logout:hover { background: var(--danger); color: #fff; }
 
-    .table-box { overflow-x: auto; }
+    .table-box { overflow-x: auto; margin-top: 10px; }
     table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
     th { text-align: left; padding: 12px 10px; background: #f1f5f9; color: var(--text-muted); font-weight: 700; text-transform: uppercase; font-size: 0.7rem; }
     td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: #334155; }
     .status-badge { padding: 3px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; }
-
-    /* CHAT BOX */
-    #chatPanel {
-      display: flex; flex-direction: column; height: 420px; background: #f8fafc;
-      border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px;
-    }
-    #chatMessagesBox {
-      flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px;
-    }
 
     .toast { position: fixed; top: 20px; right: 20px; padding: 12px 20px; border-radius: 8px; background: #0f172a; color: #fff; font-size: 0.85rem; font-weight: 600; display: none; z-index: 2000; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
   </style>
@@ -106,111 +105,183 @@
 <body>
 
   <!-- LOGIN OVERLAY -->
-  <div id="staffAuthOverlay">
+  <div id="authOverlay">
     <div class="auth-card">
       <img src="https://i.pinimg.com/736x/bd/d0/5c/bdd05c94afb66b5a72f5e17a7a879ab3.jpg" class="auth-logo" alt="Ofbuzz Logo">
-      <h2 class="auth-title">Staff Portal Login</h2>
-      <p class="auth-sub">Select profile and enter PIN to authenticate</p>
-
-      <select id="staffLoginSelect" class="auth-select">
-        <option value="">Fetching active staff profiles...</option>
-      </select>
-
-      <input type="text" id="manualStaffIdInput" class="auth-input" placeholder="Or Enter Staff ID manually (e.g. STF01)">
-
-      <!-- SECURE PIN / PASSWORD INPUT -->
-      <input type="password" id="staffPinInput" class="auth-input auth-pin-input" maxlength="6" placeholder="Enter Access PIN (••••)" onkeypress="if(event.key === 'Enter') loginStaffUser()">
-
-      <button class="auth-btn" onclick="loginStaffUser()">Unlock Workspace</button>
-      <div id="authErrorMsg" class="auth-error">Incorrect credentials or PIN. Access Denied.</div>
+      <h2 class="auth-title">Staff Admin Studio</h2>
+      <p class="auth-sub">Enter Secure Access PIN to manage workforce</p>
+      
+      <input type="password" id="adminPinInput" class="auth-input" maxlength="4" placeholder="••••" autofocus onkeypress="if(event.key === 'Enter') validateAdminPin()">
+      <button class="auth-btn" onclick="validateAdminPin()">Unlock Staff Console</button>
+      <div id="authErrorMsg" class="auth-error">Incorrect PIN. Access Denied.</div>
     </div>
   </div>
 
   <div id="toast" class="toast"></div>
 
-  <!-- MAIN STAFF CONSOLE -->
-  <div class="container" id="staffDashboard" style="display: none;">
+  <!-- MAIN STAFF ADMIN CONSOLE -->
+  <div class="container" id="staffAdminDashboard" style="display: none;">
     <header>
       <div class="brand-box">
         <img src="https://i.pinimg.com/736x/bd/d0/5c/bdd05c94afb66b5a72f5e17a7a879ab3.jpg" class="brand-logo" alt="Ofbuzz Logo">
         <div>
-          <div class="brand-title" id="displayStaffName">Staff Workspace</div>
-          <p style="font-size: 0.75rem; color: var(--text-muted);" id="displayStaffMeta">ID: — | Role: —</p>
+          <div class="brand-title">Workforce & Staff Administration Studio</div>
+          <p style="font-size: 0.75rem; color: var(--text-muted);">Staff Profiles, Task Allocation & Performance Ledger</p>
         </div>
       </div>
       <div style="display: flex; gap: 8px; align-items: center;">
-        <button class="btn-attendance" id="btnPunchAttendance" onclick="punchAttendance()">Punch Attendance</button>
-        <button class="btn-primary" onclick="loadStaffWorkspace()">Refresh</button>
-        <button class="btn-logout" onclick="logoutStaff()">Logout</button>
+        <button class="btn-primary" id="btnRefresh" onclick="syncStaffAdminData()">Refresh Data</button>
+        <button class="btn-logout" onclick="logoutAdmin()">Logout</button>
       </div>
     </header>
 
-    <!-- METRICS -->
+    <!-- KPI STATS -->
     <div class="kpi-grid">
       <div class="kpi-card">
-        <div class="kpi-title">Assigned Tasks</div>
-        <div class="kpi-val" id="kpiTotalTasks">0</div>
+        <div class="kpi-title">Total Active Workforce</div>
+        <div class="kpi-val" id="kpiTotalStaff">0</div>
+      </div>
+      <div class="kpi-card" style="border-left-color: #1877f2;">
+        <div class="kpi-title">Active Assigned Tasks</div>
+        <div class="kpi-val" id="kpiActiveTasks" style="color: #1877f2;">0</div>
       </div>
       <div class="kpi-card" style="border-left-color: #f59e0b;">
-        <div class="kpi-title">Pending / In Progress</div>
-        <div class="kpi-val" id="kpiPendingTasks" style="color: #d97706;">0</div>
-      </div>
-      <div class="kpi-card" style="border-left-color: #10b981;">
-        <div class="kpi-title">Completed & Approved</div>
-        <div class="kpi-val" id="kpiApprovedTasks" style="color: #059669;">0</div>
+        <div class="kpi-title">Deliverables Awaiting Approval</div>
+        <div class="kpi-val" id="kpiPendingApproval" style="color: #d97706;">0</div>
       </div>
     </div>
 
-    <!-- MY TASKS TABLE -->
+    <!-- 1. STAFF REGISTRATION & EDIT FORM -->
     <div class="section-card">
       <div class="section-head">
-        <span>My Assigned Deliverables & Tasks</span>
+        <span id="staffFormTitle">Add New Workforce / Staff Member</span>
+      </div>
+      <input type="hidden" id="staffEditId">
+      <div class="input-grid">
+        <div class="input-group">
+          <label>Staff ID</label>
+          <input type="text" id="stfId" placeholder="e.g. STF01">
+        </div>
+        <div class="input-group">
+          <label>Full Legal Name</label>
+          <input type="text" id="stfName" placeholder="Staff Name">
+        </div>
+        <div class="input-group">
+          <label>Corporate / Notification Email Address</label>
+          <input type="email" id="stfEmail" placeholder="staff@ofbuzz.com">
+        </div>
+        <div class="input-group">
+          <label>Functional Role / Title</label>
+          <input type="text" id="stfRole" placeholder="Senior Designer / Developer">
+        </div>
+      </div>
+      <div style="margin-top: 16px; display: flex; gap: 10px;">
+        <button class="btn-primary" id="btnSaveStaff" onclick="saveStaffRecord()">Commit Associate Record</button>
+        <button class="btn-del" id="btnCancelStaffEdit" style="display:none;" onclick="cancelStaffEdit()">Cancel</button>
+      </div>
+    </div>
+
+    <!-- 2. WORKFORCE DIRECTORY -->
+    <div class="section-card">
+      <div class="section-head">
+        <span>Workforce Directory</span>
+      </div>
+      <div class="table-box">
+        <table>
+          <thead>
+            <tr>
+              <th>Staff ID</th>
+              <th>Associate Name</th>
+              <th>Corporate Email</th>
+              <th>Functional Role</th>
+              <th>Status</th>
+              <th style="text-align: right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="staffTableBody">
+            <tr><td colspan="6" style="text-align:center;">Loading staff directory...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 3. TASK DELEGATION & ASSIGNMENT QUEUE -->
+    <div class="section-card">
+      <div class="section-head">
+        <span>Task Delegation & Assignment Queue</span>
+      </div>
+      <div class="input-grid">
+        <div class="input-group">
+          <label>Select Staff Member</label>
+          <select id="staffSelect">
+            <option value="">Choose Staff Profile</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label>Task Title</label>
+          <input type="text" id="taskTitle" placeholder="Assignment Title">
+        </div>
+        <div class="input-group" style="grid-column: span 2;">
+          <label>Assignment Instructions</label>
+          <input type="text" id="taskDesc" placeholder="Describe instructions and timeline...">
+        </div>
+      </div>
+      <button class="btn-primary" style="margin-top: 14px;" onclick="assignStaffTask()">Assign Task & Send Notification Email</button>
+    </div>
+
+    <!-- 4. PENDING TASK APPROVALS -->
+    <div class="section-card">
+      <div class="section-head">
+        <span>Pending Task Approvals & Deliverables</span>
       </div>
       <div class="table-box">
         <table>
           <thead>
             <tr>
               <th>Task Title</th>
-              <th>Instructions</th>
-              <th>Assigned Date</th>
-              <th>Status</th>
+              <th>Assigned Associate</th>
               <th>Staff Remark</th>
+              <th>Status</th>
               <th style="text-align: right;">Action</th>
             </tr>
           </thead>
-          <tbody id="myTasksBody">
-            <tr><td colspan="6" style="text-align:center;">Loading tasks...</td></tr>
+          <tbody id="taskApprovalBody">
+            <tr><td colspan="5" style="text-align:center;">No deliverables awaiting approval.</td></tr>
           </tbody>
         </table>
       </div>
     </div>
 
-    <!-- LIVE CHAT WITH ADMIN -->
+    <!-- 5. RECENT ATTENDANCE LOGS -->
     <div class="section-card">
       <div class="section-head">
-        <span>Live Communication with Admin Studio</span>
-        <button class="btn-primary" style="padding:4px 10px; font-size:11px;" onclick="loadChatMessages()">Refresh Chat</button>
+        <span>Recent Staff Attendance Activity</span>
       </div>
-      <div id="chatPanel">
-        <div id="chatMessagesBox">
-          <div style="text-align:center; color:#64748b; font-size:12px;">Loading messages...</div>
-        </div>
-        <div style="display:flex; gap:8px; align-items:center;">
-          <input type="file" id="staffChatFilePicker" style="display:none;" onchange="handleStaffAttachment(this)">
-          <button onclick="document.getElementById('staffChatFilePicker').click()" style="background:#64748b; color:#fff;" title="Attach File">Attach</button>
-          <input type="text" id="staffChatInput" placeholder="Type your message to Admin..." style="flex:1; padding:9px 12px; border:1px solid #cbd5e1; border-radius:8px;" onkeypress="if(event.key === 'Enter') sendStaffMessage()">
-          <button class="btn-chat" onclick="sendStaffMessage()">Send</button>
-        </div>
+      <div class="table-box">
+        <table>
+          <thead>
+            <tr>
+              <th>Attendance ID</th>
+              <th>Staff ID</th>
+              <th>Staff Name</th>
+              <th>Date</th>
+              <th>Check-in Time</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="attendanceTableBody">
+            <tr><td colspan="6" style="text-align:center;">Loading attendance logs...</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
 
   <script>
     const API_ENDPOINT = "https://script.google.com/macros/s/AKfycby9yiIo9euB9KTt0zBuwcF3x6pdaeJJ48mAwcTFC6xl53oH8eh0Agfwlr138t3D5KNPYQ/exec";
-    const STAFF_PORTAL_PIN = "1312";
+    const SECURE_PIN = "1312";
 
-    let currentStaff = { id: "", name: "", email: "", role: "" };
-    let staffAttachment = { url: "", type: "" };
+    let state = { staff: [], tasks: [], attendance: [] };
 
     function showToast(msg) {
       const toast = document.getElementById("toast");
@@ -226,232 +297,283 @@
       script.onerror = () => { script.remove(); showToast("Network request failed."); };
     }
 
-    function initLoginPage() {
-      const savedStaff = localStorage.getItem("ofbuzz_staff_auth");
-      if (savedStaff) {
-        currentStaff = JSON.parse(savedStaff);
-        showWorkspace();
-        return;
-      }
-      jsonp(API_ENDPOINT + "?action=getAdminData", "onStaffListLoaded");
-    }
-
-    window.onStaffListLoaded = function(res) {
-      const select = document.getElementById("staffLoginSelect");
-      if (res && res.success && res.data && res.data.staff) {
-        let optHtml = '<option value="">-- Choose Your Staff Profile --</option>';
-        res.data.staff.forEach(s => {
-          const id = Array.isArray(s) ? s[0] : (s.staffId || s.id);
-          const name = Array.isArray(s) ? s[1] : (s.staffName || s.name);
-          const role = Array.isArray(s) ? s[3] : s.role;
-          const email = Array.isArray(s) ? s[2] : s.email;
-          if (id || name) {
-            optHtml += `<option value="${id}" data-name="${name}" data-role="${role || 'Staff'}" data-email="${email || ''}">${name} (${id} - ${role || 'Staff'})</option>`;
-          }
-        });
-        select.innerHTML = optHtml;
-      } else {
-        select.innerHTML = '<option value="">No staff profiles found</option>';
-      }
-    };
-
-    function loginStaffUser() {
-      const select = document.getElementById("staffLoginSelect");
-      const manualInput = document.getElementById("manualStaffIdInput").value.trim();
-      const enteredPin = document.getElementById("staffPinInput").value.trim();
+    function validateAdminPin() {
+      const input = document.getElementById("adminPinInput");
       const errorMsg = document.getElementById("authErrorMsg");
-
-      // Password Validation
-      if (enteredPin !== STAFF_PORTAL_PIN) {
-        errorMsg.innerText = "Incorrect Password / PIN. Access Denied.";
-        errorMsg.style.display = "block";
-        document.getElementById("staffPinInput").value = "";
-        document.getElementById("staffPinInput").focus();
-        return;
-      }
-
-      if (select.value) {
-        const opt = select.options[select.selectedIndex];
-        currentStaff = {
-          id: select.value,
-          name: opt.getAttribute("data-name") || "Staff Member",
-          role: opt.getAttribute("data-role") || "Staff",
-          email: opt.getAttribute("data-email") || ""
-        };
-      } else if (manualInput) {
-        currentStaff = { id: manualInput, name: manualInput, role: "Staff", email: "" };
+      if (input.value.trim() === SECURE_PIN) {
+        sessionStorage.setItem("ofbuzz_staffadmin_auth", "true");
+        document.getElementById("authOverlay").style.display = "none";
+        document.getElementById("staffAdminDashboard").style.display = "block";
+        errorMsg.style.display = "none";
+        syncStaffAdminData();
       } else {
-        errorMsg.innerText = "Please select or enter your Staff ID.";
-        errorMsg.style.display = "block";
-        return;
+        errorMsg.style.display = "block"; input.value = ""; input.focus();
       }
-
-      localStorage.setItem("ofbuzz_staff_auth", JSON.stringify(currentStaff));
-      errorMsg.style.display = "none";
-      showWorkspace();
     }
 
-    function showWorkspace() {
-      document.getElementById("staffAuthOverlay").style.display = "none";
-      document.getElementById("staffDashboard").style.display = "block";
-      document.getElementById("displayStaffName").innerText = currentStaff.name;
-      document.getElementById("displayStaffMeta").innerText = `Staff ID: ${currentStaff.id} | Role: ${currentStaff.role}`;
-      loadStaffWorkspace();
-    }
-
-    function logoutStaff() {
-      localStorage.removeItem("ofbuzz_staff_auth");
+    function logoutAdmin() {
+      sessionStorage.removeItem("ofbuzz_staffadmin_auth");
       location.reload();
     }
 
-    function loadStaffWorkspace() {
-      loadStaffTasks();
-      loadChatMessages();
-    }
-
-    /* ATTENDANCE */
-    function punchAttendance() {
-      const btn = document.getElementById("btnPunchAttendance");
-      btn.disabled = true;
-      btn.innerText = "Punching...";
-      showToast("Logging attendance...");
-      jsonp(API_ENDPOINT + `?action=markAttendance&staffId=${encodeURIComponent(currentStaff.id)}&staffName=${encodeURIComponent(currentStaff.name)}`, "onAttendanceLogged");
-    }
-
-    window.onAttendanceLogged = function(res) {
-      const btn = document.getElementById("btnPunchAttendance");
-      btn.disabled = false;
-      btn.innerText = "Attendance Logged";
-      btn.style.background = "#059669";
-      showToast(res && res.success ? "Attendance logged successfully!" : "Failed to record.");
-    };
-
-    /* TASKS */
-    function loadStaffTasks() {
-      jsonp(API_ENDPOINT + `?action=getStaffTasks&staffId=${encodeURIComponent(currentStaff.id)}`, "onStaffTasksLoaded");
-    }
-
-    window.onStaffTasksLoaded = function(res) {
-      const tbody = document.getElementById("myTasksBody");
-      let total = 0, pending = 0, approved = 0, html = "";
-
-      if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
-        total = res.data.length;
-        res.data.forEach(t => {
-          if (t.status === "Approved") approved++;
-          else pending++;
-
-          const isActionable = t.status === "Assigned";
-          html += `<tr>
-            <td><strong>${t.title}</strong></td>
-            <td>${t.description || '—'}</td>
-            <td>${t.date || '—'}</td>
-            <td>
-              <span class="status-badge" style="background:${t.status === 'Approved' ? '#dcfce7' : (t.status === 'Pending Approval' ? '#fef3c7' : '#e0f2fe')}; color:${t.status === 'Approved' ? '#166534' : (t.status === 'Pending Approval' ? '#d97706' : '#0284c7')};">
-                ${t.status}
-              </span>
-            </td>
-            <td>
-              ${isActionable 
-                ? `<input type="text" id="remark_\${t.id}" placeholder="Enter submission note..." style="padding:4px 8px; font-size:12px; border:1px solid #cbd5e1; border-radius:6px; width:100%;">` 
-                : (t.staffRemark || '—')}
-            </td>
-            <td style="text-align: right; white-space: nowrap;">
-              ${isActionable 
-                ? `<button class="btn-primary" style="padding:4px 10px; font-size:11px;" onclick="submitTaskForReview('\${t.id}')">Submit Done</button>` 
-                : `<span style="font-size:11px; color:#64748b;">\${t.status === 'Approved' ? 'Completed' : 'Awaiting Admin'}</span>`}
-            </td>
-          </tr>`;
-        });
+    function checkAuthOnLoad() {
+      if (sessionStorage.getItem("ofbuzz_staffadmin_auth") === "true") {
+        document.getElementById("authOverlay").style.display = "none";
+        document.getElementById("staffAdminDashboard").style.display = "block";
+        syncStaffAdminData();
       } else {
-        html = '<tr><td colspan="6" style="text-align:center;">No tasks assigned yet.</td></tr>';
+        document.getElementById("authOverlay").style.display = "flex";
+        document.getElementById("staffAdminDashboard").style.display = "none";
       }
-
-      tbody.innerHTML = html;
-      document.getElementById("kpiTotalTasks").innerText = total;
-      document.getElementById("kpiPendingTasks").innerText = pending;
-      document.getElementById("kpiApprovedTasks").innerText = approved;
-    };
-
-    function submitTaskForReview(taskId) {
-      const remarkInput = document.getElementById("remark_" + taskId);
-      const remark = remarkInput ? remarkInput.value.trim() : "Task Completed";
-      showToast("Submitting deliverable...");
-      jsonp(API_ENDPOINT + `?action=submitTaskCompletion&taskId=${encodeURIComponent(taskId)}&remark=${encodeURIComponent(remark)}`, "onTaskSubmitted");
     }
 
-    window.onTaskSubmitted = function(res) {
-      if (res && res.success) { showToast("Submitted for approval!"); loadStaffTasks(); }
-      else { showToast("Submission failed."); }
-    };
-
-    /* CHAT */
-    function loadChatMessages() {
-      jsonp(API_ENDPOINT + `?action=getChatMessages&staffId=${encodeURIComponent(currentStaff.id)}`, "onStaffChatLoaded");
+    function syncStaffAdminData() {
+      const btn = document.getElementById("btnRefresh");
+      if (btn) { btn.disabled = true; btn.innerText = "Syncing..."; }
+      showToast("Fetching workforce data...");
+      jsonp(API_ENDPOINT + "?action=getAdminData", "onStaffAdminSync");
     }
 
-    window.onStaffChatLoaded = function(res) {
-      const box = document.getElementById("chatMessagesBox");
-      if (!res || !res.success || !res.data || res.data.length === 0) {
-        box.innerHTML = '<div style="text-align:center; color:#64748b; font-size:12px;">No messages with Admin yet. Say Hello!</div>';
+    window.onStaffAdminSync = function(res) {
+      const btn = document.getElementById("btnRefresh");
+      if (btn) { btn.disabled = false; btn.innerText = "Refresh Data"; }
+      if (res && res.success && res.data) {
+        state = res.data;
+        renderStaffDirectory();
+        renderTaskApprovals();
+        renderAttendanceLogs();
+        updateKpis();
+        showToast("Synchronized successfully.");
+      } else {
+        showToast("Failed to fetch records.");
+      }
+    };
+
+    function updateKpis() {
+      const totalStaff = (state.staff || []).length;
+      const tasks = state.tasks || [];
+      const activeTasks = tasks.filter(t => (Array.isArray(t) ? t[6] : t.status) === "Assigned").length;
+      const pendingApproval = tasks.filter(t => (Array.isArray(t) ? t[6] : t.status) === "Pending Approval").length;
+
+      document.getElementById("kpiTotalStaff").innerText = totalStaff;
+      document.getElementById("kpiActiveTasks").innerText = activeTasks;
+      document.getElementById("kpiPendingApproval").innerText = pendingApproval;
+    }
+
+    function renderStaffDirectory() {
+      const sBody = document.getElementById("staffTableBody");
+      const sSelect = document.getElementById("staffSelect");
+      let html = "";
+      let optHtml = '<option value="">Choose Staff Profile</option>';
+
+      const staffList = state.staff || [];
+      if (staffList.length === 0) {
+        sBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No workforce members recorded yet.</td></tr>';
+        if (sSelect) sSelect.innerHTML = optHtml;
         return;
       }
 
-      let html = "";
-      res.data.forEach(m => {
-        const isMe = m.senderType === "Staff";
-        let attachMarkup = "";
-        if (m.attachmentUrl) {
-          if (m.attachmentType.includes("image")) attachMarkup = `<br><a href="${m.attachmentUrl}" target="_blank"><img src="${m.attachmentUrl}" style="max-width:140px; border-radius:6px; margin-top:4px;"></a>`;
-          else attachMarkup = `<br><a href="${m.attachmentUrl}" target="_blank" style="font-weight:bold;">Download Attachment</a>`;
-        }
-        html += `<div style="max-width:75%; padding:10px 12px; border-radius:8px; font-size:12.5px; line-height:1.4; ${isMe ? 'background:#e0f2fe; color:#0369a1; align-self:flex-end;' : 'background:#fff; color:#0f172a; align-self:flex-start; border:1px solid #e2e8f0;'}">
-          <b>${isMe ? 'Me' : 'Admin'}:</b> ${m.messageText}${attachMarkup}
-          <div style="font-size:9px; opacity:0.7; text-align:right; margin-top:2px;">${m.timestamp}</div>
-        </div>`;
+      staffList.forEach(s => {
+        const id = Array.isArray(s) ? s[0] : (s.staffId || s.id);
+        const name = Array.isArray(s) ? s[1] : (s.staffName || s.name);
+        const email = Array.isArray(s) ? s[2] : s.email;
+        const role = Array.isArray(s) ? s[3] : s.role;
+        const status = Array.isArray(s) ? (s[4] || "Active") : (s.status || "Active");
+
+        if (!id && !name) return;
+
+        html += `<tr>
+          <td><strong>${id}</strong></td>
+          <td>${name}</td>
+          <td>${email || '—'}</td>
+          <td>${role || 'Associate'}</td>
+          <td><span class="status-badge" style="background:#e0f2fe; color:#0284c7;">${status}</span></td>
+          <td style="text-align: right; white-space: nowrap;">
+            <button class="btn-edit" onclick="editStaffRecord('${id}')">Edit</button>
+            <button class="btn-del" onclick="deleteStaffRecord('${id}')">Delete</button>
+          </td>
+        </tr>`;
+
+        optHtml += `<option value="${id}" data-name="${name}">${name} (${id} - ${role || 'Staff'})</option>`;
       });
 
-      box.innerHTML = html;
-      box.scrollTop = box.scrollHeight;
+      sBody.innerHTML = html;
+      if (sSelect) sSelect.innerHTML = optHtml;
+    }
+
+    function saveStaffRecord() {
+      const editId = document.getElementById("staffEditId").value;
+      const s = {
+        id: document.getElementById("stfId").value.trim(),
+        name: document.getElementById("stfName").value.trim(),
+        email: document.getElementById("stfEmail").value.trim(),
+        role: document.getElementById("stfRole").value.trim()
+      };
+      if (!s.id || !s.name) { showToast("Staff ID and Name are required."); return; }
+
+      showToast("Saving associate record...");
+      jsonp(API_ENDPOINT + `?action=${editId ? 'editStaff' : 'addStaff'}&data=${encodeURIComponent(JSON.stringify(s))}`, "onStaffSaved");
+    }
+
+    window.onStaffSaved = function(res) {
+      if (res && res.success) {
+        showToast("Associate record saved.");
+        cancelStaffEdit();
+        syncStaffAdminData();
+      } else {
+        showToast("Failed to save associate.");
+      }
     };
 
-    function handleStaffAttachment(input) {
-      if (input.files && input.files[0]) {
-        const file = input.files[0];
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          staffAttachment.url = e.target.result;
-          staffAttachment.type = file.type;
-          showToast("File attached ready to send!");
-        };
-        reader.readAsDataURL(file);
+    function editStaffRecord(id) {
+      const s = (state.staff || []).find(item => (Array.isArray(item) ? item[0] : (item.staffId || item.id)) === String(id).trim());
+      if (!s) return;
+      const sid = Array.isArray(s) ? s[0] : (s.staffId || s.id);
+      const name = Array.isArray(s) ? s[1] : (s.staffName || s.name);
+      const email = Array.isArray(s) ? s[2] : s.email;
+      const role = Array.isArray(s) ? s[3] : s.role;
+
+      document.getElementById("staffEditId").value = sid;
+      document.getElementById("stfId").value = sid;
+      document.getElementById("stfId").readOnly = true;
+      document.getElementById("stfName").value = name || "";
+      document.getElementById("stfEmail").value = email || "";
+      document.getElementById("stfRole").value = role || "";
+      document.getElementById("staffFormTitle").innerText = "Edit Associate: " + name;
+      document.getElementById("btnSaveStaff").innerText = "Update Associate";
+      document.getElementById("btnCancelStaffEdit").style.display = "inline-block";
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function cancelStaffEdit() {
+      document.getElementById("staffEditId").value = "";
+      document.getElementById("stfId").value = "";
+      document.getElementById("stfId").readOnly = false;
+      document.getElementById("stfName").value = "";
+      document.getElementById("stfEmail").value = "";
+      document.getElementById("stfRole").value = "";
+      document.getElementById("staffFormTitle").innerText = "Add New Workforce / Staff Member";
+      document.getElementById("btnSaveStaff").innerText = "Commit Associate Record";
+      document.getElementById("btnCancelStaffEdit").style.display = "none";
+    }
+
+    function deleteStaffRecord(id) {
+      if (confirm("Are you sure you want to delete staff member " + id + "?")) {
+        showToast("Deleting staff...");
+        jsonp(API_ENDPOINT + `?action=deleteStaff&staffId=${encodeURIComponent(id)}`, "onStaffDeleted");
       }
     }
 
-    function sendStaffMessage() {
-      const input = document.getElementById("staffChatInput");
-      const text = input.value.trim();
-      if (!text && !staffAttachment.url) return;
+    window.onStaffDeleted = function(res) {
+      if (res && res.success) {
+        showToast("Staff record removed.");
+        syncStaffAdminData();
+      } else {
+        showToast("Failed to delete record.");
+      }
+    };
 
-      const payload = {
-        staffId: currentStaff.id,
-        staffName: currentStaff.name,
-        senderType: "Staff",
-        messageText: text,
-        attachmentUrl: staffAttachment.url,
-        attachmentType: staffAttachment.type
+    function assignStaffTask() {
+      const sel = document.getElementById("staffSelect");
+      const task = {
+        staffId: sel.value,
+        staffName: sel.options[sel.selectedIndex].getAttribute("data-name"),
+        title: document.getElementById("taskTitle").value.trim(),
+        description: document.getElementById("taskDesc").value.trim()
       };
+      if (!task.staffId || !task.title) { showToast("Select staff and provide title."); return; }
 
-      window.onStaffMsgSent = function() {
-        input.value = "";
-        staffAttachment = { url: "", type: "" };
-        loadChatMessages();
-      };
-
-      jsonp(API_ENDPOINT + `?action=sendChatMessage&data=${encodeURIComponent(JSON.stringify(payload))}`, "onStaffMsgSent");
+      showToast("Assigning task & notifying staff...");
+      jsonp(API_ENDPOINT + `?action=assignTask&data=${encodeURIComponent(JSON.stringify(task))}`, "onTaskAssigned");
     }
 
-    window.onload = initLoginPage;
+    window.onTaskAssigned = function(res) {
+      if (res && res.success) {
+        showToast(res.emailSent ? "Task assigned & notification email dispatched!" : "Task assigned successfully!");
+        document.getElementById("taskTitle").value = "";
+        document.getElementById("taskDesc").value = "";
+        syncStaffAdminData();
+      } else {
+        showToast("Failed to assign task.");
+      }
+    };
+
+    function renderTaskApprovals() {
+      const tBody = document.getElementById("taskApprovalBody");
+      let html = "";
+      const tasks = state.tasks || [];
+
+      tasks.forEach(t => {
+        const tId = Array.isArray(t) ? t[0] : (t.taskId || t.id);
+        const sName = Array.isArray(t) ? t[2] : (t.staffName || t.name);
+        const title = Array.isArray(t) ? t[3] : (t.taskTitle || t.title);
+        const status = Array.isArray(t) ? t[6] : t.status;
+        const remark = Array.isArray(t) ? (t[7] || "—") : (t.staffRemark || "—");
+
+        if (status === "Pending Approval" || status === "Assigned") {
+          html += `<tr>
+            <td><strong>${title}</strong></td>
+            <td>${sName}</td>
+            <td>${remark}</td>
+            <td><span class="status-badge" style="background:${status === 'Pending Approval' ? '#fef3c7' : '#e0f2fe'}; color:${status === 'Pending Approval' ? '#d97706' : '#0284c7'};">${status}</span></td>
+            <td style="text-align: right;">
+              ${status === 'Pending Approval' 
+                ? `<button class="btn-primary" style="padding:4px 12px; font-size:11px;" onclick="approveDeliverable('\${tId}')">Approve Deliverable</button>` 
+                : `<span style="font-size:11px; color:#64748b;">Awaiting Staff Submission</span>`}
+            </td>
+          </tr>`;
+        }
+      });
+
+      tBody.innerHTML = html || '<tr><td colspan="5" style="text-align:center;">No deliverables currently awaiting approval.</td></tr>';
+    }
+
+    function approveDeliverable(taskId) {
+      showToast("Approving task...");
+      jsonp(API_ENDPOINT + `?action=approveTask&taskId=${encodeURIComponent(taskId)}&remark=Approved`, "onTaskApproved");
+    }
+
+    window.onTaskApproved = function(res) {
+      if (res && res.success) {
+        showToast("Deliverable marked as Approved!");
+        syncStaffAdminData();
+      } else {
+        showToast("Failed to approve deliverable.");
+      }
+    };
+
+    function renderAttendanceLogs() {
+      const aBody = document.getElementById("attendanceTableBody");
+      let html = "";
+      const logs = (state.attendance || []).slice(-10).reverse();
+
+      if (logs.length === 0) {
+        aBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No attendance recorded yet.</td></tr>';
+        return;
+      }
+
+      logs.forEach(a => {
+        const attId = Array.isArray(a) ? a[0] : a.attendanceId;
+        const sId = Array.isArray(a) ? a[1] : a.staffId;
+        const sName = Array.isArray(a) ? a[2] : a.staffName;
+        const date = Array.isArray(a) ? a[3] : a.date;
+        const time = Array.isArray(a) ? a[4] : a.checkInTime;
+        const status = Array.isArray(a) ? a[5] : a.status;
+
+        html += `<tr>
+          <td><span style="font-family:'JetBrains Mono'; font-size:11px;">${attId}</span></td>
+          <td><strong>${sId}</strong></td>
+          <td>${sName}</td>
+          <td>${date}</td>
+          <td>${time}</td>
+          <td><span class="status-badge" style="background:#ecfdf5; color:#059669;">${status || 'Present'}</span></td>
+        </tr>`;
+      });
+
+      aBody.innerHTML = html;
+    }
+
+    window.onload = checkAuthOnLoad;
   </script>
 </body>
 </html>
