@@ -632,11 +632,15 @@
       if (btn) { btn.disabled = true; btn.innerText = "Submitting..."; }
 
       window.onCompleteDone = function(res) {
-        showToast("Deliverable submitted for review.", true);
+        if (res && res.success) {
+          showToast("Deliverable submitted for review.", true);
+        } else {
+          showToast("Submission failed: " + (res && res.error ? res.error : "Unknown error"), false);
+        }
         retrieveTasks();
       };
 
-      jsonp(API_ENDPOINT + "?action=submitTaskComplete&taskId=" + encodeURIComponent(taskId) + "&remark=" + encodeURIComponent(remarkValue), "onCompleteDone");
+      jsonp(API_ENDPOINT + "?action=submitTaskCompletion&taskId=" + encodeURIComponent(taskId) + "&remark=" + encodeURIComponent(remarkValue), "onCompleteDone");
     }
 
     function openStaffChat() {
