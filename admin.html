@@ -31,6 +31,7 @@
     body { background: var(--bg); color: var(--text); padding: 20px 16px 80px; }
     .container { max-width: 1240px; margin: 0 auto; }
 
+    /* AUTH OVERLAY */
     #authOverlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: #0f172a; z-index: 9999; display: flex;
@@ -68,48 +69,305 @@
     .kpi-title { font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); }
     .kpi-val { font-size: 1.5rem; font-weight: 800; margin-top: 6px; color: var(--text); }
 
-    #analyticsPanel {
-      display: none; background: #ffffff; border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 24px; margin-bottom: 24px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+    .section-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 22px; margin-bottom: 24px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.02);
     }
-    .meta-analytics-header {
-      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;
-      gap: 12px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 14px;
-    }
-    .meta-live-badge {
-      display: inline-flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: 800;
-      color: #0f172a; background: #f1f5f9; padding: 6px 14px; border-radius: 20px; border: 1px solid #cbd5e1;
-    }
-    .analytics-control-bar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-    .time-filter-group { display: flex; gap: 4px; background: #f1f5f9; padding: 4px; border-radius: 10px; }
-    .time-pill {
-      padding: 6px 14px; border: none; background: transparent; font-size: 0.78rem;
-      font-weight: 700; color: #64748b; border-radius: 8px; cursor: pointer; transition: all 0.2s;
-    }
-    .time-pill.active { background: #ffffff; color: var(--text); box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
-    .custom-range-inputs { display: inline-flex; align-items: center; gap: 6px; background: #f1f5f9; padding: 4px 8px; border-radius: 8px; font-size: 0.75rem; }
-    .custom-range-inputs input[type="date"] { padding: 4px 6px; font-size: 0.75rem; border: 1px solid var(--border); border-radius: 6px; }
+    .section-head { font-size: 1rem; font-weight: 700; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
 
-    .ig-insights-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; margin-bottom: 24px; }
-    .ig-insight-card {
-      background: #f8fafc; border: 1px solid var(--border); border-radius: 14px; padding: 18px;
-      position: relative; overflow: hidden; transition: transform 0.2s ease, box-shadow 0.2s ease;
+    .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+    .input-group { display: flex; flex-direction: column; gap: 6px; }
+    label { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); }
+    input, select, textarea {
+      padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px;
+      font-size: 0.85rem; outline: none; transition: all 0.2s; background: #fff;
     }
-    .ig-insight-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.04); }
-    .ig-card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    .ig-card-title { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.03em; }
-    .ig-growth-badge { font-size: 0.7rem; font-weight: 800; padding: 3px 8px; border-radius: 20px; display: inline-flex; align-items: center; gap: 3px; }
-    .badge-positive { background: #dcfce7; color: #166534; }
-    .badge-neutral { background: #e0f2fe; color: #0369a1; }
-    .badge-alert { background: #ffedd5; color: #c2410c; font-weight: 800; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; border: 1px solid #fed7aa; }
-    .badge-severe { background: #fef2f2; color: #b91c1c; font-weight: 800; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; border: 1px solid #fecaca; }
+    input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(242, 92, 59, 0.15); }
 
-    .ig-card-value { font-size: 1.6rem; font-weight: 800; color: #0f172a; margin-bottom: 6px; letter-spacing: -0.02em; }
-    .ig-card-sub { font-size: 0.72rem; color: var(--text-muted); font-weight: 500; }
-    .ig-progress-container { margin-top: 10px; }
-    .ig-progress-bar { width: 100%; height: 6px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin-top: 4px; }
-    .ig-progress-fill { height: 100%; background: var(--meta-blue); border-radius: 4px; width: 0%; transition: width 0.6s ease; }
+    button {
+      padding: 10px 16px; border: none; border-radius: 8px; font-weight: 700;
+      font-size: 0.85rem; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-bill { background: rgba(242, 92, 59, 0.12); color: var(--primary); border: 1px solid rgba(242, 92, 59, 0.25); }
+    .btn-bill:hover { background: var(--primary); color: #fff; }
+    .btn-del { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+    .btn-del:hover { background: var(--danger); color: #fff; }
+    .btn-edit { background: rgba(245, 158, 11, 0.1); color: #d97706; }
+    .btn-edit:hover { background: #d97706; color: #fff; }
+    .btn-logout { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); }
+    .btn-logout:hover { background: var(--danger); color: #fff; }
 
-    .charts-grid { display: grid; grid-template-columns: 2fr 1.1fr; gap: 18px; margin-bottom: 20px; }
-    @media (max-width: 900px) { .charts-grid { grid-template-columns: 1fr; } }
+    .table-box { overflow-x: auto; margin-top: 12px; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    th { text-align: left; padding: 12px 10px; background: #f1f5f9; color: var(--text-muted); font-weight: 700; text-transform: uppercase; font-size: 0.7rem; }
+    td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: #334155; }
+    .status-badge { padding: 3px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; background: #e0f2fe; color: #0284c7; }
+
+    .toast { position: fixed; top: 20px; right: 20px; padding: 12px 20px; border-radius: 8px; background: #0f172a; color: #fff; font-size: 0.85rem; font-weight: 600; display: none; z-index: 2000; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+  </style>
+</head>
+<body>
+
+  <!-- AUTHENTICATION OVERLAY -->
+  <div id="authOverlay">
+    <div class="auth-card">
+      <img src="https://i.pinimg.com/736x/bd/d0/5c/bdd05c94afb66b5a72f5e17a7a879ab3.jpg" class="auth-logo" alt="Ofbuzz Logo">
+      <h2 class="auth-title">Ofbuzz Technology</h2>
+      <p class="auth-sub">Enter Secure Access PIN (1312) to unlock Admin Console</p>
+      
+      <input type="password" id="adminPinInput" class="auth-input" maxlength="4" placeholder="••••" autofocus onkeypress="if(event.key === 'Enter') validateAdminPin()">
+      <button class="auth-btn" onclick="validateAdminPin()">Unlock Console</button>
+      <div id="authErrorMsg" class="auth-error">Incorrect PIN. Access Denied.</div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <div class="container" id="mainDashboard" style="display: none;">
+    <header>
+      <div class="brand-box">
+        <img src="https://i.pinimg.com/736x/bd/d0/5c/bdd05c94afb66b5a72f5e17a7a879ab3.jpg" class="brand-logo" alt="Ofbuzz Logo">
+        <div>
+          <div class="brand-title">Ofbuzz Technology — Admin Studio</div>
+          <p style="font-size: 0.75rem; color: var(--text-muted);">Operations & Clients Billing Ledger</p>
+        </div>
+      </div>
+      <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+        <button class="btn-primary" id="btnRefresh" onclick="syncAllData()">Refresh Data</button>
+        <button class="btn-logout" onclick="lockAdminSession()">Logout</button>
+      </div>
+    </header>
+
+    <!-- TOP OVERVIEW STRIP -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-title">Current Month Demand</div>
+        <div class="kpi-val" id="todaySales">INR 0.00</div>
+      </div>
+      <div class="kpi-card" style="border-left-color: #10b981;">
+        <div class="kpi-title">Current Month Collected</div>
+        <div class="kpi-val" id="kpiTotalPaid" style="color: #10b981;">INR 0.00</div>
+      </div>
+      <div class="kpi-card" style="border-left-color: #ea580c;">
+        <div class="kpi-title">Current Month Due</div>
+        <div class="kpi-val" id="kpiTotalPending" style="color: #ea580c;">INR 0.00</div>
+      </div>
+    </div>
+
+    <!-- 1. CLIENT SETUP -->
+    <div class="section-card">
+      <div class="section-head">
+        <span id="formTitle">Register Client & Setup Services</span>
+      </div>
+      <input type="hidden" id="clientId">
+      <div class="input-grid">
+        <div class="input-group">
+          <label>Customer / Business Name</label>
+          <input type="text" id="custName" placeholder="Client Name">
+        </div>
+        <div class="input-group">
+          <label>Phone / WhatsApp</label>
+          <input type="text" id="custPhone" placeholder="Mobile Number">
+        </div>
+        <div class="input-group">
+          <label>Email Address</label>
+          <input type="email" id="custEmail" placeholder="client@domain.com">
+        </div>
+        <div class="input-group">
+          <label>Renewal / Due Date</label>
+          <input type="date" id="custDate">
+        </div>
+        <div class="input-group">
+          <label>1. One-Time Service</label>
+          <input type="text" id="oneTimeTitle" placeholder="Website Development">
+        </div>
+        <div class="input-group">
+          <label>One-Time Fee (INR)</label>
+          <input type="number" id="oneTimeAmt" placeholder="0">
+        </div>
+        <div class="input-group">
+          <label>2. Monthly Retainer Service</label>
+          <input type="text" id="monthlyTitle" placeholder="SEO & Meta Ads">
+        </div>
+        <div class="input-group">
+          <label>Monthly Fee (INR)</label>
+          <input type="number" id="monthlyAmt" placeholder="0">
+        </div>
+        <div class="input-group">
+          <label>3. Annual Support Service</label>
+          <input type="text" id="annualTitle" placeholder="Cloud Server & AMC">
+        </div>
+        <div class="input-group">
+          <label>Annual Fee (INR)</label>
+          <input type="number" id="annualAmt" placeholder="0">
+        </div>
+      </div>
+      <div style="margin-top: 16px; display: flex; gap: 10px;">
+        <button class="btn-primary" id="btnSaveClient" onclick="saveClientRecord()">Save & Update Client</button>
+        <button class="btn-del" id="btnCancelEdit" style="display:none;" onclick="cancelClientEdit()">Cancel</button>
+      </div>
+    </div>
+
+    <!-- 2. CLIENTS TABLE -->
+    <div class="section-card">
+      <div class="section-head">
+        <span>Active Clients Directory</span>
+      </div>
+      <div class="table-box">
+        <table>
+          <thead>
+            <tr>
+              <th>Client ID</th>
+              <th>Customer Name</th>
+              <th>Contact Info</th>
+              <th>Active Services</th>
+              <th>Billing Due</th>
+              <th style="text-align: right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="clientTableBody">
+            <tr><td colspan="6" style="text-align:center;">Synchronizing records...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_ENDPOINT = "https://script.google.com/macros/s/AKfycby9yiIo9euB9KTt0zBuwcF3x6pdaeJJ48mAwcTFC6xl53oH8eh0Agfwlr138t3D5KNPYQ/exec";
+    const SECURE_PIN = "1312";
+
+    let state = { clients: [], payments: [] };
+
+    function showToast(msg) {
+      const toast = document.getElementById("toast");
+      toast.innerText = msg; toast.style.display = "block";
+      setTimeout(() => { toast.style.display = "none"; }, 3500);
+    }
+
+    function jsonp(url, callbackName) {
+      const script = document.createElement("script");
+      script.src = url + (url.indexOf("?") >= 0 ? "&" : "?") + "callback=" + callbackName + "&_t=" + Date.now();
+      document.body.appendChild(script);
+      script.onload = () => script.remove();
+      script.onerror = () => { script.remove(); showToast("Network request failed."); };
+    }
+
+    function validateAdminPin() {
+      const input = document.getElementById("adminPinInput");
+      const errorMsg = document.getElementById("authErrorMsg");
+      if (input.value.trim() === SECURE_PIN) {
+        sessionStorage.setItem("ofbuzz_admin_auth", "true");
+        document.getElementById("authOverlay").style.display = "none";
+        document.getElementById("mainDashboard").style.display = "block";
+        errorMsg.style.display = "none";
+        syncAllData();
+      } else {
+        errorMsg.style.display = "block"; input.value = ""; input.focus();
+      }
+    }
+
+    function lockAdminSession() {
+      sessionStorage.removeItem("ofbuzz_admin_auth");
+      location.reload();
+    }
+
+    function checkAuthOnLoad() {
+      if (sessionStorage.getItem("ofbuzz_admin_auth") === "true") {
+        document.getElementById("authOverlay").style.display = "none";
+        document.getElementById("mainDashboard").style.display = "block";
+        syncAllData();
+      } else {
+        document.getElementById("authOverlay").style.display = "flex";
+        document.getElementById("mainDashboard").style.display = "none";
+      }
+    }
+
+    function syncAllData() {
+      const btn = document.getElementById("btnRefresh");
+      if (btn) { btn.disabled = true; btn.innerText = "Refreshing..."; }
+      showToast("Fetching latest records...");
+      jsonp(API_ENDPOINT + "?action=getAdminData", "onAdminSync");
+    }
+
+    window.onAdminSync = function(res) {
+      const btn = document.getElementById("btnRefresh");
+      if (btn) { btn.disabled = false; btn.innerText = "Refresh Data"; }
+      if (res && res.success && res.data) {
+        state = res.data;
+        renderClientsTable();
+        showToast("Synchronized successfully.");
+      } else { showToast("Error retrieving records."); }
+    };
+
+    function renderClientsTable() {
+      const clientBody = document.getElementById("clientTableBody");
+      let cHtml = "";
+      let totalDemand = 0;
+
+      (state.clients || []).forEach(c => {
+        if (String(c[11] || "").trim().toLowerCase() === "cancelled") return;
+        const otAmt = parseFloat(c[5]) || 0, moAmt = parseFloat(c[7]) || 0, anAmt = parseFloat(c[9]) || 0;
+        totalDemand += moAmt + anAmt + otAmt;
+
+        let serv = [];
+        if (c[4] && otAmt > 0) serv.push(`One-Time: ${c[4]} (INR ${otAmt})`);
+        if (c[6] && moAmt > 0) serv.push(`Monthly: ${c[6]} (INR ${moAmt})`);
+        if (c[8] && anAmt > 0) serv.push(`Annual: ${c[8]} (INR ${anAmt})`);
+
+        cHtml += `<tr>
+          <td><strong>${c[0]}</strong></td>
+          <td><strong>${c[1]}</strong></td>
+          <td>${c[2]}<br><span style="font-size:0.75rem; color:#64748b;">${c[3]}</span></td>
+          <td>${serv.join("<br>") || "—"}</td>
+          <td><strong>${c[10] ? c[10].substring(0,10) : "—"}</strong></td>
+          <td style="text-align: right; white-space: nowrap;">
+            <button class="btn-edit" onclick="editClientRecord('${c[0]}')">Edit</button> 
+            <button class="btn-del" onclick="deleteClientRecord('${c[0]}')">Delete</button>
+          </td>
+        </tr>`;
+      });
+
+      clientBody.innerHTML = cHtml || '<tr><td colspan="6" style="text-align:center;">No accounts found.</td></tr>';
+      document.getElementById("todaySales").innerText = "INR " + totalDemand.toFixed(2);
+    }
+
+    function saveClientRecord() {
+      const id = document.getElementById("clientId").value;
+      const client = { id: id, name: document.getElementById("custName").value.trim(), phone: document.getElementById("custPhone").value.trim(), email: document.getElementById("custEmail").value.trim(), nextBillingDate: document.getElementById("custDate").value, oneTimeService: document.getElementById("oneTimeTitle").value.trim(), oneTimeAmount: document.getElementById("oneTimeAmt").value, monthlyService: document.getElementById("monthlyTitle").value.trim(), monthlyAmount: document.getElementById("monthlyAmt").value, annualService: document.getElementById("annualTitle").value.trim(), annualAmount: document.getElementById("annualAmt").value };
+      if (!client.name) { showToast("Client name is required."); return; }
+      jsonp(API_ENDPOINT + `?action=${id ? 'editClient' : 'addClient'}&data=${encodeURIComponent(JSON.stringify(client))}`, "onClientSaved");
+    }
+    window.onClientSaved = function() { showToast("Client saved."); cancelClientEdit(); syncAllData(); };
+
+    function editClientRecord(id) {
+      const c = (state.clients || []).find(item => String(item[0]).trim() === String(id).trim());
+      if (!c) return;
+      document.getElementById("clientId").value = c[0]; document.getElementById("custName").value = c[1] || ""; document.getElementById("custPhone").value = c[2] || ""; document.getElementById("custEmail").value = c[3] || ""; document.getElementById("custDate").value = c[10] ? c[10].substring(0,10) : "";
+      document.getElementById("oneTimeTitle").value = c[4] || ""; document.getElementById("oneTimeAmt").value = c[5] || ""; document.getElementById("monthlyTitle").value = c[6] || ""; document.getElementById("monthlyAmt").value = c[7] || ""; document.getElementById("annualTitle").value = c[8] || ""; document.getElementById("annualAmt").value = c[9] || "";
+      document.getElementById("formTitle").innerText = "Edit Client: " + c[1]; document.getElementById("btnCancelEdit").style.display = "inline-block";
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function cancelClientEdit() {
+      document.getElementById("clientId").value = ""; document.getElementById("custName").value = ""; document.getElementById("custPhone").value = ""; document.getElementById("custEmail").value = ""; document.getElementById("custDate").value = "";
+      document.getElementById("oneTimeTitle").value = ""; document.getElementById("oneTimeAmt").value = ""; document.getElementById("monthlyTitle").value = ""; document.getElementById("monthlyAmt").value = ""; document.getElementById("annualTitle").value = ""; document.getElementById("annualAmt").value = "";
+      document.getElementById("formTitle").innerText = "Register Client & Setup Services"; document.getElementById("btnCancelEdit").style.display = "none";
+    }
+
+    function deleteClientRecord(id) {
+      if (confirm("Delete client " + id + "?")) {
+        jsonp(API_ENDPOINT + `?action=deleteClient&clientId=${encodeURIComponent(id)}`, function(res) {
+          if (res && res.success) { showToast("Deleted."); syncAllData(); }
+        });
+      }
+    }
+
+    window.onload = checkAuthOnLoad;
+  </script>
+</body>
+</html>
