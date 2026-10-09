@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Workforce & Staff Admin Console — Ofbuzz Technology</title>
+  <title>Staff Admin Console — Ofbuzz Technology</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,15 +13,11 @@
     :root {
       --primary: #f25c3b;
       --primary-dark: #d94827;
-      --meta-blue: #1877f2;
       --bg: #f8fafc;
       --surface: #ffffff;
       --border: #e2e8f0;
       --text: #0f172a;
       --text-muted: #64748b;
-      --accent: #10b981;
-      --warning: #f59e0b;
-      --danger: #ef4444;
       --radius: 12px;
     }
 
@@ -29,7 +25,6 @@
     body { background: var(--bg); color: var(--text); padding: 20px 16px 80px; }
     .container { max-width: 1100px; margin: 0 auto; }
 
-    /* AUTH OVERLAY (PIN: 1312) */
     #authOverlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: #0f172a; z-index: 9999; display: flex;
@@ -50,7 +45,7 @@
     .auth-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(242, 92, 59, 0.2); }
     .auth-btn { width: 100%; padding: 12px; font-size: 0.95rem; font-weight: 700; border-radius: 10px; background: var(--primary); color: #fff; border: none; cursor: pointer; }
     .auth-btn:hover { background: var(--primary-dark); }
-    .auth-error { color: var(--danger); font-size: 0.8rem; margin-top: 10px; font-weight: 600; display: none; }
+    .auth-error { color: #ef4444; font-size: 0.8rem; margin-top: 10px; font-weight: 600; display: none; }
 
     header {
       display: flex; justify-content: space-between; align-items: center;
@@ -88,10 +83,10 @@
     .btn-primary:hover { background: var(--primary-dark); }
     .btn-edit { background: rgba(245, 158, 11, 0.1); color: #d97706; }
     .btn-edit:hover { background: #d97706; color: #fff; }
-    .btn-del { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
-    .btn-del:hover { background: var(--danger); color: #fff; }
-    .btn-logout { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); }
-    .btn-logout:hover { background: var(--danger); color: #fff; }
+    .btn-del { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+    .btn-del:hover { background: #ef4444; color: #fff; }
+    .btn-logout { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); }
+    .btn-logout:hover { background: #ef4444; color: #fff; }
 
     .table-box { overflow-x: auto; margin-top: 10px; }
     table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
@@ -108,18 +103,18 @@
   <div id="authOverlay">
     <div class="auth-card">
       <img src="https://i.pinimg.com/736x/bd/d0/5c/bdd05c94afb66b5a72f5e17a7a879ab3.jpg" class="auth-logo" alt="Ofbuzz Logo">
-      <h2 class="auth-title">Staff Admin Studio</h2>
+      <h2 class="auth-title">Staff Admin Console</h2>
       <p class="auth-sub">Enter Secure Access PIN to manage workforce</p>
       
       <input type="password" id="adminPinInput" class="auth-input" maxlength="4" placeholder="••••" autofocus onkeypress="if(event.key === 'Enter') validateAdminPin()">
-      <button class="auth-btn" onclick="validateAdminPin()">Unlock Staff Console</button>
+      <button class="auth-btn" onclick="validateAdminPin()">Unlock Console</button>
       <div id="authErrorMsg" class="auth-error">Incorrect PIN. Access Denied.</div>
     </div>
   </div>
 
   <div id="toast" class="toast"></div>
 
-  <!-- MAIN STAFF ADMIN CONSOLE -->
+  <!-- CONSOLE -->
   <div class="container" id="staffAdminDashboard" style="display: none;">
     <header>
       <div class="brand-box">
@@ -135,7 +130,7 @@
       </div>
     </header>
 
-    <!-- KPI STATS -->
+    <!-- KPIS -->
     <div class="kpi-grid">
       <div class="kpi-card">
         <div class="kpi-title">Total Active Workforce</div>
@@ -151,7 +146,7 @@
       </div>
     </div>
 
-    <!-- 1. STAFF REGISTRATION & EDIT FORM -->
+    <!-- 1. ADD / EDIT STAFF -->
     <div class="section-card">
       <div class="section-head">
         <span id="staffFormTitle">Add New Workforce / Staff Member</span>
@@ -181,7 +176,7 @@
       </div>
     </div>
 
-    <!-- 2. WORKFORCE DIRECTORY -->
+    <!-- 2. DIRECTORY -->
     <div class="section-card">
       <div class="section-head">
         <span>Workforce Directory</span>
@@ -205,7 +200,7 @@
       </div>
     </div>
 
-    <!-- 3. TASK DELEGATION & ASSIGNMENT QUEUE -->
+    <!-- 3. ASSIGN TASK -->
     <div class="section-card">
       <div class="section-head">
         <span>Task Delegation & Assignment Queue</span>
@@ -229,7 +224,7 @@
       <button class="btn-primary" style="margin-top: 14px;" onclick="assignStaffTask()">Assign Task & Send Notification Email</button>
     </div>
 
-    <!-- 4. PENDING TASK APPROVALS -->
+    <!-- 4. APPROVALS -->
     <div class="section-card">
       <div class="section-head">
         <span>Pending Task Approvals & Deliverables</span>
@@ -252,7 +247,7 @@
       </div>
     </div>
 
-    <!-- 5. RECENT ATTENDANCE LOGS -->
+    <!-- 5. ATTENDANCE LOGS -->
     <div class="section-card">
       <div class="section-head">
         <span>Recent Staff Attendance Activity</span>
