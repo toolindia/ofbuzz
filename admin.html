@@ -249,24 +249,12 @@
       setTimeout(() => { toast.style.display = "none"; }, 3500);
     }
 
-    function jsonp(url, callback) {
-      const cbName = "jsonp_cb_" + Math.random().toString(36).substring(2) + "_" + Date.now();
-      window[cbName] = function(data) {
-        try {
-          if (typeof callback === "function") callback(data);
-        } finally {
-          delete window[cbName];
-        }
-      };
+    function jsonp(url, callbackName) {
       const script = document.createElement("script");
-      script.src = url + (url.indexOf("?") >= 0 ? "&" : "?") + "callback=" + cbName + "&_t=" + Date.now();
+      script.src = url + (url.indexOf("?") >= 0 ? "&" : "?") + "callback=" + callbackName + "&_t=" + Date.now();
       document.body.appendChild(script);
       script.onload = () => script.remove();
-      script.onerror = () => {
-        script.remove();
-        delete window[cbName];
-        showToast("Network request failed.");
-      };
+      script.onerror = () => { script.remove(); showToast("Network request failed."); };
     }
 
     function validateAdminPin() {
@@ -303,16 +291,18 @@
       const btn = document.getElementById("btnRefresh");
       if (btn) { btn.disabled = true; btn.innerText = "Refreshing..."; }
       showToast("Fetching latest records...");
-      jsonp(API_ENDPOINT + "?action=getAdminData", function(res) {
-        const btn = document.getElementById("btnRefresh");
-        if (btn) { btn.disabled = false; btn.innerText = "Refresh Data"; }
-        if (res && res.success && res.data) {
-          state = res.data;
-          renderClientsTable();
-          showToast("Synchronized successfully.");
-        } else { showToast("Error retrieving records."); }
-      });
+      jsonp(API_ENDPOINT + "?action=getAdminData", "onAdminSync");
     }
+
+    window.onAdminSync = function(res) {
+      const btn = document.getElementById("btnRefresh");
+      if (btn) { btn.disabled = false; btn.innerText = "Refresh Data"; }
+      if (res && res.success && res.data) {
+        state = res.data;
+        renderClientsTable();
+        showToast("Synchronized successfully.");
+      } else { showToast("Error retrieving records."); }
+    };
 
     function renderClientsTable() {
       const clientBody = document.getElementById("clientTableBody");
@@ -350,12 +340,9 @@
       const id = document.getElementById("clientId").value;
       const client = { id: id, name: document.getElementById("custName").value.trim(), phone: document.getElementById("custPhone").value.trim(), email: document.getElementById("custEmail").value.trim(), nextBillingDate: document.getElementById("custDate").value, oneTimeService: document.getElementById("oneTimeTitle").value.trim(), oneTimeAmount: document.getElementById("oneTimeAmt").value, monthlyService: document.getElementById("monthlyTitle").value.trim(), monthlyAmount: document.getElementById("monthlyAmt").value, annualService: document.getElementById("annualTitle").value.trim(), annualAmount: document.getElementById("annualAmt").value };
       if (!client.name) { showToast("Client name is required."); return; }
-      jsonp(API_ENDPOINT + `?action=${id ? 'editClient' : 'addClient'}&data=${encodeURIComponent(JSON.stringify(client))}`, function(res) {
-        showToast("Client saved.");
-        cancelClientEdit();
-        syncAllData();
-      });
+      jsonp(API_ENDPOINT + `?action=${id ? 'editClient' : 'addClient'}&data=${encodeURIComponent(JSON.stringify(client))}`, "onClientSaved");
     }
+    window.onClientSaved = function() { showToast("Client saved."); cancelClientEdit(); syncAllData(); };
 
     function editClientRecord(id) {
       const c = (state.clients || []).find(item => String(item[0]).trim() === String(id).trim());
