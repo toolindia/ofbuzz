@@ -292,12 +292,24 @@
       setTimeout(() => { toast.style.display = "none"; }, 3500);
     }
 
-    function jsonp(url, callbackName) {
+    function jsonp(url, callback) {
+      const cbName = "jsonp_cb_" + Math.random().toString(36).substring(2) + "_" + Date.now();
+      window[cbName] = function(data) {
+        try {
+          if (typeof callback === "function") callback(data);
+        } finally {
+          delete window[cbName];
+        }
+      };
       const script = document.createElement("script");
-      script.src = url + (url.indexOf("?") >= 0 ? "&" : "?") + "callback=" + callbackName + "&_t=" + Date.now();
+      script.src = url + (url.indexOf("?") >= 0 ? "&" : "?") + "callback=" + cbName + "&_t=" + Date.now();
       document.body.appendChild(script);
       script.onload = () => script.remove();
-      script.onerror = () => { script.remove(); showToast("Network request failed."); };
+      script.onerror = () => {
+        script.remove();
+        delete window[cbName];
+        showToast("Network request failed.");
+      };
     }
 
     function validateAdminPin() {
@@ -334,21 +346,19 @@
       const btn = document.getElementById("btnRefresh");
       if (btn) { btn.disabled = true; btn.innerText = "Syncing..."; }
       showToast("Fetching workforce data...");
-      jsonp(API_ENDPOINT + "?action=getAdminData", "onManagerSync");
+      jsonp(API_ENDPOINT + "?action=getAdminData", function(res) {
+        const btn = document.getElementById("btnRefresh");
+        if (btn) { btn.disabled = false; btn.innerText = "Refresh Data"; }
+        if (res && res.success && res.data) {
+          state = res.data;
+          renderStaffDirectory();
+          renderTaskApprovals();
+          renderAttendanceLogs();
+          updateKpis();
+          showToast("Synchronized successfully.");
+        } else { showToast("Failed to retrieve records."); }
+      });
     }
-
-    window.onManagerSync = function(res) {
-      const btn = document.getElementById("btnRefresh");
-      if (btn) { btn.disabled = false; btn.innerText = "Refresh Data"; }
-      if (res && res.success && res.data) {
-        state = res.data;
-        renderStaffDirectory();
-        renderTaskApprovals();
-        renderAttendanceLogs();
-        updateKpis();
-        showToast("Synchronized successfully.");
-      } else { showToast("Failed to retrieve records."); }
-    };
 
     function updateKpis() {
       const staffList = state.staff || [];
@@ -413,16 +423,14 @@
       if (!s.id || !s.name) { showToast("Staff ID and Name are required."); return; }
 
       showToast("Saving associate record...");
-      jsonp(API_ENDPOINT + `?action=${editId ? 'editStaff' : 'addStaff'}&data=${encodeURIComponent(JSON.stringify(s))}`, "onStaffSaved");
+      jsonp(API_ENDPOINT + `?action=${editId ? 'editStaff' : 'addStaff'}&data=${encodeURIComponent(JSON.stringify(s))}`, function(res) {
+        if (res && res.success) {
+          showToast("Associate record saved.");
+          cancelStaffEdit();
+          syncManagerData();
+        } else { showToast("Failed to save associate."); }
+      });
     }
-
-    window.onStaffSaved = function(res) {
-      if (res && res.success) {
-        showToast("Associate record saved.");
-        cancelStaffEdit();
-        syncManagerData();
-      } else { showToast("Failed to save associate."); }
-    };
 
     function editStaffRecord(id) {
       const s = (state.staff || []).find(item => (Array.isArray(item) ? item[0] : (item.staffId || item.id)) === String(id).trim());
@@ -523,7 +531,9 @@
         if (res && res.success) {
           showToast("Deliverable marked as Approved!");
           syncManagerData();
-        } else { showToast("Failed to approve deliverable."); }
+        } else { 
+          showToast((res && res.error) ? res.error : "Failed to approve deliverable."); 
+        }
       });
     }
 
