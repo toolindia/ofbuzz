@@ -70,14 +70,10 @@
     .kpi-title { font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); }
     .kpi-val { font-size: 1.5rem; font-weight: 800; margin-top: 6px; color: var(--text); }
 
-    /* PROFESSIONAL META / INSTAGRAM STYLE ANALYTICS DASHBOARD */
+    /* META / ANALYTICS */
     #analyticsPanel {
-      display: none;
-      background: #ffffff;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 24px;
-      margin-bottom: 24px;
+      display: none; background: #ffffff; border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 24px; margin-bottom: 24px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.04);
     }
     .meta-analytics-header {
@@ -98,7 +94,6 @@
     .custom-range-inputs { display: inline-flex; align-items: center; gap: 6px; background: #f1f5f9; padding: 4px 8px; border-radius: 8px; font-size: 0.75rem; }
     .custom-range-inputs input[type="date"] { padding: 4px 6px; font-size: 0.75rem; border: 1px solid var(--border); border-radius: 6px; }
 
-    /* IG INSIGHTS STYLE METRICS CARDS */
     .ig-insights-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; margin-bottom: 24px; }
     .ig-insight-card {
       background: #f8fafc; border: 1px solid var(--border); border-radius: 14px; padding: 18px;
@@ -116,17 +111,13 @@
 
     .ig-card-value { font-size: 1.6rem; font-weight: 800; color: #0f172a; margin-bottom: 6px; letter-spacing: -0.02em; }
     .ig-card-sub { font-size: 0.72rem; color: var(--text-muted); font-weight: 500; }
-    
     .ig-progress-container { margin-top: 10px; }
     .ig-progress-bar { width: 100%; height: 6px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin-top: 4px; }
     .ig-progress-fill { height: 100%; background: var(--meta-blue); border-radius: 4px; width: 0%; transition: width 0.6s ease; }
 
     .charts-grid { display: grid; grid-template-columns: 2fr 1.1fr; gap: 18px; margin-bottom: 20px; }
     @media (max-width: 900px) { .charts-grid { grid-template-columns: 1fr; } }
-    .chart-card {
-      background: #ffffff; border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 20px;
-    }
+    .chart-card { background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
     .chart-card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
     .chart-title { font-size: 0.9rem; font-weight: 800; color: var(--text); }
 
@@ -142,7 +133,6 @@
     }
     .section-head { font-size: 1rem; font-weight: 700; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
 
-    /* CATEGORY FILTER PILLS */
     .category-filter-bar { display: flex; gap: 6px; flex-wrap: wrap; }
     .cat-pill {
       padding: 6px 12px; border: 1px solid var(--border); background: #f8fafc; font-size: 0.75rem;
@@ -224,20 +214,16 @@
     .modal-grid { display: grid; grid-template-columns: 360px 1fr; gap: 24px; align-items: start; }
     @media (max-width: 960px) { .modal-grid { grid-template-columns: 1fr; } }
 
-    /* ON-SCREEN FLOATING NOTIFICATION BANNER (PERFECT FOR GOOGLE SITES IFRAME) */
+    /* ON-SCREEN TOAST FOR GOOGLE SITES IFRAME */
     .toast {
-      position: fixed; top: 18px; left: 50%; transform: translateX(-50%);
-      padding: 12px 24px; border-radius: 30px; background: #0f172a; color: #fff;
-      font-size: 0.88rem; font-weight: 700; display: none; z-index: 99999;
-      box-shadow: 0 15px 35px rgba(0,0,0,0.3); border: 1px solid #334155;
-      animation: fadeInDown 0.3s ease; text-align: center;
-    }
-    @keyframes fadeInDown {
-      from { opacity: 0; transform: translate(-50%, -15px); }
-      to { opacity: 1; transform: translate(-50%, 0); }
+      position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+      padding: 14px 28px; border-radius: 30px; background: #0f172a; color: #fff;
+      font-size: 0.9rem; font-weight: 700; display: none; z-index: 99999;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.35); border: 1.5px solid #334155;
+      text-align: center; max-width: 90%; white-space: normal; line-height: 1.4;
     }
 
-    /* CUSTOM CONFIRMATION DIALOG MODAL */
+    /* CONFIRMATION MODAL */
     .confirm-modal-box {
       background: #ffffff; padding: 24px; border-radius: 12px; max-width: 380px; width: 100%;
       text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2); border: 1px solid var(--border);
@@ -246,7 +232,7 @@
     .confirm-modal-box p { font-size: 0.85rem; color: #64748b; margin-bottom: 20px; line-height: 1.4; }
     .confirm-btns { display: flex; gap: 10px; justify-content: center; }
 
-    /* PROFESSIONAL INVOICE STYLING */
+    /* ZYLKER INVOICE STYLING */
     .zylker-invoice {
       background: #ffffff; color: #1e293b; padding: 32px; border-radius: 4px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; font-size: 0.84rem; line-height: 1.4;
@@ -307,7 +293,7 @@
 
   <div id="toast" class="toast"></div>
 
-  <!-- CUSTOM CONFIRMATION DIALOG MODAL -->
+  <!-- CUSTOM CONFIRMATION MODAL -->
   <div class="modal-backdrop" id="customConfirmModal">
     <div class="confirm-modal-box">
       <h4 id="confirmTitle">Confirm Action</h4>
@@ -337,7 +323,7 @@
       </div>
     </header>
 
-    <!-- TOP OVERVIEW STRIP -->
+    <!-- KPI STRIP -->
     <div class="kpi-grid">
       <div class="kpi-card">
         <div class="kpi-title">Current Month Demand</div>
@@ -353,12 +339,10 @@
       </div>
     </div>
 
-    <!-- UPGRADED PROFESSIONAL META / INSTAGRAM STYLE ANALYTICS DASHBOARD -->
+    <!-- ANALYTICS DASHBOARD -->
     <div id="analyticsPanel">
       <div class="meta-analytics-header">
-        <div class="meta-live-badge">
-          Business Insights & Growth Dashboard
-        </div>
+        <div class="meta-live-badge">Business Insights & Growth Dashboard</div>
         <div class="analytics-control-bar">
           <div class="time-filter-group">
             <button class="time-pill" onclick="setTimeFilter('today', this)">Today</button>
@@ -376,124 +360,69 @@
         </div>
       </div>
 
-      <!-- IG INSIGHTS STYLE METRICS CARDS -->
       <div class="ig-insights-grid">
         <div class="ig-insight-card">
-          <div class="ig-card-top">
-            <span class="ig-card-title">Gross Revenue</span>
-            <span class="ig-growth-badge badge-positive" id="badgeGross">Contracted</span>
-          </div>
+          <div class="ig-card-top"><span class="ig-card-title">Gross Revenue</span><span class="ig-growth-badge badge-positive" id="badgeGross">Contracted</span></div>
           <div class="ig-card-value" id="metaKpiGross">INR 0</div>
           <div class="ig-card-sub" id="metaKpiGrossSub">Total contracted business value</div>
-          <div class="ig-progress-container">
-            <div style="display:flex; justify-content:space-between; font-size:10px; color:#64748b; font-weight:700;"><span>Scope Target</span><span>Active</span></div>
-            <div class="ig-progress-bar"><div class="ig-progress-fill" style="width: 100%; background:#f25c3b;"></div></div>
-          </div>
+          <div class="ig-progress-container"><div class="ig-progress-bar"><div class="ig-progress-fill" style="width: 100%; background:#f25c3b;"></div></div></div>
         </div>
 
         <div class="ig-insight-card">
-          <div class="ig-card-top">
-            <span class="ig-card-title">MRR (Monthly)</span>
-            <span class="ig-growth-badge badge-positive" id="badgeMrr">Retainer</span>
-          </div>
+          <div class="ig-card-top"><span class="ig-card-title">MRR (Monthly)</span><span class="ig-growth-badge badge-positive" id="badgeMrr">Retainer</span></div>
           <div class="ig-card-value" id="metaKpiMrr">INR 0</div>
           <div class="ig-card-sub">Monthly retainer velocity</div>
-          <div class="ig-progress-container">
-            <div style="display:flex; justify-content:space-between; font-size:10px; color:#64748b; font-weight:700;"><span>Recurring Share</span><span id="mrrRatioText">0%</span></div>
-            <div class="ig-progress-bar"><div class="ig-progress-fill" id="mrrProgressBar" style="width: 0%; background:#1877f2;"></div></div>
-          </div>
+          <div class="ig-progress-container"><div class="ig-progress-bar"><div class="ig-progress-fill" id="mrrProgressBar" style="width: 0%; background:#1877f2;"></div></div></div>
         </div>
 
         <div class="ig-insight-card">
-          <div class="ig-card-top">
-            <span class="ig-card-title">Collections</span>
-            <span class="ig-growth-badge badge-positive" id="badgePaid">Realized</span>
-          </div>
+          <div class="ig-card-top"><span class="ig-card-title">Collections</span><span class="ig-growth-badge badge-positive" id="badgePaid">Realized</span></div>
           <div class="ig-card-value" id="metaKpiPaid" style="color: #059669;">INR 0</div>
           <div class="ig-card-sub" id="metaKpiPaidSub">Actual collections in window</div>
-          <div class="ig-progress-container">
-            <div style="display:flex; justify-content:space-between; font-size:10px; color:#64748b; font-weight:700;"><span>Collection Rate</span><span id="collectionRateText">0%</span></div>
-            <div class="ig-progress-bar"><div class="ig-progress-fill" id="collectionRateBar" style="width: 0%; background:#10b981;"></div></div>
-          </div>
+          <div class="ig-progress-container"><div class="ig-progress-bar"><div class="ig-progress-fill" id="collectionRateBar" style="width: 0%; background:#10b981;"></div></div></div>
         </div>
 
         <div class="ig-insight-card">
-          <div class="ig-card-top">
-            <span class="ig-card-title">Outstanding Due</span>
-            <span class="ig-growth-badge badge-neutral" id="badgeDue">Pending</span>
-          </div>
+          <div class="ig-card-top"><span class="ig-card-title">Outstanding Due</span><span class="ig-growth-badge badge-neutral" id="badgeDue">Pending</span></div>
           <div class="ig-card-value" id="metaKpiDue" style="color: #ea580c;">INR 0</div>
           <div class="ig-card-sub" id="metaKpiDueSub">Receivables to collect</div>
-          <div class="ig-progress-container">
-            <div style="display:flex; justify-content:space-between; font-size:10px; color:#64748b; font-weight:700;"><span>Pending Ratio</span><span id="pendingRateText">0%</span></div>
-            <div class="ig-progress-bar"><div class="ig-progress-fill" id="pendingRateBar" style="width: 0%; background:#ea580c;"></div></div>
-          </div>
+          <div class="ig-progress-container"><div class="ig-progress-bar"><div class="ig-progress-fill" id="pendingRateBar" style="width: 0%; background:#ea580c;"></div></div></div>
         </div>
 
         <div class="ig-insight-card">
-          <div class="ig-card-top">
-            <span class="ig-card-title">Active Accounts</span>
-            <span class="ig-growth-badge badge-positive">Clients</span>
-          </div>
+          <div class="ig-card-top"><span class="ig-card-title">Active Accounts</span><span class="ig-growth-badge badge-positive">Clients</span></div>
           <div class="ig-card-value" id="metaKpiClients">0</div>
           <div class="ig-card-sub" id="metaKpiClientsSub">0 active accounts in scope</div>
-          <div class="ig-progress-container">
-            <div style="display:flex; justify-content:space-between; font-size:10px; color:#64748b; font-weight:700;"><span>Client Base</span><span>Healthy</span></div>
-            <div class="ig-progress-bar"><div class="ig-progress-fill" style="width: 100%; background:#8b5cf6;"></div></div>
-          </div>
+          <div class="ig-progress-container"><div class="ig-progress-bar"><div class="ig-progress-fill" style="width: 100%; background:#8b5cf6;"></div></div></div>
         </div>
 
         <div class="ig-insight-card">
-          <div class="ig-card-top">
-            <span class="ig-card-title">Task Fulfillment</span>
-            <span class="ig-growth-badge badge-positive" id="badgeFulfillment">Delivery</span>
-          </div>
+          <div class="ig-card-top"><span class="ig-card-title">Task Fulfillment</span><span class="ig-growth-badge badge-positive" id="badgeFulfillment">Delivery</span></div>
           <div class="ig-card-value" id="metaKpiFulfillment">0%</div>
           <div class="ig-card-sub" id="metaKpiFulfillmentSub">0 of 0 tasks complete</div>
-          <div class="ig-progress-container">
-            <div style="display:flex; justify-content:space-between; font-size:10px; color:#64748b; font-weight:700;"><span>Completion</span><span id="fulfillmentRatioText">0%</span></div>
-            <div class="ig-progress-bar"><div class="ig-progress-fill" id="fulfillmentRatioBar" style="width: 0%; background:#0ea5e9;"></div></div>
-          </div>
+          <div class="ig-progress-container"><div class="ig-progress-bar"><div class="ig-progress-fill" id="fulfillmentRatioBar" style="width: 0%; background:#0ea5e9;"></div></div></div>
         </div>
       </div>
 
       <div class="charts-grid">
         <div class="chart-card">
-          <div class="chart-card-head">
-            <div class="chart-title">Revenue & Cashflow Timeline</div>
-            <span style="font-size:0.75rem; color:#64748b;" id="chartTimelineSubtitle">All Time Trend</span>
-          </div>
-          <div style="height: 230px; position: relative;">
-            <canvas id="revenueLineChart"></canvas>
-          </div>
+          <div class="chart-card-head"><div class="chart-title">Revenue & Cashflow Timeline</div><span style="font-size:0.75rem; color:#64748b;" id="chartTimelineSubtitle">All Time Trend</span></div>
+          <div style="height: 230px; position: relative;"><canvas id="revenueLineChart"></canvas></div>
         </div>
-
         <div class="chart-card">
-          <div class="chart-card-head">
-            <div class="chart-title">Service Revenue Mix</div>
-            <span style="font-size:0.75rem; color:#64748b;">Tier Breakdown</span>
-          </div>
-          <div style="height: 160px; position: relative;">
-            <canvas id="serviceMixChart"></canvas>
-          </div>
+          <div class="chart-card-head"><div class="chart-title">Service Revenue Mix</div><span style="font-size:0.75rem; color:#64748b;">Tier Breakdown</span></div>
+          <div style="height: 160px; position: relative;"><canvas id="serviceMixChart"></canvas></div>
           <div class="collection-meter-box">
-            <div style="display:flex; justify-content:space-between; font-size:0.75rem; font-weight:700;">
-              <span style="color:#64748b;">Collection Efficiency Rate</span>
-              <span id="collectionPercentText" style="color:#059669;">0%</span>
-            </div>
-            <div class="meter-bar-track">
-              <div class="meter-bar-fill" id="collectionProgressBar"></div>
-            </div>
+            <div style="display:flex; justify-content:space-between; font-size:0.75rem; font-weight:700;"><span style="color:#64748b;">Collection Efficiency Rate</span><span id="collectionPercentText" style="color:#059669;">0%</span></div>
+            <div class="meter-bar-track"><div class="meter-bar-fill" id="collectionProgressBar"></div></div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- PAYMENT & RECEIVABLES LEDGER WITH AGING OVERDUE ALERTS -->
+    <!-- PAYMENT & RECEIVABLES LEDGER -->
     <div class="section-card">
-      <div class="section-head">
-        <span>Payment & Receivables Ledger (Active Status & Overdue Cycle Alerts)</span>
-      </div>
+      <div class="section-head"><span>Payment & Receivables Ledger (Active Status & Overdue Cycle Alerts)</span></div>
       <div class="table-box">
         <table>
           <thead>
@@ -517,51 +446,19 @@
 
     <!-- 1. CLIENT SETUP -->
     <div class="section-card">
-      <div class="section-head">
-        <span id="formTitle">Register Client & Setup Multi-Tier Services</span>
-      </div>
+      <div class="section-head"><span id="formTitle">Register Client & Setup Multi-Tier Services</span></div>
       <input type="hidden" id="clientId">
       <div class="input-grid">
-        <div class="input-group">
-          <label>Customer / Business Name</label>
-          <input type="text" id="custName" placeholder="Client Name">
-        </div>
-        <div class="input-group">
-          <label>Phone / WhatsApp</label>
-          <input type="text" id="custPhone" placeholder="Mobile Number">
-        </div>
-        <div class="input-group">
-          <label>Email Address</label>
-          <input type="email" id="custEmail" placeholder="client@domain.com">
-        </div>
-        <div class="input-group">
-          <label>Renewal / Due Date</label>
-          <input type="date" id="custDate">
-        </div>
-        <div class="input-group">
-          <label>1. One-Time Service</label>
-          <input type="text" id="oneTimeTitle" placeholder="Website Development">
-        </div>
-        <div class="input-group">
-          <label>One-Time Fee (INR)</label>
-          <input type="number" id="oneTimeAmt" placeholder="0">
-        </div>
-        <div class="input-group">
-          <label>2. Monthly Retainer Service</label>
-          <input type="text" id="monthlyTitle" placeholder="SEO & Meta Ads">
-        </div>
-        <div class="input-group">
-          <label>Monthly Fee (INR)</label>
-          <input type="number" id="monthlyAmt" placeholder="0">
-        </div>
-        <div class="input-group">
-          <label>3. Annual Support Service</label>
-          <input type="text" id="annualTitle" placeholder="Cloud Server & AMC">
-        </div>
-        <div class="input-group">
-          <label>Annual Fee (INR)</label>
-          <input type="number" id="annualAmt" placeholder="0">
-        </div>
+        <div class="input-group"><label>Customer / Business Name</label><input type="text" id="custName" placeholder="Client Name"></div>
+        <div class="input-group"><label>Phone / WhatsApp</label><input type="text" id="custPhone" placeholder="Mobile Number"></div>
+        <div class="input-group"><label>Email Address</label><input type="email" id="custEmail" placeholder="client@domain.com"></div>
+        <div class="input-group"><label>Renewal / Due Date</label><input type="date" id="custDate"></div>
+        <div class="input-group"><label>1. One-Time Service</label><input type="text" id="oneTimeTitle" placeholder="Website Development"></div>
+        <div class="input-group"><label>One-Time Fee (INR)</label><input type="number" id="oneTimeAmt" placeholder="0"></div>
+        <div class="input-group"><label>2. Monthly Retainer Service</label><input type="text" id="monthlyTitle" placeholder="SEO & Meta Ads"></div>
+        <div class="input-group"><label>Monthly Fee (INR)</label><input type="number" id="monthlyAmt" placeholder="0"></div>
+        <div class="input-group"><label>3. Annual Support Service</label><input type="text" id="annualTitle" placeholder="Cloud Server & AMC"></div>
+        <div class="input-group"><label>Annual Fee (INR)</label><input type="number" id="annualAmt" placeholder="0"></div>
       </div>
       <div style="margin-top: 16px; display: flex; gap: 10px;">
         <button class="btn-primary" id="btnSaveClient" onclick="saveClientRecord()">Save & Update Client</button>
@@ -569,7 +466,7 @@
       </div>
     </div>
 
-    <!-- 2. CLIENTS TABLE WITH STRICT CATEGORY FILTERING -->
+    <!-- 2. CLIENTS TABLE -->
     <div class="section-card">
       <div class="section-head">
         <span>Active Clients Directory</span>
@@ -600,7 +497,7 @@
     </div>
   </div>
 
-  <!-- ADMIN LIVE CHAT DASHBOARD MODAL -->
+  <!-- ADMIN CHAT MODAL -->
   <div class="modal-backdrop" id="adminChatModal">
     <div class="modal-window" style="max-width: 750px; height: 600px;">
       <div class="modal-header">
@@ -630,7 +527,7 @@
     </div>
   </div>
 
-  <!-- DEDICATED STAFF MANAGEMENT MODAL -->
+  <!-- STAFF MANAGEMENT MODAL -->
   <div class="modal-backdrop" id="staffManagementModal">
     <div class="modal-window" style="max-width: 900px;">
       <div class="modal-header">
@@ -639,27 +536,13 @@
       </div>
       <div class="modal-body">
         <div class="section-card" style="margin-bottom: 20px;">
-          <div class="section-head">
-            <span id="staffFormTitle">Add New Workforce / Staff Member</span>
-          </div>
+          <div class="section-head"><span id="staffFormTitle">Add New Workforce / Staff Member</span></div>
           <input type="hidden" id="staffEditId">
           <div class="input-grid">
-            <div class="input-group">
-              <label>Staff ID</label>
-              <input type="text" id="stfId" placeholder="STF01">
-            </div>
-            <div class="input-group">
-              <label>Full Legal Name</label>
-              <input type="text" id="stfName" placeholder="Full Name">
-            </div>
-            <div class="input-group">
-              <label>Corporate Email Address</label>
-              <input type="email" id="stfEmail" placeholder="staff@ofbuzz.com">
-            </div>
-            <div class="input-group">
-              <label>Functional Role</label>
-              <input type="text" id="stfRole" placeholder="Senior Designer / Developer">
-            </div>
+            <div class="input-group"><label>Staff ID</label><input type="text" id="stfId" placeholder="STF01"></div>
+            <div class="input-group"><label>Full Legal Name</label><input type="text" id="stfName" placeholder="Full Name"></div>
+            <div class="input-group"><label>Corporate Email Address</label><input type="email" id="stfEmail" placeholder="staff@ofbuzz.com"></div>
+            <div class="input-group"><label>Functional Role</label><input type="text" id="stfRole" placeholder="Senior Designer / Developer"></div>
           </div>
           <div style="margin-top: 16px; display: flex; gap: 10px;">
             <button class="btn-primary" id="btnSaveStaff" onclick="saveStaffRecord()">Commit Associate Record</button>
@@ -668,9 +551,7 @@
         </div>
 
         <div class="section-card" style="margin-bottom: 20px;">
-          <div class="section-head">
-            <span>Workforce Directory</span>
-          </div>
+          <div class="section-head"><span>Workforce Directory</span></div>
           <div class="table-box">
             <table>
               <thead>
@@ -691,24 +572,11 @@
         </div>
 
         <div class="section-card" style="margin-bottom: 0;">
-          <div class="section-head">
-            <span>Task Delegation & Assignment Queue</span>
-          </div>
+          <div class="section-head"><span>Task Delegation & Assignment Queue</span></div>
           <div class="input-grid">
-            <div class="input-group">
-              <label>Select Staff Member</label>
-              <select id="staffSelect">
-                <option value="">Choose Staff Profile</option>
-              </select>
-            </div>
-            <div class="input-group">
-              <label>Task Title</label>
-              <input type="text" id="taskTitle" placeholder="Assignment Title">
-            </div>
-            <div class="input-group" style="grid-column: span 2;">
-              <label>Assignment Instructions</label>
-              <input type="text" id="taskDesc" placeholder="Describe instructions and timeline...">
-            </div>
+            <div class="input-group"><label>Select Staff Member</label><select id="staffSelect"><option value="">Choose Staff Profile</option></select></div>
+            <div class="input-group"><label>Task Title</label><input type="text" id="taskTitle" placeholder="Assignment Title"></div>
+            <div class="input-group" style="grid-column: span 2;"><label>Assignment Instructions</label><input type="text" id="taskDesc" placeholder="Describe instructions and timeline..."></div>
           </div>
           <button class="btn-primary" style="margin-top: 12px;" onclick="assignStaffTask()">Assign Task & Send Notification Email</button>
           
@@ -734,7 +602,7 @@
     </div>
   </div>
 
-  <!-- COMPLETE CUSTOMER MASTER DOSSIER & DIRECTORY MODAL -->
+  <!-- CUSTOMER MASTER DOSSIER MODAL -->
   <div class="modal-backdrop" id="customerProfileModal">
     <div class="modal-window" style="max-width: 880px;">
       <div class="modal-header">
@@ -871,7 +739,6 @@
               <button class="btn-primary" style="margin-top: 10px; width: 100%; font-size: 0.78rem;" onclick="markCycleRenewed()">Save & Rollover Due Date</button>
             </div>
 
-            <!-- CUSTOM BILL ITEM BUILDER -->
             <div class="section-card" style="padding: 16px; margin-bottom: 16px; border-left: 4px solid #1877f2;">
               <h4 style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px;">Add Custom Bill Item</h4>
               <div class="input-grid">
@@ -891,7 +758,6 @@
               <button class="btn-primary" style="margin-top: 10px; width: 100%; background: #1877f2;" onclick="addCustomBillItem()">+ Add Custom Item to Bill</button>
             </div>
 
-            <!-- INSTALLMENT RECORDING -->
             <div class="section-card" style="padding: 16px; margin-bottom: 16px;">
               <h4 style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px;">Record Installment / Advance</h4>
               <div class="input-grid">
@@ -922,18 +788,9 @@
             <div class="section-card" style="padding: 16px;">
               <h4 style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px;">Tax & Discount Config</h4>
               <div class="input-grid">
-                <div class="input-group">
-                  <label>GST / Tax Rate (%)</label>
-                  <input type="number" id="invTaxRate" value="0" oninput="renderInvoicePreview()">
-                </div>
-                <div class="input-group">
-                  <label>Discount (%)</label>
-                  <input type="number" id="invDiscountRate" value="0" oninput="renderInvoicePreview()">
-                </div>
-                <div class="input-group" style="grid-column: span 2;">
-                  <label>Merchant UPI ID (For Dynamic QR)</label>
-                  <input type="text" id="invUpiId" value="ofbuzz@ptyes" placeholder="username@upi" oninput="renderInvoicePreview()">
-                </div>
+                <div class="input-group"><label>GST / Tax Rate (%)</label><input type="number" id="invTaxRate" value="0" oninput="renderInvoicePreview()"></div>
+                <div class="input-group"><label>Discount (%)</label><input type="number" id="invDiscountRate" value="0" oninput="renderInvoicePreview()"></div>
+                <div class="input-group" style="grid-column: span 2;"><label>Merchant UPI ID (For Dynamic QR)</label><input type="text" id="invUpiId" value="ofbuzz@ptyes" placeholder="username@upi" oninput="renderInvoicePreview()"></div>
               </div>
             </div>
           </div>
@@ -971,18 +828,9 @@
                   </div>
 
                   <div class="date-meta-box">
-                    <div class="date-meta-row">
-                      <span class="lbl">Invoice Date :</span>
-                      <span class="val" id="previewInvDate">23 Sep 2026</span>
-                    </div>
-                    <div class="date-meta-row">
-                      <span class="lbl">Terms :</span>
-                      <span class="val" id="previewTerms">Due on Receipt</span>
-                    </div>
-                    <div class="date-meta-row">
-                      <span class="lbl">Due Date :</span>
-                      <span class="val" id="previewDueDate">23 Sep 2026</span>
-                    </div>
+                    <div class="date-meta-row"><span class="lbl">Invoice Date :</span><span class="val" id="previewInvDate">23 Sep 2026</span></div>
+                    <div class="date-meta-row"><span class="lbl">Terms :</span><span class="val" id="previewTerms">Due on Receipt</span></div>
+                    <div class="date-meta-row"><span class="lbl">Due Date :</span><span class="val" id="previewDueDate">23 Sep 2026</span></div>
                   </div>
                 </div>
 
@@ -1014,30 +862,12 @@
 
                 <div class="summary-section">
                   <table class="summary-table">
-                    <tr>
-                      <td class="label">Sub Total</td>
-                      <td class="value" id="prevSubtotal">0.00</td>
-                    </tr>
-                    <tr id="rowDiscount" style="display:none;">
-                      <td class="label" id="lblDiscount">Discount(0%)</td>
-                      <td class="value" id="prevDiscount">(-) 0.00</td>
-                    </tr>
-                    <tr id="rowTax" style="display:none;">
-                      <td class="label" id="lblTax">Sales Tax (0%)</td>
-                      <td class="value" id="prevTax">0.00</td>
-                    </tr>
-                    <tr class="grand-total">
-                      <td class="label">Total</td>
-                      <td class="value" id="prevTotal">INR 0.00</td>
-                    </tr>
-                    <tr id="rowPaid" style="display:none; color: #059669;">
-                      <td class="label" style="color: #059669;">Total Paid</td>
-                      <td class="value" style="color: #059669;" id="prevPaid">(-) INR 0.00</td>
-                    </tr>
-                    <tr class="balance-due-strip">
-                      <td class="label">Balance Due</td>
-                      <td class="value" id="prevDue">INR 0.00</td>
-                    </tr>
+                    <tr><td class="label">Sub Total</td><td class="value" id="prevSubtotal">0.00</td></tr>
+                    <tr id="rowDiscount" style="display:none;"><td class="label" id="lblDiscount">Discount(0%)</td><td class="value" id="prevDiscount">(-) 0.00</td></tr>
+                    <tr id="rowTax" style="display:none;"><td class="label" id="lblTax">Sales Tax (0%)</td><td class="value" id="prevTax">0.00</td></tr>
+                    <tr class="grand-total"><td class="label">Total</td><td class="value" id="prevTotal">INR 0.00</td></tr>
+                    <tr id="rowPaid" style="display:none; color: #059669;"><td class="label" style="color: #059669;">Total Paid</td><td class="value" style="color: #059669;" id="prevPaid">(-) INR 0.00</td></tr>
+                    <tr class="balance-due-strip"><td class="label">Balance Due</td><td class="value" id="prevDue">INR 0.00</td></tr>
                   </table>
                 </div>
 
@@ -1045,11 +875,9 @@
                   <div class="notes-block">
                     <h5>Notes</h5>
                     <p>It was wonderful doing business with you.<br>If you have any questions, do let me know. Thank you.</p>
-
                     <h5>Terms & Conditions</h5>
                     <p>Please make payment before the due date.</p>
                   </div>
-
                   <div class="qr-container-box">
                     <div id="invoiceQr" style="width: 110px; height: 110px; margin: 0 auto;"></div>
                     <span style="font-size: 0.65rem; color: #64748b; font-weight: 700; display: block; margin-top: 4px;">Instant UPI Scan</span>
@@ -1076,7 +904,6 @@
     let selectedChatStaffId = null, adminActiveAttachment = { url: "", type: "" };
     let lineChartInstance = null, mixChartInstance = null;
 
-    /* SAFE DATE PARSER */
     function parseLocalDate(val) {
       if (!val) return null;
       let str = String(val).trim();
@@ -1091,7 +918,6 @@
       return new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate(), 0, 0, 0, 0);
     }
 
-    /* ADVANCED RECURRING CYCLE & OVERDUE AGING CALCULATOR */
     function calculateClientCycleMetrics(c, payments) {
       const clientId = String(c[0] || "").trim();
       const oneTime = parseFloat(c[5]) || 0;
@@ -1238,7 +1064,6 @@
       }
     }
 
-    /* ENHANCED IN-FRAME / EMBED TOAST NOTIFICATION */
     let toastTimer = null;
     function showToast(msg) {
       const toast = document.getElementById("toast");
@@ -1246,7 +1071,7 @@
       toast.innerText = msg;
       toast.style.display = "block";
       clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => { toast.style.display = "none"; }, 3800);
+      toastTimer = setTimeout(() => { toast.style.display = "none"; }, 3500);
     }
 
     function showCustomConfirm(title, desc, onYesCallback) {
@@ -1311,8 +1136,8 @@
 
       let html = "";
       let optHtml = '<option value="">Choose Staff Profile</option>';
-
       const staffList = state.staff || [];
+
       if (staffList.length === 0) {
         sBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No staff members found.</td></tr>';
         if (sSelect) sSelect.innerHTML = optHtml;
@@ -1366,7 +1191,7 @@
             <td>${remark}</td>
             <td><span class="status-badge" style="background:${status === 'Pending Approval' ? '#fef3c7' : '#e0f2fe'}; color:${status === 'Pending Approval' ? '#d97706' : '#0284c7'};">${status}</span></td>
             <td>
-              ${status === 'Pending Approval' ? `<button class="btn-primary" style="padding:4px 10px; font-size:11px;" onclick="approveTask('\${tId}')">Approve</button>` : `<span style="font-size:11px; color:#64748b;">In Progress</span>`}
+              ${status === 'Pending Approval' ? `<button class="btn-primary" style="padding:4px 10px; font-size:11px;" onclick="approveTask('${tId}')">Approve</button>` : `<span style="font-size:11px; color:#64748b;">In Progress</span>`}
             </td>
           </tr>`;
         }
@@ -1455,7 +1280,6 @@
       if (!text && !adminActiveAttachment.url) return;
 
       const payload = { staffId: selectedChatStaffId, staffName: "Admin", senderType: "Admin", messageText: text, attachmentUrl: adminActiveAttachment.url, attachmentType: adminActiveAttachment.type };
-
       window.onAdminChatSent = function() { input.value = ""; adminActiveAttachment = { url: "", type: "" }; loadAdminChatMessages(); };
       jsonp(API_ENDPOINT + `?action=sendChatMessage&data=${encodeURIComponent(JSON.stringify(payload))}`, "onAdminChatSent");
     }
@@ -1568,7 +1392,6 @@
         }
       });
       document.getElementById("profPaymentsHistoryBody").innerHTML = historyRows || '<tr><td colspan="4" style="text-align:center; padding:16px;">No transaction records found for this account.</td></tr>';
-      
       document.getElementById("customerProfileModal").style.display = "flex";
     }
     function closeCustomerProfileModal() { document.getElementById("customerProfileModal").style.display = "none"; }
@@ -1699,4 +1522,452 @@
       document.getElementById("metaKpiMrr").innerText = "INR " + totalMrr.toLocaleString("en-IN");
       document.getElementById("metaKpiPaid").innerText = "INR " + totalCollected.toLocaleString("en-IN");
       document.getElementById("metaKpiPaidSub").innerText = "Realized in " + subPeriodTitle;
-      document.getElementById("metaKpiDue").innerText = "INR " + Math.round(displayDue).toLocaleString("en
+      document.getElementById("metaKpiDue").innerText = "INR " + Math.round(displayDue).toLocaleString("en-IN");
+      document.getElementById("metaKpiClients").innerText = activeAccounts;
+      document.getElementById("metaKpiClientsSub").innerText = activeAccounts + " active accounts in scope";
+      
+      let fulfillmentPct = tasksTotal > 0 ? Math.round((tasksDone / tasksTotal) * 100) : 100;
+      document.getElementById("metaKpiFulfillment").innerText = fulfillmentPct + "%";
+      document.getElementById("metaKpiFulfillmentSub").innerText = tasksDone + " of " + tasksTotal + " tasks complete";
+      document.getElementById("fulfillmentRatioText").innerText = fulfillmentPct + "%";
+      document.getElementById("fulfillmentRatioBar").style.width = fulfillmentPct + "%";
+
+      let mrrRatio = displayTarget > 0 ? Math.round((totalMrr / displayTarget) * 100) : 0;
+      document.getElementById("mrrRatioText").innerText = mrrRatio + "%";
+      document.getElementById("mrrProgressBar").style.width = Math.min(100, mrrRatio) + "%";
+
+      let collectionRatio = displayTarget > 0 ? Math.min(100, Math.round((totalCollected / displayTarget) * 100)) : (totalCollected > 0 ? 100 : 0);
+      document.getElementById("collectionRateText").innerText = collectionRatio + "%";
+      document.getElementById("collectionRateBar").style.width = collectionRatio + "%";
+
+      let pendingRatio = displayTarget > 0 ? Math.min(100, Math.round((displayDue / displayTarget) * 100)) : 0;
+      document.getElementById("pendingRateText").innerText = pendingRatio + "%";
+      document.getElementById("pendingRateBar").style.width = pendingRatio + "%";
+
+      document.getElementById("collectionPercentText").innerText = collectionRatio + "%";
+      document.getElementById("collectionProgressBar").style.width = collectionRatio + "%";
+
+      renderTimelineChart(timelineBuckets);
+      renderServiceMixChart(oneTimeSum, monthlySum, annualSum);
+    }
+
+    function renderTimelineChart(buckets) {
+      const canvas = document.getElementById("revenueLineChart"); 
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d"); 
+      let labels = Object.keys(buckets).sort();
+      let data = labels.map(k => buckets[k]);
+
+      const formattedLabels = labels.map(dateStr => {
+        const p = dateStr.split('-');
+        if (p.length === 3) {
+          const d = new Date(parseInt(p[0], 10), parseInt(p[1], 10) - 1, parseInt(p[2], 10));
+          return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+        }
+        return dateStr;
+      });
+
+      if (lineChartInstance) lineChartInstance.destroy();
+      lineChartInstance = new Chart(ctx, { 
+        type: "line", 
+        data: { 
+          labels: formattedLabels.length ? formattedLabels : ["Current"], 
+          datasets: [{ 
+            data: data.length ? data : [0], 
+            borderColor: "#1877f2", 
+            borderWidth: 2.5, 
+            pointRadius: 3,
+            pointBackgroundColor: "#1877f2",
+            fill: true, 
+            backgroundColor: "rgba(24,119,242,0.12)", 
+            tension: 0.3 
+          }] 
+        }, 
+        options: { 
+          responsive: true, 
+          maintainAspectRatio: false, 
+          plugins: { 
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function(context) { return ' Received: INR ' + Number(context.raw || 0).toLocaleString('en-IN'); }
+              }
+            }
+          }, 
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { callback: function(value) { return '₹' + value; } }
+            }
+          }
+        } 
+      });
+    }
+
+    function renderServiceMixChart(ot, mo, an) {
+      const canvas = document.getElementById("serviceMixChart"); if (!canvas) return;
+      const ctx = canvas.getContext("2d"); const hasData = (ot + mo + an) > 0;
+      if (mixChartInstance) mixChartInstance.destroy();
+      mixChartInstance = new Chart(ctx, { type: "doughnut", data: { labels: ["One-Time", "Monthly", "Annual"], datasets: [{ data: hasData ? [ot, mo, an] : [1, 1, 1], backgroundColor: hasData ? ["#f25c3b", "#1877f2", "#10b981"] : ["#e2e8f0", "#e2e8f0", "#e2e8f0"] }] }, options: { responsive: true, maintainAspectRatio: false, cutout: "70%", plugins: { legend: { position: "right", labels: { boxWidth: 8, font: { size: 9 } } } } } });
+    }
+
+    function renderAdminDashboard() {
+      const clientBody = document.getElementById("clientTableBody"); let cHtml = "";
+      (state.clients || []).forEach(c => {
+        if (String(c[11] || "").trim().toLowerCase() === "cancelled") return;
+        const otAmt = parseFloat(c[5]) || 0, moAmt = parseFloat(c[7]) || 0, anAmt = parseFloat(c[9]) || 0;
+        if (activeClientCategory === "monthly" && moAmt <= 0) return;
+        if (activeClientCategory === "annual" && anAmt <= 0) return;
+        if (activeClientCategory === "onetime" && otAmt <= 0) return;
+
+        let serv = [];
+        if (activeClientCategory === "all" || activeClientCategory === "onetime") { if (c[4] && otAmt > 0) serv.push(`One-Time: ${c[4]} (INR ${otAmt})`); }
+        if (activeClientCategory === "all" || activeClientCategory === "monthly") { if (c[6] && moAmt > 0) serv.push(`Monthly: ${c[6]} (INR ${moAmt})`); }
+        if (activeClientCategory === "all" || activeClientCategory === "annual") { if (c[8] && anAmt > 0) serv.push(`Annual: ${c[8]} (INR ${anAmt})`); }
+        if (serv.length === 0 && activeClientCategory !== "all") return;
+
+        cHtml += `<tr>
+          <td><span class="badge-link" onclick="openCustomerProfileModal('${c[0]}')" title="Click to view full directory">${c[0]}</span></td>
+          <td><strong>${c[1]}</strong></td>
+          <td>${c[2]}<br><span style="font-size:0.75rem; color:#64748b;">${c[3]}</span></td>
+          <td>${serv.join("<br>") || "—"}</td>
+          <td><strong>${c[10] ? c[10].substring(0,10) : "—"}</strong></td>
+          <td style="text-align: right; white-space: nowrap;">
+            <button class="btn-bill" onclick="openInvoiceModal('${c[0]}')">Generate Bill</button> 
+            <button class="btn-cancel-service" onclick="cancelClientService('${c[0]}')">Cancel</button> 
+            <button class="btn-edit" onclick="editClientRecord('${c[0]}')">Edit</button> 
+            <button class="btn-del" onclick="deleteClientRecord('${c[0]}')">Delete</button>
+          </td>
+        </tr>`;
+      });
+      clientBody.innerHTML = cHtml || '<tr><td colspan="6" style="text-align:center;">No accounts found.</td></tr>';
+    }
+
+    function saveClientRecord() {
+      const id = document.getElementById("clientId").value;
+      const client = { id: id, name: document.getElementById("custName").value.trim(), phone: document.getElementById("custPhone").value.trim(), email: document.getElementById("custEmail").value.trim(), nextBillingDate: document.getElementById("custDate").value, oneTimeService: document.getElementById("oneTimeTitle").value.trim(), oneTimeAmount: document.getElementById("oneTimeAmt").value, monthlyService: document.getElementById("monthlyTitle").value.trim(), monthlyAmount: document.getElementById("monthlyAmt").value, annualService: document.getElementById("annualTitle").value.trim(), annualAmount: document.getElementById("annualAmt").value };
+      if (!client.name) { showToast("Client name is required."); return; }
+      jsonp(API_ENDPOINT + `?action=${id ? 'editClient' : 'addClient'}&data=${encodeURIComponent(JSON.stringify(client))}`, "onClientSaved");
+    }
+    window.onClientSaved = function() { showToast("Client saved."); cancelClientEdit(); syncAllData(); };
+
+    function editClientRecord(id) {
+      const c = (state.clients || []).find(item => String(item[0]).trim() === String(id).trim());
+      if (!c) return;
+      document.getElementById("clientId").value = c[0]; document.getElementById("custName").value = c[1] || ""; document.getElementById("custPhone").value = c[2] || ""; document.getElementById("custEmail").value = c[3] || ""; document.getElementById("custDate").value = c[10] ? c[10].substring(0,10) : "";
+      document.getElementById("oneTimeTitle").value = c[4] || ""; document.getElementById("oneTimeAmt").value = c[5] || ""; document.getElementById("monthlyTitle").value = c[6] || ""; document.getElementById("monthlyAmt").value = c[7] || ""; document.getElementById("annualTitle").value = c[8] || ""; document.getElementById("annualAmt").value = c[9] || "";
+      document.getElementById("formTitle").innerText = "Edit Client: " + c[1]; document.getElementById("btnCancelEdit").style.display = "inline-block";
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function cancelClientEdit() {
+      document.getElementById("clientId").value = ""; document.getElementById("custName").value = ""; document.getElementById("custPhone").value = ""; document.getElementById("custEmail").value = ""; document.getElementById("custDate").value = "";
+      document.getElementById("oneTimeTitle").value = ""; document.getElementById("oneTimeAmt").value = ""; document.getElementById("monthlyTitle").value = ""; document.getElementById("monthlyAmt").value = ""; document.getElementById("annualTitle").value = ""; document.getElementById("annualAmt").value = "";
+      document.getElementById("formTitle").innerText = "Register Client & Setup Multi-Tier Services"; document.getElementById("btnCancelEdit").style.display = "none";
+    }
+
+    function saveStaffRecord() {
+      const editId = document.getElementById("staffEditId").value;
+      const s = { id: document.getElementById("stfId").value.trim(), name: document.getElementById("stfName").value.trim(), email: document.getElementById("stfEmail").value.trim(), role: document.getElementById("stfRole").value.trim() };
+      if (!s.id || !s.name) { showToast("Staff ID and Name required."); return; }
+      jsonp(API_ENDPOINT + `?action=${editId ? 'editStaff' : 'addStaff'}&data=${encodeURIComponent(JSON.stringify(s))}`, "onStaffSaved");
+    }
+    window.onStaffSaved = function() { showToast("Staff saved."); cancelStaffEdit(); syncAllData(); };
+
+    function editStaffRecord(id) {
+      const s = (state.staff || []).find(item => (Array.isArray(item) ? item[0] : (item.staffId || item.id)) === String(id).trim());
+      if (!s) return;
+      const sid = Array.isArray(s) ? s[0] : (s.staffId || s.id);
+      const name = Array.isArray(s) ? s[1] : (s.staffName || s.name);
+      const email = Array.isArray(s) ? s[2] : s.email;
+      const role = Array.isArray(s) ? s[3] : s.role;
+
+      document.getElementById("staffEditId").value = sid; 
+      document.getElementById("stfId").value = sid; 
+      document.getElementById("stfId").readOnly = true;
+      document.getElementById("stfName").value = name || ""; 
+      document.getElementById("stfEmail").value = email || ""; 
+      document.getElementById("stfRole").value = role || "";
+      document.getElementById("staffFormTitle").innerText = "Edit Staff: " + name; 
+      document.getElementById("btnSaveStaff").innerText = "Update Staff"; 
+      document.getElementById("btnCancelStaffEdit").style.display = "inline-block";
+      openStaffModal();
+    }
+
+    function cancelStaffEdit() {
+      document.getElementById("staffEditId").value = ""; document.getElementById("stfId").value = ""; document.getElementById("stfId").readOnly = false;
+      document.getElementById("stfName").value = ""; document.getElementById("stfEmail").value = ""; document.getElementById("stfRole").value = "";
+      document.getElementById("staffFormTitle").innerText = "Add New Workforce / Staff Member"; document.getElementById("btnSaveStaff").innerText = "Commit Associate Record"; document.getElementById("btnCancelStaffEdit").style.display = "none";
+    }
+
+    function assignStaffTask() {
+      const sel = document.getElementById("staffSelect");
+      const task = { staffId: sel.value, staffName: sel.options[sel.selectedIndex].getAttribute("data-name"), title: document.getElementById("taskTitle").value.trim(), description: document.getElementById("taskDesc").value.trim() };
+      if (!task.staffId || !task.title) { showToast("Select staff and title."); return; }
+      showToast("Assigning task & notifying staff...");
+      jsonp(API_ENDPOINT + `?action=assignTask&data=${encodeURIComponent(JSON.stringify(task))}`, "onTaskAssigned");
+    }
+    window.onTaskAssigned = function(res) { 
+      if (res && res.success) {
+        showToast(res.emailSent ? "Task assigned & Notification email sent!" : "Task assigned successfully!");
+        document.getElementById("taskTitle").value = ""; 
+        document.getElementById("taskDesc").value = ""; 
+        syncAllData(); 
+      } else {
+        showToast("Failed to assign task.");
+      }
+    };
+
+    function approveTask(id) {
+      showToast("Approving deliverable...");
+      jsonp(API_ENDPOINT + `?action=approveTask&taskId=${encodeURIComponent(id)}&remark=Approved`, "onTaskApproved");
+    }
+    window.onTaskApproved = function(res) { 
+      if (res && res.success) {
+        showToast("Task approved successfully!"); 
+        syncAllData(); 
+      } else {
+        showToast("Approval failed.");
+      }
+    };
+
+    function openInvoiceModal(clientId) {
+      const c = (state.clients || []).find(item => String(item[0]).trim() === String(clientId).trim());
+      if (!c) return;
+      currentInvoice.client = c; currentInvoice.advances = []; currentInvoice.customItems = [];
+      (state.payments || []).forEach(p => {
+        if (String(p[1] || "").trim() === String(c[0]).trim() && parseFloat(p[4]) !== 0) {
+          currentInvoice.advances.push({ mode: p[6] ? (p[6].includes("[") ? p[6].split("[")[1].replace("]", "") : "Direct") : "Direct", amount: parseFloat(p[4]), note: p[6] ? p[6].split("[")[0].trim() : "Installment" });
+        }
+      });
+      document.getElementById("invoiceCycleSelector").value = "monthly"; document.getElementById("advDate").value = new Date().toISOString().split("T")[0];
+      changeInvoiceCycle();
+      document.getElementById("modalClientHeader").innerText = `Billing: ${c[1]} (${c[0]})`;
+      document.getElementById("previewCustName").innerText = c[1];
+      document.getElementById("previewCustAddress").innerHTML = `Phone: ${c[2] || '—'}<br>Email: ${c[3] || '—'}`;
+      document.getElementById("invoiceModal").style.display = "flex";
+    }
+
+    function changeInvoiceCycle() {
+      const c = currentInvoice.client; if (!c) return;
+      const cycle = document.getElementById("invoiceCycleSelector").value;
+      currentInvoice.lineItems = [];
+      const now = new Date(); const mStr = now.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+      let term = "Net 15 Days", dueDays = 15;
+
+      if (cycle === "monthly" && c[6] && parseFloat(c[7]) > 0) { currentInvoice.lineItems.push({ name: c[6], desc: `Monthly Retainer (${mStr})`, price: parseFloat(c[7]), qty: 1 }); term = "Net 7"; dueDays = 7; }
+      else if (cycle === "initial") {
+        if (c[4] && parseFloat(c[5]) > 0) currentInvoice.lineItems.push({ name: c[4], desc: "One-Time Setup", price: parseFloat(c[5]), qty: 1 });
+        if (c[6] && parseFloat(c[7]) > 0) currentInvoice.lineItems.push({ name: c[6], desc: `1st Month Retainer (${mStr})`, price: parseFloat(c[7]), qty: 1 });
+        term = "Due on Receipt"; dueDays = 0;
+      } else if (cycle === "annual" && c[8] && parseFloat(c[9]) > 0) { currentInvoice.lineItems.push({ name: c[8], desc: "Annual AMC", price: parseFloat(c[9]), qty: 1 }); term = "Net 15"; dueDays = 15; }
+      else {
+        if (c[4] && parseFloat(c[5]) > 0) currentInvoice.lineItems.push({ name: c[4], desc: "One-Time", price: parseFloat(c[5]), qty: 1 });
+        if (c[6] && parseFloat(c[7]) > 0) currentInvoice.lineItems.push({ name: c[6], desc: "Monthly", price: parseFloat(c[7]), qty: 1 });
+        if (c[8] && parseFloat(c[9]) > 0) currentInvoice.lineItems.push({ name: c[8], desc: "Annual", price: parseFloat(c[9]), qty: 1 });
+        term = "Consolidated"; dueDays = 0;
+      }
+
+      currentInvoice.customItems.forEach(ci => currentInvoice.lineItems.push(ci));
+      if (currentInvoice.lineItems.length === 0) currentInvoice.lineItems.push({ name: "Consulting", desc: "Digital Services", price: 2000, qty: 1 });
+
+      document.getElementById("previewInvNumber").innerText = `# INV-${Math.floor(100000 + Math.random() * 900000)}`;
+      document.getElementById("previewInvDate").innerText = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+      document.getElementById("previewTerms").innerText = term;
+      document.getElementById("previewDueDate").innerText = new Date(now.getTime() + dueDays * 24 * 60 * 60 * 1000).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+      
+      const rol = new Date(now);
+      if (cycle === "annual") rol.setFullYear(rol.getFullYear() + 1); else rol.setMonth(rol.getMonth() + 1);
+      currentInvoice.calculatedNextDue = rol.toISOString().split('T')[0];
+      renderInvoicePreview();
+    }
+
+    function addCustomBillItem() {
+      const title = document.getElementById("customItemTitle").value.trim();
+      const amt = parseFloat(document.getElementById("customItemAmt").value) || 0;
+      if (!title || amt <= 0) { showToast("Enter title and amount."); return; }
+      currentInvoice.customItems.push({ name: title, desc: "Custom Item", price: amt, qty: 1 });
+      document.getElementById("customItemTitle").value = ""; document.getElementById("customItemAmt").value = "";
+      changeInvoiceCycle();
+      showToast("Custom item added.");
+    }
+
+    function markCycleRenewed() {
+      const c = currentInvoice.client; if (!c) return;
+      c[10] = currentInvoice.calculatedNextDue;
+      jsonp(API_ENDPOINT + `?action=rolloverCycle&clientId=${encodeURIComponent(c[0])}&cycleType=${document.getElementById("invoiceCycleSelector").value}&nextDate=${currentInvoice.calculatedNextDue}`, "onRolloverDone");
+    }
+    window.onRolloverDone = function() { showToast("Cycle rolled over."); syncAllData(); };
+
+    function sendInvoiceToClientEmail() {
+      const c = currentInvoice.client; if (!c || !c[3]) { showToast("No email found."); return; }
+      const payload = { name: c[1], email: c[3], invoiceNumber: document.getElementById("previewInvNumber").innerText, date: document.getElementById("previewInvDate").innerText, dueDate: document.getElementById("previewDueDate").innerText, items: currentInvoice.lineItems, subtotal: currentInvoice.financials.subtotal, total: currentInvoice.financials.total, paid: currentInvoice.financials.paid, balanceDue: currentInvoice.financials.balanceDue, upi: document.getElementById("invUpiId").value.trim() };
+      showToast("Dispatching invoice email...");
+      jsonp(API_ENDPOINT + `?action=sendInvoiceMail&data=${encodeURIComponent(JSON.stringify(payload))}`, "onMailSent");
+    }
+    window.onMailSent = function(res) { showToast(res && res.success ? res.message : "Failed."); };
+
+    function closeInvoiceModal() { document.getElementById("invoiceModal").style.display = "none"; }
+
+    function addAdvanceReceipt() {
+      const c = currentInvoice.client; if (!c) return;
+      const amt = parseFloat(document.getElementById("advAmount").value) || 0;
+      if (amt <= 0) { showToast("Enter valid amount."); return; }
+      jsonp(API_ENDPOINT + `?action=recordAdvancePayment&clientId=${encodeURIComponent(c[0])}&amount=${encodeURIComponent(amt)}&mode=${encodeURIComponent(document.getElementById("advMode").value)}&note=${encodeURIComponent(document.getElementById("advNote").value)}&payDate=${encodeURIComponent(document.getElementById("advDate").value)}`, "onAdvDone");
+    }
+    window.onAdvDone = function() { showToast("Installment recorded."); syncAllData(); closeInvoiceModal(); };
+
+    function renderInvoicePreview() {
+      let sub = 0, lHtml = "";
+      currentInvoice.lineItems.forEach((item, idx) => {
+        let tot = item.qty * item.price; sub += tot;
+        lHtml += `<tr><td style="text-align: center;">${idx + 1}</td><td><strong>${item.name}</strong><span class="item-sub-desc">${item.desc}</span></td><td style="text-align: center;">${item.qty}</td><td style="text-align: right;">${item.price.toFixed(2)}</td><td style="text-align: right; font-weight:700;">${tot.toFixed(2)}</td></tr>`;
+      });
+      document.getElementById("previewLineItems").innerHTML = lHtml;
+
+      let paid = 0, aHtml = "";
+      if (currentInvoice.advances.length > 0) {
+        document.getElementById("previewAdvanceBox").style.display = "block";
+        currentInvoice.advances.forEach(a => {
+          paid += a.amount;
+          aHtml += `<tr><td colspan="2"><strong>${a.note}</strong></td><td style="text-align: center;">${a.mode}</td><td colspan="2" style="text-align: right; color:#059669; font-weight:700;">(-) ${a.amount.toFixed(2)}</td></tr>`;
+        });
+        document.getElementById("previewAdvanceItems").innerHTML = aHtml;
+      } else { document.getElementById("previewAdvanceBox").style.display = "none"; }
+
+      const taxR = parseFloat(document.getElementById("invTaxRate").value) || 0, discR = parseFloat(document.getElementById("invDiscountRate").value) || 0;
+      const discAmt = sub * (discR / 100), taxAmt = (sub - discAmt) * (taxR / 100);
+      const total = (sub - discAmt) + taxAmt, due = Math.max(0, total - paid);
+      currentInvoice.financials = { subtotal: sub.toFixed(2), total: total.toFixed(2), paid: paid.toFixed(2), balanceDue: due.toFixed(2) };
+
+      document.getElementById("prevSubtotal").innerText = sub.toFixed(2);
+      document.getElementById("prevTotal").innerText = "INR " + total.toFixed(2);
+      document.getElementById("prevDue").innerText = "INR " + due.toFixed(2);
+      document.getElementById("topBalanceDue").innerText = "INR " + due.toFixed(2);
+
+      const qr = document.getElementById("invoiceQr"); qr.innerHTML = "";
+      const upiId = document.getElementById("invUpiId").value.trim();
+      if (upiId && due > 0) new QRCode(qr, { text: `upi://pay?pa=${encodeURIComponent(upiId)}&pn=Ofbuzz&am=${due.toFixed(2)}&cu=INR`, width: 110, height: 110 });
+    }
+
+    /* INVOICE PRINT ENGINE (100% GOOGLE SITES IFRAME COMPATIBLE) */
+    function downloadFormattedInvoice() {
+      showToast("Preparing formatted 1-Page PDF...");
+      const printContents = document.getElementById("printableInvoice").outerHTML;
+
+      let printFrame = document.getElementById("invoicePrintFrame");
+      if (!printFrame) {
+        printFrame = document.createElement("iframe");
+        printFrame.id = "invoicePrintFrame";
+        printFrame.style.position = "fixed";
+        printFrame.style.top = "-9999px";
+        printFrame.style.left = "-9999px";
+        printFrame.style.width = "0px";
+        printFrame.style.height = "0px";
+        printFrame.style.border = "none";
+        document.body.appendChild(printFrame);
+      }
+
+      const doc = printFrame.contentWindow.document;
+      doc.open();
+      doc.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Invoice - Ofbuzz Technology</title>
+          <link rel="preconnect" href="https://fonts.googleapis.com">
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+          <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
+          <style>
+            @page {
+              size: A4 portrait;
+              margin: 8mm 10mm;
+            }
+            * {
+              box-sizing: border-box;
+              margin: 0;
+              padding: 0;
+              font-family: 'Plus Jakarta Sans', sans-serif;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+            }
+            html, body {
+              width: 100%;
+              background: #ffffff !important;
+              color: #1e293b !important;
+            }
+            .zylker-invoice {
+              border: none !important;
+              box-shadow: none !important;
+              padding: 0 !important;
+              width: 100% !important;
+              font-size: 0.82rem !important;
+            }
+            .inv-top-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+            .inv-brand-wrapper { display: flex; align-items: center; gap: 10px; }
+            .inv-logo-img { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; }
+            .inv-brand-text { font-size: 1.4rem; font-weight: 800; color: #0f172a; letter-spacing: -0.03em; }
+            .inv-brand-meta { font-size: 0.72rem; color: #475569; margin-top: 2px; line-height: 1.3; }
+            .inv-title-col { text-align: right; }
+            .inv-title-main { font-size: 1.8rem; font-weight: 400; color: #f25c3b; letter-spacing: -0.02em; line-height: 1; }
+            .inv-hash-num { font-size: 0.85rem; font-weight: 700; color: #1e293b; margin-top: 3px; font-family: 'JetBrains Mono', monospace; }
+            .inv-balance-top-tag { margin-top: 6px; }
+            .inv-balance-top-tag span { display: block; font-size: 0.68rem; font-weight: 700; color: #475569; }
+            .inv-balance-top-tag strong { display: block; font-size: 1.15rem; font-weight: 800; color: #0f172a; margin-top: 2px; }
+            .inv-dates-grid { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 14px; }
+            .bill-to-box span { display: block; font-size: 0.72rem; color: #64748b; font-weight: 600; margin-bottom: 2px; }
+            .bill-to-box strong { display: block; font-size: 0.88rem; color: #0f172a; font-weight: 800; }
+            .bill-to-box p { font-size: 0.72rem; color: #475569; line-height: 1.3; margin-top: 2px; }
+            .date-meta-box { text-align: right; font-size: 0.75rem; }
+            .date-meta-row { display: flex; justify-content: flex-end; gap: 14px; margin-bottom: 2px; }
+            .date-meta-row span.lbl { color: #475569; font-weight: 500; }
+            .date-meta-row span.val { color: #0f172a; font-weight: 700; min-width: 80px; text-align: right; }
+            .zylker-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+            .zylker-table th { background: #f25c3b !important; color: #ffffff !important; padding: 7px 9px; font-size: 0.72rem; font-weight: 700; text-align: left; }
+            .zylker-table th:last-child { text-align: right; }
+            .zylker-table td { padding: 7px 9px; border-bottom: 1px solid #e2e8f0; font-size: 0.76rem; vertical-align: top; }
+            .zylker-table td:last-child { text-align: right; }
+            .item-sub-desc { display: block; font-size: 0.66rem; color: #64748b; margin-top: 1px; }
+            .summary-section { width: 100%; display: flex; justify-content: flex-end; margin-top: 4px; }
+            .summary-table { width: 280px; border-collapse: collapse; font-size: 0.76rem; }
+            .summary-table td { padding: 3px 4px; }
+            .summary-table td.label { text-align: right; color: #475569; font-weight: 500; }
+            .summary-table td.value { text-align: right; color: #0f172a; font-weight: 700; width: 95px; }
+            .summary-table tr.grand-total td { font-size: 0.84rem; font-weight: 800; color: #0f172a; padding-top: 4px; }
+            .balance-due-strip { background: #fff8f6 !important; border-radius: 4px; }
+            .balance-due-strip td { padding: 5px 4px !important; font-size: 0.88rem !important; font-weight: 800 !important; color: #0f172a !important; }
+            .inv-bottom-notes { margin-top: 12px; padding-top: 8px; border-top: 1px solid #f1f5f9; display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: flex-end; }
+            .notes-block h5 { font-size: 0.74rem; font-weight: 800; color: #0f172a; margin-bottom: 2px; }
+            .notes-block p { font-size: 0.68rem; color: #64748b; line-height: 1.3; margin-bottom: 6px; }
+            .qr-container-box { text-align: center; background: #fafbfc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 8px; }
+          </style>
+        </head>
+        <body>
+          <div class="zylker-invoice">
+            ${printContents}
+          </div>
+        </body>
+        </html>
+      `);
+      doc.close();
+
+      setTimeout(() => {
+        const qrContainer = doc.getElementById("invoiceQr");
+        if (qrContainer) {
+          qrContainer.innerHTML = "";
+          const dueText = doc.getElementById("topBalanceDue").innerText.replace("INR ", "").trim();
+          const qrPayload = "upi://pay?pa=ofbuzz@ptyes&pn=Ofbuzz%20Technology&am=" + dueText + "&cu=INR";
+          new printFrame.contentWindow.QRCode(qrContainer, { text: qrPayload, width: 100, height: 100 });
+        }
+        setTimeout(() => {
+          printFrame.contentWindow.focus();
+          printFrame.contentWindow.print();
+        }, 500);
+      }, 350);
+    }
+
+    window.onload = checkAuthOnLoad;
+  </script>
+</body>
+</html>
