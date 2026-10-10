@@ -219,6 +219,7 @@
     .badge-Assigned { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
     .badge-Pending { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
     .badge-Approved { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+    .badge-Rejected { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
 
     .task-submission-drawer {
       margin-top: 12px;
@@ -601,20 +602,30 @@
         var output = "";
 
         res.data.forEach(function(item) {
-          var badgeClass = item.status === "Pending Approval" ? "badge-Pending" : (item.status === "Approved" ? "badge-Approved" : "badge-Assigned");
+          var currentStatus = item.status || "Assigned";
+          var badgeClass = "badge-Assigned";
+          if (currentStatus === "Pending Approval") badgeClass = "badge-Pending";
+          else if (currentStatus === "Approved") badgeClass = "badge-Approved";
+          else if (currentStatus === "Rejected") badgeClass = "badge-Rejected";
           
           output += '<div class="task-item">';
           output += '<div class="task-item-top">';
-          output += '<div class="task-item-title">' + item.title + '</div>';
-          output += '<span class="badge ' + badgeClass + '">' + item.status + '</span>';
+          output += '<div class="task-item-title">' + (item.title || "Task Deliverable") + '</div>';
+          output += '<span class="badge ' + badgeClass + '">' + currentStatus + '</span>';
           output += '</div>';
           output += '<p class="task-item-desc">' + (item.description || "No specific instructions provided.") + '</p>';
 
-          if (item.status === "Assigned") {
+          if (item.adminRemark) {
+            output += '<p style="font-size: 0.76rem; color: #d97706; margin-bottom: 8px;"><strong>Admin Remark:</strong> ' + item.adminRemark + '</p>';
+          }
+
+          if (currentStatus === "Assigned" || currentStatus === "Rejected") {
             output += '<div class="task-submission-drawer">';
-            output += '<textarea id="remark_' + item.id + '" class="submission-input" placeholder="Provide completion notes, deliverable links, or execution remarks..."></textarea>';
+            output += '<textarea id="remark_' + item.id + '" class="submission-input" placeholder="Provide completion notes, deliverable links, or execution remarks...">' + (item.staffRemark || "") + '</textarea>';
             output += '<button id="btnComp_' + item.id + '" class="btn-submit-task" onclick="markTaskComplete(\'' + item.id + '\')">Submit for Administrative Verification</button>';
             output += '</div>';
+          } else if (currentStatus === "Pending Approval") {
+            output += '<div style="font-size:0.78rem; color:#0284c7; font-weight:700; margin-top:6px;">Submitted note: ' + (item.staffRemark || "Task submitted") + '</div>';
           }
           output += '</div>';
         });
@@ -627,15 +638,15 @@
 
     function markTaskComplete(taskId) {
       var remarkInput = document.getElementById("remark_" + taskId);
-      var remarkValue = remarkInput ? remarkInput.value : "";
+      var remarkValue = remarkInput ? remarkInput.value.trim() : "";
       var btn = document.getElementById("btnComp_" + taskId);
       if (btn) { btn.disabled = true; btn.innerText = "Submitting..."; }
 
       window.onCompleteDone = function(res) {
         if (res && res.success) {
-          showToast("Deliverable submitted for review.", true);
+          showToast(res.message || "Deliverable submitted for review.", true);
         } else {
-          showToast("Submission failed: " + (res && res.error ? res.error : "Unknown error"), false);
+          showToast((res && res.error) ? res.error : "Failed to submit task.", false);
         }
         retrieveTasks();
       };
