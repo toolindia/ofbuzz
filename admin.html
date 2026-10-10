@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
     :root {
@@ -28,9 +29,9 @@
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
     body { background: var(--bg); color: var(--text); padding: 20px 16px 80px; }
-    .container { max-width: 1280px; margin: 0 auto; }
+    .container { max-width: 1240px; margin: 0 auto; }
 
-    /* AUTH OVERLAY */
+    /* AUTHENTICATION OVERLAY */
     #authOverlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: #0f172a; z-index: 9999; display: flex;
@@ -57,40 +58,101 @@
       display: flex; justify-content: space-between; align-items: center;
       background: var(--surface); padding: 16px 24px; border-radius: var(--radius);
       border: 1px solid var(--border); box-shadow: 0 4px 20px rgba(0,0,0,0.03);
-      margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
+      margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
     }
     .brand-box { display: flex; align-items: center; gap: 12px; }
     .brand-logo { width: 44px; height: 44px; border-radius: 8px; object-fit: cover; }
     .brand-title { font-size: 1.15rem; font-weight: 800; color: var(--text); }
 
-    /* TAB STRIP */
-    .tab-strip { display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 2px solid var(--border); padding-bottom: 8px; flex-wrap: wrap; }
-    .tab-btn {
-      padding: 10px 18px; border-radius: 8px; font-weight: 700; font-size: 0.86rem;
-      border: none; background: transparent; color: var(--text-muted); cursor: pointer; transition: all 0.2s;
+    /* TOP STATS STRIP */
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .kpi-card { background: var(--surface); padding: 18px; border-radius: var(--radius); border: 1px solid var(--border); border-left: 4px solid var(--primary); }
+    .kpi-title { font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); }
+    .kpi-val { font-size: 1.5rem; font-weight: 800; margin-top: 6px; color: var(--text); }
+
+    /* PROFESSIONAL META / INSTAGRAM STYLE ANALYTICS DASHBOARD */
+    #analyticsPanel {
+      display: none;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.04);
     }
-    .tab-btn.active { background: var(--primary); color: #fff; }
+    .meta-analytics-header {
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;
+      gap: 12px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 14px;
+    }
+    .meta-live-badge {
+      display: inline-flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: 800;
+      color: #0f172a; background: #f1f5f9; padding: 6px 14px; border-radius: 20px; border: 1px solid #cbd5e1;
+    }
+    .analytics-control-bar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .time-filter-group { display: flex; gap: 4px; background: #f1f5f9; padding: 4px; border-radius: 10px; }
+    .time-pill {
+      padding: 6px 14px; border: none; background: transparent; font-size: 0.78rem;
+      font-weight: 700; color: #64748b; border-radius: 8px; cursor: pointer; transition: all 0.2s;
+    }
+    .time-pill.active { background: #ffffff; color: var(--text); box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+    .custom-range-inputs { display: inline-flex; align-items: center; gap: 6px; background: #f1f5f9; padding: 4px 8px; border-radius: 8px; font-size: 0.75rem; }
+    .custom-range-inputs input[type="date"] { padding: 4px 6px; font-size: 0.75rem; border: 1px solid var(--border); border-radius: 6px; }
 
-    /* KPI METRICS */
-    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 24px; }
-    .kpi-card { background: var(--surface); padding: 16px 18px; border-radius: var(--radius); border: 1px solid var(--border); border-left: 4px solid var(--primary); }
-    .kpi-title { font-size: 0.72rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); }
-    .kpi-val { font-size: 1.4rem; font-weight: 800; margin-top: 6px; color: var(--text); }
+    /* IG INSIGHTS STYLE METRICS CARDS */
+    .ig-insights-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .ig-insight-card {
+      background: #f8fafc; border: 1px solid var(--border); border-radius: 14px; padding: 18px;
+      position: relative; overflow: hidden; transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .ig-insight-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.04); }
+    .ig-card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .ig-card-title { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.03em; }
+    .ig-growth-badge { font-size: 0.7rem; font-weight: 800; padding: 3px 8px; border-radius: 20px; display: inline-flex; align-items: center; gap: 3px; }
+    .badge-positive { background: #dcfce7; color: #166534; }
+    .badge-neutral { background: #e0f2fe; color: #0369a1; }
+    .badge-danger { background: #fee2e2; color: #991b1b; }
+    .badge-alert { background: #ffedd5; color: #c2410c; font-weight: 800; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; border: 1px solid #fed7aa; }
+    .badge-severe { background: #fef2f2; color: #b91c1c; font-weight: 800; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; border: 1px solid #fecaca; }
 
-    /* SECTIONS */
+    .ig-card-value { font-size: 1.6rem; font-weight: 800; color: #0f172a; margin-bottom: 6px; letter-spacing: -0.02em; }
+    .ig-card-sub { font-size: 0.72rem; color: var(--text-muted); font-weight: 500; }
+    
+    .ig-progress-container { margin-top: 10px; }
+    .ig-progress-bar { width: 100%; height: 6px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin-top: 4px; }
+    .ig-progress-fill { height: 100%; background: var(--meta-blue); border-radius: 4px; width: 0%; transition: width 0.6s ease; }
+
+    .charts-grid { display: grid; grid-template-columns: 2fr 1.1fr; gap: 18px; margin-bottom: 20px; }
+    @media (max-width: 900px) { .charts-grid { grid-template-columns: 1fr; } }
+    .chart-card {
+      background: #ffffff; border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 20px;
+    }
+    .chart-card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+    .chart-title { font-size: 0.9rem; font-weight: 800; color: var(--text); }
+
+    .collection-meter-box { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border); }
+    .meter-bar-track { width: 100%; height: 8px; background: #e2e8f0; border-radius: 6px; overflow: hidden; margin: 6px 0; }
+    .meter-bar-fill { height: 100%; background: #10b981; border-radius: 6px; width: 0%; transition: width 0.6s ease; }
+
+    /* PANELS & TABLES */
     .section-card {
       background: var(--surface); border: 1px solid var(--border);
       border-radius: var(--radius); padding: 22px; margin-bottom: 24px;
       box-shadow: 0 4px 16px rgba(0,0,0,0.02);
     }
-    .section-head {
-      font-size: 0.95rem; font-weight: 800; margin-bottom: 16px; border-bottom: 1px solid var(--border);
-      padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+    .section-head { font-size: 1rem; font-weight: 700; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+
+    /* CATEGORY FILTER PILLS */
+    .category-filter-bar { display: flex; gap: 6px; flex-wrap: wrap; }
+    .cat-pill {
+      padding: 6px 12px; border: 1px solid var(--border); background: #f8fafc; font-size: 0.75rem;
+      font-weight: 700; color: #64748b; border-radius: 8px; cursor: pointer; transition: all 0.2s;
     }
+    .cat-pill.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 
     .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
     .input-group { display: flex; flex-direction: column; gap: 6px; }
-    label { font-size: 0.74rem; font-weight: 700; color: var(--text-muted); }
+    label { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); }
     input, select, textarea {
       padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px;
       font-size: 0.85rem; outline: none; transition: all 0.2s; background: #fff;
@@ -98,65 +160,134 @@
     input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(242, 92, 59, 0.15); }
 
     button {
-      padding: 9px 15px; border: none; border-radius: 8px; font-weight: 700;
-      font-size: 0.82rem; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 10px 16px; border: none; border-radius: 8px; font-weight: 700;
+      font-size: 0.85rem; cursor: pointer; transition: all 0.2s;
     }
     .btn-primary { background: var(--primary); color: #fff; }
     .btn-primary:hover { background: var(--primary-dark); }
     .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
-    .btn-bill { background: rgba(24, 119, 242, 0.1); color: var(--meta-blue); border: 1px solid rgba(24, 119, 242, 0.2); }
-    .btn-bill:hover { background: var(--meta-blue); color: #fff; }
+    .btn-bill { background: rgba(242, 92, 59, 0.12); color: var(--primary); border: 1px solid rgba(242, 92, 59, 0.25); }
+    .btn-bill:hover { background: var(--primary); color: #fff; }
+    .btn-profile { background: rgba(16, 185, 129, 0.12); color: #059669; border: 1px solid rgba(16, 185, 129, 0.25); }
+    .btn-profile:hover { background: #059669; color: #fff; }
     .btn-del { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
     .btn-del:hover { background: var(--danger); color: #fff; }
+    .btn-cancel-service { background: rgba(239, 68, 68, 0.12); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.25); }
+    .btn-cancel-service:hover { background: #dc2626; color: #fff; }
     .btn-edit { background: rgba(245, 158, 11, 0.1); color: #d97706; }
     .btn-edit:hover { background: #d97706; color: #fff; }
-    .btn-chat { background: rgba(2, 132, 199, 0.1); color: #0284c7; border: 1px solid rgba(2, 132, 199, 0.2); }
-    .btn-chat:hover { background: #0284c7; color: #fff; }
+    .btn-adjust { background: rgba(24, 119, 242, 0.1); color: #1877f2; border: 1px solid rgba(24, 119, 242, 0.25); }
+    .btn-adjust:hover { background: #1877f2; color: #fff; }
+    .btn-mail { background: #0284c7; color: #fff; }
+    .btn-mail:hover { background: #0369a1; }
+    .btn-reminder { background: rgba(234, 88, 12, 0.12); color: #ea580c; border: 1px solid rgba(234, 88, 12, 0.3); }
+    .btn-reminder:hover { background: #ea580c; color: #fff; }
+    .btn-analytics { background: #1e293b; color: #fff; }
+    .btn-analytics:hover { background: #0f172a; }
+    .btn-staff-mgmt { background: #0ea5e9; color: #fff; }
+    .btn-staff-mgmt:hover { background: #0284c7; }
+    .btn-chat-mgmt { background: #8b5cf6; color: #fff; }
+    .btn-chat-mgmt:hover { background: #7c3aed; }
     .btn-logout { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); }
     .btn-logout:hover { background: var(--danger); color: #fff; }
 
-    .table-box { overflow-x: auto; margin-top: 10px; }
-    table { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
-    th { text-align: left; padding: 11px 10px; background: #f1f5f9; color: var(--text-muted); font-weight: 700; text-transform: uppercase; font-size: 0.7rem; }
-    td { padding: 10px 10px; border-bottom: 1px solid var(--border); color: #334155; }
-    .status-badge { padding: 3px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; display: inline-block; }
+    .badge-link {
+      display: inline-block; padding: 5px 9px; background: #e0f2fe; color: #0284c7;
+      border-radius: 6px; font-weight: 700; font-size: 0.8rem; text-decoration: none; cursor: pointer;
+      font-family: 'JetBrains Mono', monospace; border: 1px solid #bae6fd; transition: all 0.2s;
+    }
+    .badge-link:hover { background: #0284c7; color: #ffffff; }
 
-    /* MODAL POPUPS */
-    .modal-overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.65);
-      z-index: 5000; display: none; align-items: center; justify-content: center; padding: 16px;
-    }
-    .modal-box {
-      background: #ffffff; width: 100%; max-width: 560px; border-radius: 14px;
-      padding: 24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); max-height: 90vh; overflow-y: auto;
-    }
-    .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
-    .modal-title { font-size: 1.1rem; font-weight: 800; color: var(--text); }
-    .modal-close { cursor: pointer; font-size: 1.4rem; color: var(--text-muted); line-height: 1; }
+    .table-box { overflow-x: auto; margin-top: 12px; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    th { text-align: left; padding: 12px 10px; background: #f1f5f9; color: var(--text-muted); font-weight: 700; text-transform: uppercase; font-size: 0.7rem; }
+    td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: #334155; }
+    .status-badge { padding: 3px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; background: #e0f2fe; color: #0284c7; }
 
-    /* CHAT MODAL UI */
-    .chat-modal-box {
-      background: #ffffff; width: 100%; max-width: 620px; height: 620px; border-radius: 14px;
-      display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3); border: 1px solid var(--border);
+    /* MODALS */
+    .modal-backdrop {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(6px);
+      z-index: 1000; display: none; align-items: center; justify-content: center; padding: 16px;
     }
-    .chat-header {
-      padding: 14px 18px; background: #0f172a; color: #fff; display: flex;
-      justify-content: space-between; align-items: center; gap: 10px;
+    .modal-window {
+      background: #f1f5f9; width: 100%; max-width: 1100px; max-height: 94vh;
+      border-radius: var(--radius); overflow-y: auto; box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+      display: flex; flex-direction: column;
     }
-    .chat-messages {
-      flex: 1; padding: 16px; overflow-y: auto; background: #f8fafc; display: flex; flex-direction: column; gap: 10px;
+    .modal-header {
+      padding: 16px 24px; border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+      position: sticky; top: 0; background: #fff; z-index: 10;
     }
-    .msg-bubble { max-width: 80%; padding: 10px 14px; border-radius: 10px; font-size: 0.82rem; line-height: 1.45; }
-    .msg-staff { background: #ffffff; color: #0f172a; align-self: flex-start; border: 1px solid var(--border); }
-    .msg-admin { background: #e0f2fe; color: #0369a1; align-self: flex-end; border: 1px solid #bae6fd; }
-    .msg-time { font-size: 0.65rem; opacity: 0.75; margin-top: 4px; text-align: right; }
-    .chat-input-area {
-      padding: 12px 16px; background: #ffffff; border-top: 1px solid var(--border); display: flex; gap: 8px; align-items: center;
-    }
-    .chat-text-input { flex: 1; padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.84rem; outline: none; }
-    .chat-text-input:focus { border-color: var(--primary); }
+    .modal-body { padding: 24px; }
+    .modal-grid { display: grid; grid-template-columns: 360px 1fr; gap: 24px; align-items: start; }
+    @media (max-width: 960px) { .modal-grid { grid-template-columns: 1fr; } }
 
-    .toast { position: fixed; top: 20px; right: 20px; padding: 12px 20px; border-radius: 8px; background: #0f172a; color: #fff; font-size: 0.85rem; font-weight: 600; display: none; z-index: 9999; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+    /* ON-SCREEN FLOATING NOTIFICATION BANNER (PERFECT FOR GOOGLE SITES IFRAME) */
+    .toast {
+      position: fixed; top: 18px; left: 50%; transform: translateX(-50%);
+      padding: 12px 24px; border-radius: 30px; background: #0f172a; color: #fff;
+      font-size: 0.88rem; font-weight: 700; display: none; z-index: 99999;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.3); border: 1px solid #334155;
+      animation: fadeInDown 0.3s ease; text-align: center;
+    }
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translate(-50%, -15px); }
+      to { opacity: 1; transform: translate(-50%, 0); }
+    }
+
+    /* CUSTOM CONFIRMATION DIALOG MODAL */
+    .confirm-modal-box {
+      background: #ffffff; padding: 24px; border-radius: 12px; max-width: 380px; width: 100%;
+      text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2); border: 1px solid var(--border);
+    }
+    .confirm-modal-box h4 { font-size: 1.1rem; color: #0f172a; margin-bottom: 8px; font-weight: 800; }
+    .confirm-modal-box p { font-size: 0.85rem; color: #64748b; margin-bottom: 20px; line-height: 1.4; }
+    .confirm-btns { display: flex; gap: 10px; justify-content: center; }
+
+    /* PROFESSIONAL INVOICE STYLING */
+    .zylker-invoice {
+      background: #ffffff; color: #1e293b; padding: 32px; border-radius: 4px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; font-size: 0.84rem; line-height: 1.4;
+    }
+    .inv-top-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+    .inv-brand-wrapper { display: flex; align-items: center; gap: 12px; }
+    .inv-logo-img { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; }
+    .inv-brand-text { font-size: 1.5rem; font-weight: 800; color: #0f172a; letter-spacing: -0.03em; }
+    .inv-brand-meta { font-size: 0.75rem; color: #475569; margin-top: 3px; line-height: 1.3; }
+    .inv-title-col { text-align: right; }
+    .inv-title-main { font-size: 1.9rem; font-weight: 400; color: #f25c3b; letter-spacing: -0.02em; line-height: 1; }
+    .inv-hash-num { font-size: 0.9rem; font-weight: 700; color: #1e293b; margin-top: 4px; font-family: 'JetBrains Mono', monospace; }
+    .inv-balance-top-tag { margin-top: 8px; }
+    .inv-balance-top-tag span { display: block; font-size: 0.72rem; font-weight: 700; color: #475569; }
+    .inv-balance-top-tag strong { display: block; font-size: 1.25rem; font-weight: 800; color: #0f172a; letter-spacing: -0.02em; margin-top: 2px; }
+    .inv-dates-grid { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 18px; padding-top: 2px; }
+    .bill-to-box span { display: block; font-size: 0.75rem; color: #64748b; font-weight: 600; margin-bottom: 2px; }
+    .bill-to-box strong { display: block; font-size: 0.92rem; color: #0f172a; font-weight: 800; }
+    .bill-to-box p { font-size: 0.76rem; color: #475569; line-height: 1.3; margin-top: 2px; }
+    .date-meta-box { text-align: right; font-size: 0.78rem; }
+    .date-meta-row { display: flex; justify-content: flex-end; gap: 16px; margin-bottom: 3px; }
+    .date-meta-row span.lbl { color: #475569; font-weight: 500; }
+    .date-meta-row span.val { color: #0f172a; font-weight: 700; min-width: 85px; text-align: right; }
+    .zylker-table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+    .zylker-table th { background: #f25c3b; color: #ffffff; padding: 8px 10px; font-size: 0.74rem; font-weight: 700; text-align: left; }
+    .zylker-table th:last-child { text-align: right; }
+    .zylker-table td { padding: 8px 10px; border-bottom: 1px solid #e2e8f0; font-size: 0.79rem; vertical-align: top; }
+    .zylker-table td:last-child { text-align: right; }
+    .item-sub-desc { display: block; font-size: 0.7rem; color: #64748b; margin-top: 2px; }
+    .summary-section { width: 100%; display: flex; justify-content: flex-end; margin-top: 4px; }
+    .summary-table { width: 300px; border-collapse: collapse; font-size: 0.8rem; }
+    .summary-table td { padding: 3px 5px; }
+    .summary-table td.label { text-align: right; color: #475569; font-weight: 500; }
+    .summary-table td.value { text-align: right; color: #0f172a; font-weight: 700; width: 100px; }
+    .summary-table tr.grand-total td { font-size: 0.88rem; font-weight: 800; color: #0f172a; padding-top: 4px; }
+    .balance-due-strip { background: #fff8f6; border-radius: 4px; }
+    .balance-due-strip td { padding: 6px 5px !important; font-size: 0.92rem !important; font-weight: 800 !important; color: #0f172a !important; }
+    .inv-bottom-notes { margin-top: 16px; padding-top: 10px; border-top: 1px solid #f1f5f9; display: grid; grid-template-columns: 1fr auto; gap: 14px; align-items: flex-end; }
+    .notes-block h5 { font-size: 0.78rem; font-weight: 800; color: #0f172a; margin-bottom: 2px; }
+    .notes-block p { font-size: 0.72rem; color: #64748b; line-height: 1.3; margin-bottom: 8px; }
+    .qr-container-box { text-align: center; background: #fafbfc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; }
   </style>
 </head>
 <body>
@@ -164,11 +295,11 @@
   <!-- AUTHENTICATION OVERLAY -->
   <div id="authOverlay">
     <div class="auth-card">
-      <img src="https://i.pinimg.com/736x/bd/d0/5c/bdd05c94afb66b5a72f5e17a7a879ab3.jpg" class="auth-logo" alt="Ofbuzz Logo">
+      <img src="https://i.pinimg.com/736x/bd/d0/5c/bdd05c94afb66b5a72f5e17a7a879ab3.jpg" class="auth-logo" alt="Ofbuzz Logo" referrerpolicy="no-referrer">
       <h2 class="auth-title">Ofbuzz Technology</h2>
       <p class="auth-sub">Enter Secure Access PIN (1312) to unlock Admin Console</p>
       
-      <input type="password" id="adminPinInput" class="auth-input" maxlength="4" placeholder="••••" autofocus onkeypress="if(event.key === 'Enter') validateAdminPin()">
+      <input type="password" id="adminPinInput" class="auth-input" maxlength="4" placeholder="••••" autofocus onkeypress="handlePinKeyPress(event)">
       <button class="auth-btn" onclick="validateAdminPin()">Unlock Console</button>
       <div id="authErrorMsg" class="auth-error">Incorrect PIN. Access Denied.</div>
     </div>
@@ -176,30 +307,37 @@
 
   <div id="toast" class="toast"></div>
 
+  <!-- CUSTOM CONFIRMATION DIALOG MODAL -->
+  <div class="modal-backdrop" id="customConfirmModal">
+    <div class="confirm-modal-box">
+      <h4 id="confirmTitle">Confirm Action</h4>
+      <p id="confirmDesc">Are you sure you want to proceed?</p>
+      <div class="confirm-btns">
+        <button class="btn-del" id="confirmYesBtn" style="padding: 8px 20px;">Yes, Proceed</button>
+        <button class="btn-primary" onclick="closeCustomConfirm()" style="background:#64748b; padding: 8px 20px;">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <div class="container" id="mainDashboard" style="display: none;">
     <header>
       <div class="brand-box">
-        <img src="https://i.pinimg.com/736x/bd/d0/5c/bdd05c94afb66b5a72f5e17a7a879ab3.jpg" class="brand-logo" alt="Ofbuzz Logo">
+        <img src="https://i.pinimg.com/736x/bd/d0/5c/bdd05c94afb66b5a72f5e17a7a879ab3.jpg" class="brand-logo" alt="Ofbuzz Logo" referrerpolicy="no-referrer">
         <div>
           <div class="brand-title">Ofbuzz Technology — Admin Studio</div>
-          <p style="font-size: 0.75rem; color: var(--text-muted);">Operations, Billing Ledger & Workforce Automation</p>
+          <p style="font-size: 0.75rem; color: var(--text-muted);">Operations & Billing Ledger</p>
         </div>
       </div>
       <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-        <button class="btn-chat" onclick="openAdminChat()"><span style="font-size:1rem;">💬</span> Live Staff Chat</button>
+        <button class="btn-staff-mgmt" onclick="openStaffModal()">Staff Management</button>
+        <button class="btn-chat-mgmt" onclick="openAdminChatModal()">Live Chat Dashboard</button>
+        <button class="btn-analytics" id="btnToggleAnalytics" onclick="toggleAnalyticsDrawer()">Analytics View</button>
         <button class="btn-primary" id="btnRefresh" onclick="syncAllData()">Refresh Data</button>
         <button class="btn-logout" onclick="lockAdminSession()">Logout</button>
       </div>
     </header>
 
-    <!-- NAVIGATION TABS -->
-    <div class="tab-strip">
-      <button class="tab-btn active" id="tabBtnClients" onclick="switchTab('clients')">Clients & Billing</button>
-      <button class="tab-btn" id="tabBtnTasks" onclick="switchTab('tasks')">Task Approvals & Delegation</button>
-      <button class="tab-btn" id="tabBtnStaff" onclick="switchTab('staff')">Workforce Directory & Attendance</button>
-    </div>
-
-    <!-- METRICS STRIP -->
+    <!-- TOP OVERVIEW STRIP -->
     <div class="kpi-grid">
       <div class="kpi-card">
         <div class="kpi-title">Current Month Demand</div>
@@ -213,384 +351,859 @@
         <div class="kpi-title">Current Month Due</div>
         <div class="kpi-val" id="kpiTotalPending" style="color: #ea580c;">INR 0.00</div>
       </div>
-      <div class="kpi-card" style="border-left-color: #f59e0b;">
-        <div class="kpi-title">Tasks Awaiting Approval</div>
-        <div class="kpi-val" id="kpiPendingApproval" style="color: #d97706;">0</div>
-      </div>
     </div>
 
-    <!-- ============================================== -->
-    <!-- TAB 1: CLIENTS & BILLING -->
-    <!-- ============================================== -->
-    <div id="sectionClients">
-      <!-- 1. REGISTER CLIENT -->
-      <div class="section-card">
-        <div class="section-head">
-          <span id="formTitle">Register Client & Setup Services</span>
+    <!-- UPGRADED PROFESSIONAL META / INSTAGRAM STYLE ANALYTICS DASHBOARD -->
+    <div id="analyticsPanel">
+      <div class="meta-analytics-header">
+        <div class="meta-live-badge">
+          Business Insights & Growth Dashboard
         </div>
-        <input type="hidden" id="clientId">
-        <div class="input-grid">
-          <div class="input-group">
-            <label>Customer / Business Name</label>
-            <input type="text" id="custName" placeholder="Client Name">
+        <div class="analytics-control-bar">
+          <div class="time-filter-group">
+            <button class="time-pill" onclick="setTimeFilter('today', this)">Today</button>
+            <button class="time-pill" onclick="setTimeFilter('7d', this)">7D</button>
+            <button class="time-pill" onclick="setTimeFilter('30d', this)">30D</button>
+            <button class="time-pill" onclick="setTimeFilter('month', this)">This Month</button>
+            <button class="time-pill active" onclick="setTimeFilter('all', this)">All Time</button>
           </div>
-          <div class="input-group">
-            <label>Phone / WhatsApp</label>
-            <input type="text" id="custPhone" placeholder="Mobile Number">
+          <div class="custom-range-inputs">
+            <span>From:</span>
+            <input type="date" id="analyticsFromDate" onchange="applyCustomAnalyticsDate()">
+            <span>To:</span>
+            <input type="date" id="analyticsToDate" onchange="applyCustomAnalyticsDate()">
           </div>
-          <div class="input-group">
-            <label>Email Address</label>
-            <input type="email" id="custEmail" placeholder="client@domain.com">
-          </div>
-          <div class="input-group">
-            <label>Renewal / Due Date</label>
-            <input type="date" id="custDate">
-          </div>
-          <div class="input-group">
-            <label>1. One-Time Service</label>
-            <input type="text" id="oneTimeTitle" placeholder="Website Development">
-          </div>
-          <div class="input-group">
-            <label>One-Time Fee (INR)</label>
-            <input type="number" id="oneTimeAmt" placeholder="0">
-          </div>
-          <div class="input-group">
-            <label>2. Monthly Retainer Service</label>
-            <input type="text" id="monthlyTitle" placeholder="SEO & Meta Ads">
-          </div>
-          <div class="input-group">
-            <label>Monthly Fee (INR)</label>
-            <input type="number" id="monthlyAmt" placeholder="0">
-          </div>
-          <div class="input-group">
-            <label>3. Annual Support Service</label>
-            <input type="text" id="annualTitle" placeholder="Cloud Server & AMC">
-          </div>
-          <div class="input-group">
-            <label>Annual Fee (INR)</label>
-            <input type="number" id="annualAmt" placeholder="0">
-          </div>
-        </div>
-        <div style="margin-top: 16px; display: flex; gap: 10px;">
-          <button class="btn-primary" id="btnSaveClient" onclick="saveClientRecord()">Save & Update Client</button>
-          <button class="btn-del" id="btnCancelEdit" style="display:none;" onclick="cancelClientEdit()">Cancel</button>
         </div>
       </div>
 
-      <!-- 2. CLIENTS DIRECTORY -->
-      <div class="section-card">
-        <div class="section-head">
-          <span>Active Clients Directory & Billing Ledgers</span>
-        </div>
-        <div class="table-box">
-          <table>
-            <thead>
-              <tr>
-                <th>Client ID</th>
-                <th>Customer Name</th>
-                <th>Contact Info</th>
-                <th>Active Services</th>
-                <th>Billing Due</th>
-                <th style="text-align: right;">Billing & Account Actions</th>
-              </tr>
-            </thead>
-            <tbody id="clientTableBody">
-              <tr><td colspan="6" style="text-align:center;">Synchronizing records...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- ============================================== -->
-    <!-- TAB 2: TASK APPROVALS & DELEGATION -->
-    <!-- ============================================== -->
-    <div id="sectionTasks" style="display: none;">
-      <!-- PENDING APPROVALS QUEUE -->
-      <div class="section-card" style="border: 2px solid var(--primary);">
-        <div class="section-head">
-          <span style="color: var(--primary);">Deliverables Awaiting Administrative Approval</span>
-          <span style="font-size:0.75rem; color:var(--text-muted);">Real-time Staff Submissions</span>
-        </div>
-        <div class="table-box">
-          <table>
-            <thead>
-              <tr>
-                <th>Task ID</th>
-                <th>Task Title</th>
-                <th>Staff Associate</th>
-                <th>Staff Submission Note</th>
-                <th>Status</th>
-                <th style="text-align: right;">Approval Action</th>
-              </tr>
-            </thead>
-            <tbody id="taskApprovalBody">
-              <tr><td colspan="6" style="text-align:center;">No deliverables currently awaiting approval.</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- TASK DELEGATION -->
-      <div class="section-card">
-        <div class="section-head">
-          <span>Delegate New Task to Associate</span>
-        </div>
-        <div class="input-grid">
-          <div class="input-group">
-            <label>Select Workforce Associate</label>
-            <select id="taskStaffSelect">
-              <option value="">Choose Staff Member</option>
-            </select>
+      <!-- IG INSIGHTS STYLE METRICS CARDS -->
+      <div class="ig-insights-grid">
+        <div class="ig-insight-card">
+          <div class="ig-card-top">
+            <span class="ig-card-title">Gross Revenue</span>
+            <span class="ig-growth-badge badge-positive" id="badgeGross">Contracted</span>
           </div>
-          <div class="input-group">
-            <label>Assignment Title</label>
-            <input type="text" id="taskTitle" placeholder="e.g. E-Commerce Banner Design">
-          </div>
-          <div class="input-group" style="grid-column: span 2;">
-            <label>Detailed Instructions & Client Brief</label>
-            <textarea id="taskDesc" rows="2" placeholder="Enter instructions, deadlines, asset links..."></textarea>
+          <div class="ig-card-value" id="metaKpiGross">INR 0</div>
+          <div class="ig-card-sub" id="metaKpiGrossSub">Total contracted business value</div>
+          <div class="ig-progress-container">
+            <div style="display:flex; justify-content:space-between; font-size:10px; color:#64748b; font-weight:700;"><span>Scope Target</span><span>Active</span></div>
+            <div class="ig-progress-bar"><div class="ig-progress-fill" style="width: 100%; background:#f25c3b;"></div></div>
           </div>
         </div>
-        <button class="btn-primary" style="margin-top: 14px;" onclick="assignStaffTask()">Assign Task & Send Notification Email</button>
+
+        <div class="ig-insight-card">
+          <div class="ig-card-top">
+            <span class="ig-card-title">MRR (Monthly)</span>
+            <span class="ig-growth-badge badge-positive" id="badgeMrr">Retainer</span>
+          </div>
+          <div class="ig-card-value" id="metaKpiMrr">INR 0</div>
+          <div class="ig-card-sub">Monthly retainer velocity</div>
+          <div class="ig-progress-container">
+            <div style="display:flex; justify-content:space-between; font-size:10px; color:#64748b; font-weight:700;"><span>Recurring Share</span><span id="mrrRatioText">0%</span></div>
+            <div class="ig-progress-bar"><div class="ig-progress-fill" id="mrrProgressBar" style="width: 0%; background:#1877f2;"></div></div>
+          </div>
+        </div>
+
+        <div class="ig-insight-card">
+          <div class="ig-card-top">
+            <span class="ig-card-title">Collections</span>
+            <span class="ig-growth-badge badge-positive" id="badgePaid">Realized</span>
+          </div>
+          <div class="ig-card-value" id="metaKpiPaid" style="color: #059669;">INR 0</div>
+          <div class="ig-card-sub" id="metaKpiPaidSub">Actual collections in window</div>
+          <div class="ig-progress-container">
+            <div style="display:flex; justify-content:space-between; font-size:10px; color:#64748b; font-weight:700;"><span>Collection Rate</span><span id="collectionRateText">0%</span></div>
+            <div class="ig-progress-bar"><div class="ig-progress-fill" id="collectionRateBar" style="width: 0%; background:#10b981;"></div></div>
+          </div>
+        </div>
+
+        <div class="ig-insight-card">
+          <div class="ig-card-top">
+            <span class="ig-card-title">Outstanding Due</span>
+            <span class="ig-growth-badge badge-neutral" id="badgeDue">Pending</span>
+          </div>
+          <div class="ig-card-value" id="metaKpiDue" style="color: #ea580c;">INR 0</div>
+          <div class="ig-card-sub" id="metaKpiDueSub">Receivables to collect</div>
+          <div class="ig-progress-container">
+            <div style="display:flex; justify-content:space-between; font-size:10px; color:#64748b; font-weight:700;"><span>Pending Ratio</span><span id="pendingRateText">0%</span></div>
+            <div class="ig-progress-bar"><div class="ig-progress-fill" id="pendingRateBar" style="width: 0%; background:#ea580c;"></div></div>
+          </div>
+        </div>
+
+        <div class="ig-insight-card">
+          <div class="ig-card-top">
+            <span class="ig-card-title">Active Accounts</span>
+            <span class="ig-growth-badge badge-positive">Clients</span>
+          </div>
+          <div class="ig-card-value" id="metaKpiClients">0</div>
+          <div class="ig-card-sub" id="metaKpiClientsSub">0 active accounts in scope</div>
+          <div class="ig-progress-container">
+            <div style="display:flex; justify-content:space-between; font-size:10px; color:#64748b; font-weight:700;"><span>Client Base</span><span>Healthy</span></div>
+            <div class="ig-progress-bar"><div class="ig-progress-fill" style="width: 100%; background:#8b5cf6;"></div></div>
+          </div>
+        </div>
+
+        <div class="ig-insight-card">
+          <div class="ig-card-top">
+            <span class="ig-card-title">Task Fulfillment</span>
+            <span class="ig-growth-badge badge-positive" id="badgeFulfillment">Delivery</span>
+          </div>
+          <div class="ig-card-value" id="metaKpiFulfillment">0%</div>
+          <div class="ig-card-sub" id="metaKpiFulfillmentSub">0 of 0 tasks complete</div>
+          <div class="ig-progress-container">
+            <div style="display:flex; justify-content:space-between; font-size:10px; color:#64748b; font-weight:700;"><span>Completion</span><span id="fulfillmentRatioText">0%</span></div>
+            <div class="ig-progress-bar"><div class="ig-progress-fill" id="fulfillmentRatioBar" style="width: 0%; background:#0ea5e9;"></div></div>
+          </div>
+        </div>
       </div>
 
-      <!-- ALL TASKS LOG -->
-      <div class="section-card">
-        <div class="section-head">
-          <span>All Assigned Deliverables Ledger</span>
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-card-head">
+            <div class="chart-title">Revenue & Cashflow Timeline</div>
+            <span style="font-size:0.75rem; color:#64748b;" id="chartTimelineSubtitle">All Time Trend</span>
+          </div>
+          <div style="height: 230px; position: relative;">
+            <canvas id="revenueLineChart"></canvas>
+          </div>
         </div>
-        <div class="table-box">
-          <table>
-            <thead>
-              <tr>
-                <th>Task ID</th>
-                <th>Title</th>
-                <th>Associate</th>
-                <th>Assigned Date</th>
-                <th>Status</th>
-                <th>Admin Remark</th>
-              </tr>
-            </thead>
-            <tbody id="allTasksBody">
-              <tr><td colspan="6" style="text-align:center;">Loading tasks...</td></tr>
-            </tbody>
-          </table>
+
+        <div class="chart-card">
+          <div class="chart-card-head">
+            <div class="chart-title">Service Revenue Mix</div>
+            <span style="font-size:0.75rem; color:#64748b;">Tier Breakdown</span>
+          </div>
+          <div style="height: 160px; position: relative;">
+            <canvas id="serviceMixChart"></canvas>
+          </div>
+          <div class="collection-meter-box">
+            <div style="display:flex; justify-content:space-between; font-size:0.75rem; font-weight:700;">
+              <span style="color:#64748b;">Collection Efficiency Rate</span>
+              <span id="collectionPercentText" style="color:#059669;">0%</span>
+            </div>
+            <div class="meter-bar-track">
+              <div class="meter-bar-fill" id="collectionProgressBar"></div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- ============================================== -->
-    <!-- TAB 3: WORKFORCE & ATTENDANCE -->
-    <!-- ============================================== -->
-    <div id="sectionStaff" style="display: none;">
-      <!-- ADD / EDIT STAFF -->
-      <div class="section-card">
-        <div class="section-head">
-          <span id="staffFormTitle">Add New Workforce / Staff Member</span>
+    <!-- PAYMENT & RECEIVABLES LEDGER WITH AGING OVERDUE ALERTS -->
+    <div class="section-card">
+      <div class="section-head">
+        <span>Payment & Receivables Ledger (Active Status & Overdue Cycle Alerts)</span>
+      </div>
+      <div class="table-box">
+        <table>
+          <thead>
+            <tr>
+              <th>Client ID</th>
+              <th>Customer Name</th>
+              <th>Contact Details</th>
+              <th>Active Demand</th>
+              <th>Cycle Received</th>
+              <th>Pending Due</th>
+              <th>Aging Cycle Status</th>
+              <th style="text-align: right;">Action</th>
+            </tr>
+          </thead>
+          <tbody id="recoveryLedgerBody">
+            <tr><td colspan="8" style="text-align:center;">Calculating ledger balances...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 1. CLIENT SETUP -->
+    <div class="section-card">
+      <div class="section-head">
+        <span id="formTitle">Register Client & Setup Multi-Tier Services</span>
+      </div>
+      <input type="hidden" id="clientId">
+      <div class="input-grid">
+        <div class="input-group">
+          <label>Customer / Business Name</label>
+          <input type="text" id="custName" placeholder="Client Name">
         </div>
-        <input type="hidden" id="staffEditId">
-        <div class="input-grid">
-          <div class="input-group">
-            <label>Staff ID</label>
-            <input type="text" id="stfId" placeholder="e.g. STF01">
-          </div>
-          <div class="input-group">
-            <label>Full Legal Name</label>
-            <input type="text" id="stfName" placeholder="Full Name">
-          </div>
-          <div class="input-group">
-            <label>Notification Email Address</label>
-            <input type="email" id="stfEmail" placeholder="staff@ofbuzz.com">
-          </div>
-          <div class="input-group">
-            <label>Functional Role</label>
-            <input type="text" id="stfRole" placeholder="Senior Designer / Developer">
-          </div>
+        <div class="input-group">
+          <label>Phone / WhatsApp</label>
+          <input type="text" id="custPhone" placeholder="Mobile Number">
         </div>
-        <div style="margin-top: 16px; display: flex; gap: 10px;">
-          <button class="btn-primary" id="btnSaveStaff" onclick="saveStaffRecord()">Commit Associate Record</button>
-          <button class="btn-del" id="btnCancelStaffEdit" style="display:none;" onclick="cancelStaffEdit()">Cancel</button>
+        <div class="input-group">
+          <label>Email Address</label>
+          <input type="email" id="custEmail" placeholder="client@domain.com">
+        </div>
+        <div class="input-group">
+          <label>Renewal / Due Date</label>
+          <input type="date" id="custDate">
+        </div>
+        <div class="input-group">
+          <label>1. One-Time Service</label>
+          <input type="text" id="oneTimeTitle" placeholder="Website Development">
+        </div>
+        <div class="input-group">
+          <label>One-Time Fee (INR)</label>
+          <input type="number" id="oneTimeAmt" placeholder="0">
+        </div>
+        <div class="input-group">
+          <label>2. Monthly Retainer Service</label>
+          <input type="text" id="monthlyTitle" placeholder="SEO & Meta Ads">
+        </div>
+        <div class="input-group">
+          <label>Monthly Fee (INR)</label>
+          <input type="number" id="monthlyAmt" placeholder="0">
+        </div>
+        <div class="input-group">
+          <label>3. Annual Support Service</label>
+          <input type="text" id="annualTitle" placeholder="Cloud Server & AMC">
+        </div>
+        <div class="input-group">
+          <label>Annual Fee (INR)</label>
+          <input type="number" id="annualAmt" placeholder="0">
         </div>
       </div>
+      <div style="margin-top: 16px; display: flex; gap: 10px;">
+        <button class="btn-primary" id="btnSaveClient" onclick="saveClientRecord()">Save & Update Client</button>
+        <button class="btn-del" id="btnCancelEdit" style="display:none;" onclick="cancelClientEdit()">Cancel</button>
+      </div>
+    </div>
 
-      <!-- WORKFORCE DIRECTORY -->
-      <div class="section-card">
-        <div class="section-head">
-          <span>Workforce Directory</span>
-        </div>
-        <div class="table-box">
-          <table>
-            <thead>
-              <tr>
-                <th>Staff ID</th>
-                <th>Associate Name</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Status</th>
-                <th style="text-align: right;">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="staffTableBody">
-              <tr><td colspan="6" style="text-align:center;">Loading staff...</td></tr>
-            </tbody>
-          </table>
+    <!-- 2. CLIENTS TABLE WITH STRICT CATEGORY FILTERING -->
+    <div class="section-card">
+      <div class="section-head">
+        <span>Active Clients Directory</span>
+        <div class="category-filter-bar">
+          <button class="cat-pill active" onclick="setClientCategoryFilter('all', this)">All Accounts</button>
+          <button class="cat-pill" onclick="setClientCategoryFilter('monthly', this)">Monthly Retainers</button>
+          <button class="cat-pill" onclick="setClientCategoryFilter('annual', this)">Annual AMC</button>
+          <button class="cat-pill" onclick="setClientCategoryFilter('onetime', this)">One-Time Projects</button>
         </div>
       </div>
+      <div class="table-box">
+        <table>
+          <thead>
+            <tr>
+              <th>Client ID (Open Master Dossier)</th>
+              <th>Customer Name</th>
+              <th>Contact Info</th>
+              <th>Active Services (Filtered)</th>
+              <th>Billing Due</th>
+              <th style="text-align: right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="clientTableBody">
+            <tr><td colspan="6" style="text-align:center;">Synchronizing records...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 
-      <!-- ATTENDANCE MONITORING -->
-      <div class="section-card">
-        <div class="section-head">
-          <span>Attendance Activity Ledger</span>
+  <!-- ADMIN LIVE CHAT DASHBOARD MODAL -->
+  <div class="modal-backdrop" id="adminChatModal">
+    <div class="modal-window" style="max-width: 750px; height: 600px;">
+      <div class="modal-header">
+        <h3 style="font-size: 1.1rem; font-weight: 800;">Admin Live Support & Chat Dashboard</h3>
+        <div style="display:flex; gap:6px; align-items:center;">
+          <button onclick="loadAdminChatMessages()" style="width:auto; padding:5px 10px; background:#0284c7; color:#fff; font-size:11px; border-radius:6px; border:none; cursor:pointer;" title="Manual Sync">Refresh</button>
+          <button class="btn-del" onclick="closeAdminChatModal()">Close</button>
         </div>
-        <div class="table-box">
-          <table>
-            <thead>
-              <tr>
-                <th>Attendance ID</th>
-                <th>Staff ID</th>
-                <th>Staff Name</th>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Status / Type</th>
-              </tr>
-            </thead>
-            <tbody id="attendanceTableBody">
-              <tr><td colspan="6" style="text-align:center;">Loading attendance logs...</td></tr>
-            </tbody>
-          </table>
+      </div>
+      <div class="modal-body" style="display:flex; gap:16px; height:calc(100% - 65px); padding:16px; overflow:hidden;">
+        <div style="width: 220px; border-right:1px solid #e2e8f0; overflow-y:auto; padding-right:8px;" id="adminStaffChatList">
+          <div style="font-size:12px; font-weight:700; color:#64748b; margin-bottom:8px;">Active Workforce</div>
+        </div>
+        <div style="flex:1; display:flex; flex-direction:column; height:100%;">
+          <div style="font-size:13px; font-weight:700; color:#0f172a; margin-bottom:6px;" id="activeChatStaffName">Select a staff member from sidebar</div>
+          <div id="adminChatMessages" style="flex:1; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;">
+            <div style="text-align:center; color:#64748b; font-size:12px;">No active chat selected.</div>
+          </div>
+          <div style="display:flex; gap:8px; margin-top:10px; align-items:center;">
+            <input type="file" id="adminChatFilePicker" style="display:none;" onchange="handleAdminAttachment(this)">
+            <button onclick="document.getElementById('adminChatFilePicker').click()" style="width:38px; padding:8px; background:#64748b; margin:0;" title="Attach File">Attach</button>
+            <input type="text" id="adminChatInput" placeholder="Type reply as Admin..." style="flex:1; margin:0;" onkeypress="handleAdminChatKey(event)">
+            <button class="btn-primary" onclick="sendAdminChatMessage()" style="width:75px; margin:0;">Send</button>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ============================================== -->
-  <!-- MODAL: LIVE STAFF SUPPORT CHAT DRAWER -->
-  <!-- ============================================== -->
-  <div class="modal-overlay" id="adminChatModal">
-    <div class="chat-modal-box">
-      <div class="chat-header">
-        <div style="display:flex; align-items:center; gap:10px; flex:1;">
-          <label style="font-size:0.75rem; color:#94a3b8; font-weight:700;">Chatting With:</label>
-          <select id="chatStaffSelect" style="padding:6px 10px; border-radius:6px; font-size:0.8rem; background:#1e293b; color:#fff; border:1px solid #334155;" onchange="loadAdminChatMessages()">
-            <option value="">Select Associate</option>
+  <!-- DEDICATED STAFF MANAGEMENT MODAL -->
+  <div class="modal-backdrop" id="staffManagementModal">
+    <div class="modal-window" style="max-width: 900px;">
+      <div class="modal-header">
+        <h3 style="font-size: 1.1rem; font-weight: 800;">Workforce & Staff Management Studio</h3>
+        <button class="btn-del" onclick="closeStaffModal()">Close</button>
+      </div>
+      <div class="modal-body">
+        <div class="section-card" style="margin-bottom: 20px;">
+          <div class="section-head">
+            <span id="staffFormTitle">Add New Workforce / Staff Member</span>
+          </div>
+          <input type="hidden" id="staffEditId">
+          <div class="input-grid">
+            <div class="input-group">
+              <label>Staff ID</label>
+              <input type="text" id="stfId" placeholder="STF01">
+            </div>
+            <div class="input-group">
+              <label>Full Legal Name</label>
+              <input type="text" id="stfName" placeholder="Full Name">
+            </div>
+            <div class="input-group">
+              <label>Corporate Email Address</label>
+              <input type="email" id="stfEmail" placeholder="staff@ofbuzz.com">
+            </div>
+            <div class="input-group">
+              <label>Functional Role</label>
+              <input type="text" id="stfRole" placeholder="Senior Designer / Developer">
+            </div>
+          </div>
+          <div style="margin-top: 16px; display: flex; gap: 10px;">
+            <button class="btn-primary" id="btnSaveStaff" onclick="saveStaffRecord()">Commit Associate Record</button>
+            <button class="btn-del" id="btnCancelStaffEdit" style="display:none;" onclick="cancelStaffEdit()">Cancel</button>
+          </div>
+        </div>
+
+        <div class="section-card" style="margin-bottom: 20px;">
+          <div class="section-head">
+            <span>Workforce Directory</span>
+          </div>
+          <div class="table-box">
+            <table>
+              <thead>
+                <tr>
+                  <th>Staff ID</th>
+                  <th>Associate Name</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Status</th>
+                  <th style="text-align: right;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="staffTableBody">
+                <tr><td colspan="6" style="text-align:center;">Loading staff...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="section-card" style="margin-bottom: 0;">
+          <div class="section-head">
+            <span>Task Delegation & Assignment Queue</span>
+          </div>
+          <div class="input-grid">
+            <div class="input-group">
+              <label>Select Staff Member</label>
+              <select id="staffSelect">
+                <option value="">Choose Staff Profile</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label>Task Title</label>
+              <input type="text" id="taskTitle" placeholder="Assignment Title">
+            </div>
+            <div class="input-group" style="grid-column: span 2;">
+              <label>Assignment Instructions</label>
+              <input type="text" id="taskDesc" placeholder="Describe instructions and timeline...">
+            </div>
+          </div>
+          <button class="btn-primary" style="margin-top: 12px;" onclick="assignStaffTask()">Assign Task & Send Notification Email</button>
+          
+          <div class="table-box" style="margin-top: 20px;">
+            <h4 style="font-size: 0.85rem; margin-bottom: 8px;">Pending Task Approvals</h4>
+            <table>
+              <thead>
+                <tr>
+                  <th>Task</th>
+                  <th>Assigned Associate</th>
+                  <th>Staff Remark</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="taskApprovalBody">
+                <tr><td colspan="5" style="text-align:center;">No deliverables awaiting approval.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPLETE CUSTOMER MASTER DOSSIER & DIRECTORY MODAL -->
+  <div class="modal-backdrop" id="customerProfileModal">
+    <div class="modal-window" style="max-width: 880px;">
+      <div class="modal-header">
+        <div>
+          <h3 style="font-size: 1.15rem; font-weight: 800;" id="profClientName">Customer Master Dossier & Directory</h3>
+          <p style="font-size: 0.78rem; color: var(--text-muted);" id="profClientDetails">Client ID & Account Ledger</p>
+        </div>
+        <button class="btn-del" onclick="closeCustomerProfileModal()">Close</button>
+      </div>
+      <div class="modal-body">
+        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:16px; margin-bottom:16px;">
+          <h4 style="font-size:0.8rem; text-transform:uppercase; color:#64748b; font-weight:800; margin-bottom:10px;">Client Account Profile</h4>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px; font-size:0.82rem;">
+            <div><span style="color:#64748b;">Account ID:</span> <strong id="profAccId" style="font-family:'JetBrains Mono'; color:#0f172a;">—</strong></div>
+            <div><span style="color:#64748b;">Phone / WhatsApp:</span> <strong id="profAccPhone" style="color:#0f172a;">—</strong></div>
+            <div><span style="color:#64748b;">Billing Email:</span> <strong id="profAccEmail" style="color:#0f172a;">—</strong></div>
+            <div><span style="color:#64748b;">Onboarding Date:</span> <strong id="profAccDate" style="color:#0f172a;">—</strong></div>
+          </div>
+        </div>
+
+        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:16px; margin-bottom:16px;">
+          <h4 style="font-size:0.8rem; text-transform:uppercase; color:#64748b; font-weight:800; margin-bottom:10px;">Contracted Services & Billing Parameters</h4>
+          <div id="profServicesBreakdown" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:12px; font-size:0.82rem;"></div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px;">
+          <div style="background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:16px; text-align:center;">
+            <span style="font-size:0.72rem; text-transform:uppercase; color:#64748b; font-weight:700;">Total Lifetime Demand</span>
+            <div style="font-size:1.35rem; font-weight:800; color:#0f172a; margin-top:4px;" id="profBilledAmt">INR 0.00</div>
+          </div>
+          <div style="background:#ecfdf5; border:1px solid #d1fae5; border-radius:10px; padding:16px; text-align:center;">
+            <span style="font-size:0.72rem; text-transform:uppercase; color:#065f46; font-weight:700;">Lifetime Realized</span>
+            <div style="font-size:1.35rem; font-weight:800; color:#059669; margin-top:4px;" id="profReceivedAmt">INR 0.00</div>
+          </div>
+          <div style="background:#fff7ed; border:1px solid #ffedd5; border-radius:10px; padding:16px; text-align:center;">
+            <span style="font-size:0.72rem; text-transform:uppercase; color:#9a3412; font-weight:700;">Active Pending Due</span>
+            <div style="font-size:1.35rem; font-weight:800; color:#ea580c; margin-top:4px;" id="profPendingAmt">INR 0.00</div>
+            <div id="profPendingAlertTag" style="margin-top:6px;"></div>
+          </div>
+        </div>
+
+        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:16px;">
+          <h4 style="font-size:0.85rem; font-weight:800; color:#0f172a; margin-bottom:10px;">Itemized Payment & Settlement Directory</h4>
+          <div class="table-box" style="margin-top:0;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Receipt Date</th>
+                  <th>Payment Gateway / Method</th>
+                  <th>Amount Realized</th>
+                  <th>Reference & Installment Notes</th>
+                </tr>
+              </thead>
+              <tbody id="profPaymentsHistoryBody">
+                <tr><td colspan="4" style="text-align:center;">No payment records found.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAYMENT ADJUSTMENT MODAL -->
+  <div class="modal-backdrop" id="paymentAdjustmentModal">
+    <div class="modal-window" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3 style="font-size: 1.05rem; font-weight: 800;">Adjust Client Payment</h3>
+        <button class="btn-del" onclick="closePaymentAdjustmentModal()">Close</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="adjClientId">
+        <div style="margin-bottom: 14px; background: #fff; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+          <span style="font-size: 0.75rem; color: #64748b; font-weight: 700;">Account:</span>
+          <strong id="adjClientName" style="display: block; font-size: 0.95rem; color: #0f172a; margin-top: 2px;"></strong>
+          <div style="display:flex; justify-content:space-between; margin-top: 6px; font-size: 0.8rem;">
+            <span>Current Cycle: <strong id="adjBilledVal">INR 0.00</strong></span>
+            <span>Current Paid: <strong id="adjCurrentPaidVal" style="color:#059669;">INR 0.00</strong></span>
+          </div>
+        </div>
+
+        <div class="input-group" style="margin-bottom: 12px;">
+          <label>Adjustment Action</label>
+          <select id="adjActionType">
+            <option value="add">Option 1: Add Payment (+ Increase Received)</option>
+            <option value="deduct">Option 2: Deduct / Correction (- Refund or Mistake Correction)</option>
           </select>
         </div>
-        <div style="display:flex; gap:6px;">
-          <button class="btn-bill" style="padding:4px 10px; font-size:0.75rem; color:#fff; border-color:#334155;" onclick="loadAdminChatMessages()">Sync</button>
-          <button class="btn-del" style="padding:4px 10px; font-size:0.75rem;" onclick="closeAdminChat()">Close</button>
-        </div>
-      </div>
 
-      <div class="chat-messages" id="adminChatMessagesBox">
-        <div style="text-align:center; color:var(--text-muted); font-size:0.82rem; margin:auto;">
-          Select a staff member above to view communication thread.
+        <div class="input-group" style="margin-bottom: 12px;">
+          <label>Amount (INR)</label>
+          <input type="number" id="adjAmount" placeholder="e.g. 500" min="1">
         </div>
-      </div>
 
-      <div class="chat-input-area">
-        <input type="file" id="adminChatFilePicker" accept="image/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx" style="display:none;" onchange="handleAdminChatAttachment(this)">
-        <button class="btn-bill" onclick="document.getElementById('adminChatFilePicker').click()" title="Attach File">Attach</button>
-        <input type="text" id="adminChatTextInput" class="chat-text-input" placeholder="Type administrative response..." onkeypress="if(event.key === 'Enter') sendAdminChatMessage()">
-        <button class="btn-primary" onclick="sendAdminChatMessage()">Send</button>
+        <div class="input-group" style="margin-bottom: 16px;">
+          <label>Adjustment Remark / Reason</label>
+          <input type="text" id="adjRemark" placeholder="e.g. Partial payment / Cash settlement">
+        </div>
+
+        <button class="btn-primary" id="btnSaveAdjustment" style="width: 100%;" onclick="savePaymentAdjustment()">Save Adjustment & Recalculate</button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL: INVOICE GENERATOR WITH QR CODE -->
-  <div class="modal-overlay" id="invoiceModal">
-    <div class="modal-box">
-      <div class="modal-head">
-        <div class="modal-title">Client Invoice & UPI Payment</div>
-        <div class="modal-close" onclick="closeInvoiceModal()">&times;</div>
+  <!-- INVOICE GENERATOR MODAL -->
+  <div class="modal-backdrop" id="invoiceModal">
+    <div class="modal-window">
+      <div class="modal-header">
+        <div>
+          <h3 style="font-size: 1.1rem; font-weight: 800;">BillCraft Invoice Studio</h3>
+          <p style="font-size: 0.75rem; color: var(--text-muted);" id="modalClientHeader">Client Billing Console</p>
+        </div>
+        <div style="display:flex; gap: 8px;">
+          <button class="btn-mail" id="btnSendEmail" onclick="sendInvoiceToClientEmail()">Send Bill via Email</button>
+          <button class="btn-primary" style="background:#059669;" onclick="downloadFormattedInvoice()">Print / Download 1-Page PDF</button>
+          <button class="btn-del" onclick="closeInvoiceModal()">Close</button>
+        </div>
       </div>
-      <div id="invoiceContent" style="font-size:0.85rem;"></div>
-      <div style="display:flex; justify-content:center; margin:16px 0;" id="invoiceQrBox"></div>
-      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:16px;">
-        <button class="btn-primary" id="btnDispatchInvoice" onclick="dispatchInvoiceEmail()">Email Invoice to Client</button>
-        <button class="btn-del" onclick="closeInvoiceModal()">Close</button>
-      </div>
-    </div>
-  </div>
 
-  <!-- MODAL: RECORD PAYMENT -->
-  <div class="modal-overlay" id="paymentModal">
-    <div class="modal-box">
-      <div class="modal-head">
-        <div class="modal-title">Record Client Payment / Advance</div>
-        <div class="modal-close" onclick="closePaymentModal()">&times;</div>
-      </div>
-      <input type="hidden" id="payClientId">
-      <div class="input-grid" style="grid-template-columns: 1fr;">
-        <div class="input-group">
-          <label>Customer Name</label>
-          <input type="text" id="payClientName" readonly style="background:#f1f5f9;">
+      <div class="modal-body">
+        <div class="modal-grid">
+          <div>
+            <div class="section-card" style="padding: 16px; margin-bottom: 16px; border-left: 4px solid var(--primary);">
+              <h4 style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px;">Select Invoice Cycle</h4>
+              <div class="input-group">
+                <label>Billing Period / Type</label>
+                <select id="invoiceCycleSelector" onchange="changeInvoiceCycle()">
+                  <option value="monthly" selected>Monthly Retainer (Excludes One-Time)</option>
+                  <option value="initial">Initial Onboarding (One-Time + Retainer)</option>
+                  <option value="annual">Annual Renewal (Excludes One-Time)</option>
+                  <option value="full">Consolidated Statement (All Services)</option>
+                </select>
+              </div>
+              <button class="btn-primary" style="margin-top: 10px; width: 100%; font-size: 0.78rem;" onclick="markCycleRenewed()">Save & Rollover Due Date</button>
+            </div>
+
+            <!-- CUSTOM BILL ITEM BUILDER -->
+            <div class="section-card" style="padding: 16px; margin-bottom: 16px; border-left: 4px solid #1877f2;">
+              <h4 style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px;">Add Custom Bill Item</h4>
+              <div class="input-grid">
+                <div class="input-group" style="grid-column: span 2;">
+                  <label>Custom Item Title</label>
+                  <input type="text" id="customItemTitle" placeholder="e.g. Extra Graphic Design Work">
+                </div>
+                <div class="input-group">
+                  <label>Amount (INR)</label>
+                  <input type="number" id="customItemAmt" placeholder="1000">
+                </div>
+                <div class="input-group">
+                  <label>Quantity</label>
+                  <input type="number" id="customItemQty" value="1">
+                </div>
+              </div>
+              <button class="btn-primary" style="margin-top: 10px; width: 100%; background: #1877f2;" onclick="addCustomBillItem()">+ Add Custom Item to Bill</button>
+            </div>
+
+            <!-- INSTALLMENT RECORDING -->
+            <div class="section-card" style="padding: 16px; margin-bottom: 16px;">
+              <h4 style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px;">Record Installment / Advance</h4>
+              <div class="input-grid">
+                <div class="input-group">
+                  <label>Payment Method</label>
+                  <select id="advMode">
+                    <option value="UPI / QR Scan">UPI / QR Scan</option>
+                    <option value="Bank Transfer / NEFT">Bank Transfer / NEFT</option>
+                    <option value="Cash / Cheque">Cash / Cheque</option>
+                  </select>
+                </div>
+                <div class="input-group">
+                  <label>Installment Date</label>
+                  <input type="date" id="advDate">
+                </div>
+                <div class="input-group">
+                  <label>Amount Paid (INR)</label>
+                  <input type="number" id="advAmount" placeholder="500">
+                </div>
+                <div class="input-group">
+                  <label>Installment Reference / Note</label>
+                  <input type="text" id="advNote" placeholder="e.g. 1st installment paid">
+                </div>
+              </div>
+              <button class="btn-primary" id="btnCommitAdvance" style="margin-top: 10px; width: 100%; background: #059669;" onclick="addAdvanceReceipt()">Record & Save Installment</button>
+            </div>
+
+            <div class="section-card" style="padding: 16px;">
+              <h4 style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px;">Tax & Discount Config</h4>
+              <div class="input-grid">
+                <div class="input-group">
+                  <label>GST / Tax Rate (%)</label>
+                  <input type="number" id="invTaxRate" value="0" oninput="renderInvoicePreview()">
+                </div>
+                <div class="input-group">
+                  <label>Discount (%)</label>
+                  <input type="number" id="invDiscountRate" value="0" oninput="renderInvoicePreview()">
+                </div>
+                <div class="input-group" style="grid-column: span 2;">
+                  <label>Merchant UPI ID (For Dynamic QR)</label>
+                  <input type="text" id="invUpiId" value="ofbuzz@ptyes" placeholder="username@upi" oninput="renderInvoicePreview()">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div id="invoiceRenderWrapper">
+              <div class="zylker-invoice" id="printableInvoice">
+                <div class="inv-top-row">
+                  <div>
+                    <div class="inv-brand-wrapper">
+                      <img id="mainOfbuzzLogo" src="https://i.pinimg.com/736x/bd/d0/5c/bdd05c94afb66b5a72f5e17a7a879ab3.jpg" class="inv-logo-img" alt="Ofbuzz Technology Logo" referrerpolicy="no-referrer">
+                      <div class="inv-brand-text">Ofbuzz Technology</div>
+                    </div>
+                    <div class="inv-brand-meta">
+                      1912 Tech Hub, Delhi NCR<br>
+                      India | ofbuzztechnology@gmail.com
+                    </div>
+                  </div>
+
+                  <div class="inv-title-col">
+                    <div class="inv-title-main">Invoice</div>
+                    <div class="inv-hash-num" id="previewInvNumber"># INV-000085</div>
+                    <div class="inv-balance-top-tag">
+                      <span>Balance Due</span>
+                      <strong id="topBalanceDue">INR 0.00</strong>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="inv-dates-grid">
+                  <div class="bill-to-box">
+                    <span>Bill To</span>
+                    <strong id="previewCustName">Customer Name</strong>
+                    <p id="previewCustAddress">Delhi NCR, India<br>Phone: +91 7827201014</p>
+                  </div>
+
+                  <div class="date-meta-box">
+                    <div class="date-meta-row">
+                      <span class="lbl">Invoice Date :</span>
+                      <span class="val" id="previewInvDate">23 Sep 2026</span>
+                    </div>
+                    <div class="date-meta-row">
+                      <span class="lbl">Terms :</span>
+                      <span class="val" id="previewTerms">Due on Receipt</span>
+                    </div>
+                    <div class="date-meta-row">
+                      <span class="lbl">Due Date :</span>
+                      <span class="val" id="previewDueDate">23 Sep 2026</span>
+                    </div>
+                  </div>
+                </div>
+
+                <table class="zylker-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 38px; text-align: center;">#</th>
+                      <th>Item & Description</th>
+                      <th style="width: 70px; text-align: center;">Qty</th>
+                      <th style="width: 100px; text-align: right;">Rate</th>
+                      <th style="width: 110px; text-align: right;">Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody id="previewLineItems"></tbody>
+                </table>
+
+                <div id="previewAdvanceBox" style="display: none; margin-top: 6px; margin-bottom: 8px;">
+                  <table class="zylker-table" style="margin-bottom: 0;">
+                    <thead>
+                      <tr>
+                        <th style="background:#059669;" colspan="2">Installments / Payments Settled</th>
+                        <th style="background:#059669; text-align:center;">Mode</th>
+                        <th style="background:#059669; text-align:right;" colspan="2">Amount Paid</th>
+                      </tr>
+                    </thead>
+                    <tbody id="previewAdvanceItems"></tbody>
+                  </table>
+                </div>
+
+                <div class="summary-section">
+                  <table class="summary-table">
+                    <tr>
+                      <td class="label">Sub Total</td>
+                      <td class="value" id="prevSubtotal">0.00</td>
+                    </tr>
+                    <tr id="rowDiscount" style="display:none;">
+                      <td class="label" id="lblDiscount">Discount(0%)</td>
+                      <td class="value" id="prevDiscount">(-) 0.00</td>
+                    </tr>
+                    <tr id="rowTax" style="display:none;">
+                      <td class="label" id="lblTax">Sales Tax (0%)</td>
+                      <td class="value" id="prevTax">0.00</td>
+                    </tr>
+                    <tr class="grand-total">
+                      <td class="label">Total</td>
+                      <td class="value" id="prevTotal">INR 0.00</td>
+                    </tr>
+                    <tr id="rowPaid" style="display:none; color: #059669;">
+                      <td class="label" style="color: #059669;">Total Paid</td>
+                      <td class="value" style="color: #059669;" id="prevPaid">(-) INR 0.00</td>
+                    </tr>
+                    <tr class="balance-due-strip">
+                      <td class="label">Balance Due</td>
+                      <td class="value" id="prevDue">INR 0.00</td>
+                    </tr>
+                  </table>
+                </div>
+
+                <div class="inv-bottom-notes">
+                  <div class="notes-block">
+                    <h5>Notes</h5>
+                    <p>It was wonderful doing business with you.<br>If you have any questions, do let me know. Thank you.</p>
+
+                    <h5>Terms & Conditions</h5>
+                    <p>Please make payment before the due date.</p>
+                  </div>
+
+                  <div class="qr-container-box">
+                    <div id="invoiceQr" style="width: 110px; height: 110px; margin: 0 auto;"></div>
+                    <span style="font-size: 0.65rem; color: #64748b; font-weight: 700; display: block; margin-top: 4px;">Instant UPI Scan</span>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="input-group">
-          <label>Payment Amount (INR)</label>
-          <input type="number" id="payAmount" placeholder="0">
-        </div>
-        <div class="input-group">
-          <label>Payment Mode</label>
-          <select id="payMode">
-            <option value="UPI / QR">UPI / QR Code</option>
-            <option value="Bank NEFT/IMPS">Bank NEFT / IMPS</option>
-            <option value="Cash">Cash</option>
-          </select>
-        </div>
-        <div class="input-group">
-          <label>Notes / Transaction Reference</label>
-          <input type="text" id="payNote" placeholder="e.g. UTR / Advance Installment">
-        </div>
-      </div>
-      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:18px;">
-        <button class="btn-primary" onclick="submitClientPayment()">Save Payment Record</button>
-        <button class="btn-del" onclick="closePaymentModal()">Cancel</button>
       </div>
     </div>
   </div>
 
   <script>
     const API_ENDPOINT = "https://script.google.com/macros/s/AKfycby9yiIo9euB9KTt0zBuwcF3x6pdaeJJ48mAwcTFC6xl53oH8eh0Agfwlr138t3D5KNPYQ/exec";
+    const BRAND_LOGO_URL = "https://i.pinimg.com/736x/bd/d0/5c/bdd05c94afb66b5a72f5e17a7a879ab3.jpg";
     const SECURE_PIN = "1312";
 
-    let state = { clients: [], payments: [], tasks: [], staff: [], attendance: [], chats: [] };
-    let currentInvoiceData = null;
-    let adminAttachment = { url: "", type: "" };
+    let state = { clients: [], staff: [], tasks: [], payments: [], chats: [] };
+    let currentInvoice = { client: null, lineItems: [], customItems: [], advances: [], calculatedNextDue: "", financials: {} };
+    let activeTimeFilter = "all", activeClientCategory = "all";
+    let customFilterStartDate = null, customFilterEndDate = null;
+    let selectedChatStaffId = null, adminActiveAttachment = { url: "", type: "" };
+    let lineChartInstance = null, mixChartInstance = null;
 
-    function showToast(msg) {
-      const toast = document.getElementById("toast");
-      toast.innerText = msg; toast.style.display = "block";
-      setTimeout(() => { toast.style.display = "none"; }, 3500);
+    /* SAFE DATE PARSER */
+    function parseLocalDate(val) {
+      if (!val) return null;
+      let str = String(val).trim();
+      if (str.length >= 10 && str.charAt(4) === '-' && str.charAt(7) === '-') {
+        const y = parseInt(str.substring(0, 4), 10);
+        const m = parseInt(str.substring(5, 7), 10) - 1;
+        const d = parseInt(str.substring(8, 10), 10);
+        return new Date(y, m, d, 0, 0, 0, 0);
+      }
+      const parsed = new Date(str);
+      if (isNaN(parsed.getTime())) return null;
+      return new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate(), 0, 0, 0, 0);
     }
 
-    // DYNAMIC BULLETPROOF JSONP CONTROLLER
-    function jsonp(url, callback) {
-      const cbName = "jsonp_cb_" + Math.random().toString(36).substring(2, 9) + "_" + Date.now();
-      
-      window[cbName] = function(res) {
-        try {
-          if (typeof callback === "function") {
-            callback(res);
-          } else if (typeof callback === "string" && typeof window[callback] === "function") {
-            window[callback](res);
+    /* ADVANCED RECURRING CYCLE & OVERDUE AGING CALCULATOR */
+    function calculateClientCycleMetrics(c, payments) {
+      const clientId = String(c[0] || "").trim();
+      const oneTime = parseFloat(c[5]) || 0;
+      const monthly = parseFloat(c[7]) || 0;
+      const annual = parseFloat(c[9]) || 0;
+      const now = new Date();
+
+      const curYear = now.getFullYear();
+      const curMonth = now.getMonth();
+      const startOfCurrentMonth = new Date(curYear, curMonth, 1, 0, 0, 0, 0);
+      const startOfCurrentYear = new Date(curYear, 0, 1, 0, 0, 0, 0);
+
+      let activeCycleDemand = 0;
+      let isMonthly = monthly > 0;
+      let isAnnual = annual > 0;
+
+      if (isMonthly) activeCycleDemand += monthly;
+      if (isAnnual) activeCycleDemand += annual;
+      if (!isMonthly && !isAnnual) activeCycleDemand = oneTime;
+
+      let activeCycleReceived = 0;
+      let lifetimeReceived = 0;
+
+      (payments || []).forEach(p => {
+        if (String(p[1] || "").trim() === clientId) {
+          const amt = parseFloat(p[4]) || 0;
+          lifetimeReceived += amt;
+          const pDate = parseLocalDate(p[5]);
+
+          if (isMonthly) {
+            if (pDate && pDate >= startOfCurrentMonth) activeCycleReceived += amt;
+          } else if (isAnnual) {
+            if (pDate && pDate >= startOfCurrentYear) activeCycleReceived += amt;
+          } else {
+            activeCycleReceived += amt;
           }
-        } catch (err) {
-          console.error("Callback execution error:", err);
-        } finally {
-          delete window[cbName];
         }
-      };
+      });
 
-      const script = document.createElement("script");
-      script.src = url + (url.indexOf("?") >= 0 ? "&" : "?") + "callback=" + cbName + "&_t=" + Date.now();
-      document.body.appendChild(script);
+      let elapsedMonths = 1, elapsedYears = 1;
+      const dateStr = String(c[10] || "").substring(0, 10);
+      if (dateStr && !isNaN(new Date(dateStr).getTime())) {
+        const parts = dateStr.split('-');
+        let startDate = parts.length === 3 ? new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10)) : new Date(dateStr);
+        let mDiff = (now.getFullYear() - startDate.getFullYear()) * 12 + (now.getMonth() - startDate.getMonth());
+        if (now.getDate() >= startDate.getDate()) mDiff += 1;
+        elapsedMonths = Math.max(1, mDiff);
 
-      script.onload = () => script.remove();
-      script.onerror = () => {
-        script.remove();
-        delete window[cbName];
-        showToast("Network request failed.");
+        let yDiff = now.getFullYear() - startDate.getFullYear();
+        if (now.getMonth() > startDate.getMonth() || (now.getMonth() === startDate.getMonth() && now.getDate() >= startDate.getDate())) yDiff += 1;
+        elapsedYears = Math.max(1, yDiff);
+      }
+
+      const lifetimeBilled = oneTime + (monthly * elapsedMonths) + (annual * elapsedYears);
+      const lifetimeDue = Math.max(0, lifetimeBilled - lifetimeReceived);
+
+      let overdueCycleCount = 0;
+      let statusLabel = "";
+      let statusClass = "badge-neutral";
+
+      if (isMonthly) {
+        let netRecurringDue = Math.max(0, (monthly * elapsedMonths) - Math.max(0, lifetimeReceived - oneTime));
+        overdueCycleCount = Math.floor(netRecurringDue / monthly);
+        if (netRecurringDue > 0 && overdueCycleCount === 0) overdueCycleCount = 1;
+
+        if (overdueCycleCount >= 2) {
+          statusLabel = `+${overdueCycleCount} Months Overdue`;
+          statusClass = "badge-severe";
+        } else if (overdueCycleCount === 1) {
+          statusLabel = `+1 Month Due`;
+          statusClass = "badge-alert";
+        } else {
+          statusLabel = "Settled";
+          statusClass = "badge-positive";
+        }
+      } else if (isAnnual) {
+        let netAnnualDue = Math.max(0, (annual * elapsedYears) - Math.max(0, lifetimeReceived - oneTime));
+        overdueCycleCount = Math.floor(netAnnualDue / annual);
+        if (netAnnualDue > 0 && overdueCycleCount === 0) overdueCycleCount = 1;
+
+        if (overdueCycleCount >= 2) {
+          statusLabel = `+${overdueCycleCount} Years Overdue`;
+          statusClass = "badge-severe";
+        } else if (overdueCycleCount === 1) {
+          statusLabel = `+1 Year Due`;
+          statusClass = "badge-alert";
+        } else {
+          statusLabel = "Settled";
+          statusClass = "badge-positive";
+        }
+      } else {
+        if (lifetimeDue > 0) {
+          statusLabel = "Unpaid Project";
+          statusClass = "badge-alert";
+        } else {
+          statusLabel = "Settled";
+          statusClass = "badge-positive";
+        }
+      }
+
+      const activePendingDue = isMonthly || isAnnual ? (overdueCycleCount > 0 ? (isMonthly ? monthly * overdueCycleCount : annual * overdueCycleCount) : 0) : lifetimeDue;
+
+      return {
+        activeCycleDemand,
+        activeCycleReceived,
+        activePendingDue,
+        lifetimeBilled,
+        lifetimeReceived,
+        lifetimeDue,
+        overdueCycleCount,
+        statusLabel,
+        statusClass
       };
     }
 
@@ -608,6 +1221,7 @@
       }
     }
 
+    function handlePinKeyPress(e) { if (e.key === "Enter") validateAdminPin(); }
     function lockAdminSession() {
       sessionStorage.removeItem("ofbuzz_admin_auth");
       location.reload();
@@ -624,370 +1238,87 @@
       }
     }
 
-    function switchTab(tab) {
-      document.getElementById("sectionClients").style.display = tab === 'clients' ? 'block' : 'none';
-      document.getElementById("sectionTasks").style.display = tab === 'tasks' ? 'block' : 'none';
-      document.getElementById("sectionStaff").style.display = tab === 'staff' ? 'block' : 'none';
+    /* ENHANCED IN-FRAME / EMBED TOAST NOTIFICATION */
+    let toastTimer = null;
+    function showToast(msg) {
+      const toast = document.getElementById("toast");
+      if (!toast) return;
+      toast.innerText = msg;
+      toast.style.display = "block";
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { toast.style.display = "none"; }, 3800);
+    }
 
-      document.getElementById("tabBtnClients").className = 'tab-btn ' + (tab === 'clients' ? 'active' : '');
-      document.getElementById("tabBtnTasks").className = 'tab-btn ' + (tab === 'tasks' ? 'active' : '');
-      document.getElementById("tabBtnStaff").className = 'tab-btn ' + (tab === 'staff' ? 'active' : '');
+    function showCustomConfirm(title, desc, onYesCallback) {
+      document.getElementById("confirmTitle").innerText = title;
+      document.getElementById("confirmDesc").innerText = desc;
+      const yesBtn = document.getElementById("confirmYesBtn");
+      const newBtn = yesBtn.cloneNode(true);
+      yesBtn.parentNode.replaceChild(newBtn, yesBtn);
+      newBtn.onclick = function() { closeCustomConfirm(); onYesCallback(); };
+      document.getElementById("customConfirmModal").style.display = "flex";
+    }
+    function closeCustomConfirm() { document.getElementById("customConfirmModal").style.display = "none"; }
+
+    function jsonp(url, callbackName) {
+      const script = document.createElement("script");
+      script.src = url + (url.indexOf("?") >= 0 ? "&" : "?") + "callback=" + callbackName + "&_t=" + Date.now();
+      document.body.appendChild(script);
+      script.onload = () => script.remove();
+      script.onerror = () => { script.remove(); showToast("Network request failed."); };
     }
 
     function syncAllData() {
       const btn = document.getElementById("btnRefresh");
       if (btn) { btn.disabled = true; btn.innerText = "Refreshing..."; }
       showToast("Fetching latest records...");
-
-      jsonp(API_ENDPOINT + "?action=getAdminData", function(res) {
-        if (btn) { btn.disabled = false; btn.innerText = "Refresh Data"; }
-        if (res && res.success && res.data) {
-          state = res.data;
-          renderClientsTable();
-          renderTaskApprovals();
-          renderStaffDirectory();
-          renderAttendanceLogs();
-          updateKpis();
-          showToast("Synchronized successfully.");
-        } else {
-          showToast("Error retrieving records.");
-        }
-      });
+      jsonp(API_ENDPOINT + "?action=getAdminData", "onAdminSync");
     }
 
-    function updateKpis() {
-      let totalDemand = 0;
-      (state.clients || []).forEach(c => {
-        if (String(c[11] || "").trim().toLowerCase() === "cancelled") return;
-        totalDemand += (parseFloat(c[5]) || 0) + (parseFloat(c[7]) || 0) + (parseFloat(c[9]) || 0);
-      });
+    window.onAdminSync = function(res) {
+      const btn = document.getElementById("btnRefresh");
+      if (btn) { btn.disabled = false; btn.innerText = "Refresh Data"; }
+      if (res && res.success && res.data) {
+        state = res.data;
+        renderAdminDashboard();
+        renderPaymentLedger();
+        renderMetaAnalytics();
+        renderStaffDirectory();
+        renderTaskApprovals();
+        if (selectedChatStaffId) loadAdminChatMessages();
+        showToast("Synchronized successfully.");
+      } else { showToast("Error retrieving records."); }
+    };
 
-      let totalCollected = 0;
-      (state.payments || []).forEach(p => {
-        totalCollected += parseFloat(p[4]) || 0;
-      });
-
-      let totalDue = Math.max(0, totalDemand - totalCollected);
-      const tasks = state.tasks || [];
-      const pendingApprovalCount = tasks.filter(t => (Array.isArray(t) ? t[6] : t.status) === "Pending Approval").length;
-
-      document.getElementById("todaySales").innerText = "INR " + totalDemand.toFixed(2);
-      document.getElementById("kpiTotalPaid").innerText = "INR " + totalCollected.toFixed(2);
-      document.getElementById("kpiTotalPending").innerText = "INR " + totalDue.toFixed(2);
-      document.getElementById("kpiPendingApproval").innerText = pendingApprovalCount;
+    function toggleAnalyticsDrawer() {
+      const panel = document.getElementById("analyticsPanel");
+      const btn = document.getElementById("btnToggleAnalytics");
+      if (panel.style.display === "block") { panel.style.display = "none"; btn.innerText = "Analytics View"; }
+      else { panel.style.display = "block"; btn.innerText = "Close Analytics"; renderMetaAnalytics(); }
     }
 
-    // ================= CLIENT BILLING ACTIONS =================
-    function renderClientsTable() {
-      const clientBody = document.getElementById("clientTableBody");
-      let cHtml = "";
-
-      (state.clients || []).forEach(c => {
-        if (String(c[11] || "").trim().toLowerCase() === "cancelled") return;
-        const otAmt = parseFloat(c[5]) || 0, moAmt = parseFloat(c[7]) || 0, anAmt = parseFloat(c[9]) || 0;
-
-        let serv = [];
-        if (c[4] && otAmt > 0) serv.push(`One-Time: ${c[4]} (INR ${otAmt})`);
-        if (c[6] && moAmt > 0) serv.push(`Monthly: ${c[6]} (INR ${moAmt})`);
-        if (c[8] && anAmt > 0) serv.push(`Annual: ${c[8]} (INR ${anAmt})`);
-
-        cHtml += `<tr>
-          <td><strong>${c[0]}</strong></td>
-          <td><strong>${c[1]}</strong></td>
-          <td>${c[2]}<br><span style="font-size:0.75rem; color:#64748b;">${c[3]}</span></td>
-          <td>${serv.join("<br>") || "—"}</td>
-          <td><strong>${c[10] ? c[10].substring(0,10) : "—"}</strong></td>
-          <td style="text-align: right; white-space: nowrap;">
-            <button class="btn-bill" onclick="openInvoiceModal('${c[0]}')">Bill / Invoice</button>
-            <button class="btn-bill" style="background:rgba(16,185,129,0.1); color:#059669; border-color:rgba(16,185,129,0.25);" onclick="openPaymentModal('${c[0]}', '${encodeURIComponent(c[1])}')">Pay</button>
-            <button class="btn-bill" style="background:rgba(245,158,11,0.1); color:#d97706;" onclick="sendReminderMail('${c[0]}', ${otAmt + moAmt + anAmt})">Reminder</button>
-            <button class="btn-bill" onclick="rolloverBillingCycle('${c[0]}')">Rollover</button>
-            <button class="btn-edit" onclick="editClientRecord('${c[0]}')">Edit</button> 
-            <button class="btn-del" onclick="deleteClientRecord('${c[0]}')">Delete</button>
-          </td>
-        </tr>`;
-      });
-
-      clientBody.innerHTML = cHtml || '<tr><td colspan="6" style="text-align:center;">No accounts found.</td></tr>';
+    function openStaffModal() { 
+      document.getElementById("staffManagementModal").style.display = "flex"; 
+      renderStaffDirectory();
+      renderTaskApprovals();
     }
+    function closeStaffModal() { document.getElementById("staffManagementModal").style.display = "none"; }
 
-    function saveClientRecord() {
-      const id = document.getElementById("clientId").value;
-      const client = {
-        id: id,
-        name: document.getElementById("custName").value.trim(),
-        phone: document.getElementById("custPhone").value.trim(),
-        email: document.getElementById("custEmail").value.trim(),
-        nextBillingDate: document.getElementById("custDate").value,
-        oneTimeService: document.getElementById("oneTimeTitle").value.trim(),
-        oneTimeAmount: document.getElementById("oneTimeAmt").value,
-        monthlyService: document.getElementById("monthlyTitle").value.trim(),
-        monthlyAmount: document.getElementById("monthlyAmt").value,
-        annualService: document.getElementById("annualTitle").value.trim(),
-        annualAmount: document.getElementById("annualAmt").value
-      };
-      if (!client.name) { showToast("Client name is required."); return; }
-
-      showToast("Saving client...");
-      jsonp(API_ENDPOINT + `?action=${id ? 'editClient' : 'addClient'}&data=${encodeURIComponent(JSON.stringify(client))}`, function(res) {
-        showToast("Client saved successfully.");
-        cancelClientEdit();
-        syncAllData();
-      });
-    }
-
-    function editClientRecord(id) {
-      const c = (state.clients || []).find(item => String(item[0]).trim() === String(id).trim());
-      if (!c) return;
-      document.getElementById("clientId").value = c[0];
-      document.getElementById("custName").value = c[1] || "";
-      document.getElementById("custPhone").value = c[2] || "";
-      document.getElementById("custEmail").value = c[3] || "";
-      document.getElementById("custDate").value = c[10] ? c[10].substring(0,10) : "";
-      document.getElementById("oneTimeTitle").value = c[4] || "";
-      document.getElementById("oneTimeAmt").value = c[5] || "";
-      document.getElementById("monthlyTitle").value = c[6] || "";
-      document.getElementById("monthlyAmt").value = c[7] || "";
-      document.getElementById("annualTitle").value = c[8] || "";
-      document.getElementById("annualAmt").value = c[9] || "";
-      document.getElementById("formTitle").innerText = "Edit Client: " + c[1];
-      document.getElementById("btnCancelEdit").style.display = "inline-block";
-      switchTab('clients');
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-
-    function cancelClientEdit() {
-      document.getElementById("clientId").value = "";
-      document.getElementById("custName").value = "";
-      document.getElementById("custPhone").value = "";
-      document.getElementById("custEmail").value = "";
-      document.getElementById("custDate").value = "";
-      document.getElementById("oneTimeTitle").value = "";
-      document.getElementById("oneTimeAmt").value = "";
-      document.getElementById("monthlyTitle").value = "";
-      document.getElementById("monthlyAmt").value = "";
-      document.getElementById("annualTitle").value = "";
-      document.getElementById("annualAmt").value = "";
-      document.getElementById("formTitle").innerText = "Register Client & Setup Services";
-      document.getElementById("btnCancelEdit").style.display = "none";
-    }
-
-    function deleteClientRecord(id) {
-      if (confirm("Delete client " + id + "?")) {
-        showToast("Deleting client...");
-        jsonp(API_ENDPOINT + `?action=deleteClient&clientId=${encodeURIComponent(id)}`, function(res) {
-          if (res && res.success) { showToast("Client removed."); syncAllData(); }
-        });
-      }
-    }
-
-    function openInvoiceModal(id) {
-      const c = (state.clients || []).find(item => String(item[0]).trim() === String(id).trim());
-      if (!c) return;
-
-      const total = (parseFloat(c[5]) || 0) + (parseFloat(c[7]) || 0) + (parseFloat(c[9]) || 0);
-      const upiUrl = `upi://pay?pa=satyamxpandey11@okhdfcbank&pn=Ofbuzz%20Technology&am=${total}&cu=INR`;
-      const invNo = "INV-" + new Date().getFullYear() + "-" + c[0].replace(/\D/g, '').slice(-4);
-
-      currentInvoiceData = {
-        email: c[3],
-        name: c[1],
-        invoiceNumber: invNo,
-        total: total,
-        balanceDue: total,
-        upi: upiUrl,
-        items: [
-          { name: c[4] || "One-Time Service", price: c[5] || 0 },
-          { name: c[6] || "Monthly Retainer", price: c[7] || 0 },
-          { name: c[8] || "Annual Cloud/Support", price: c[9] || 0 }
-        ].filter(it => parseFloat(it.price) > 0)
-      };
-
-      let html = `<p><strong>Billed To:</strong> ${c[1]} (${c[2]})</p>
-                  <p><strong>Email:</strong> ${c[3] || '—'}</p>
-                  <p><strong>Invoice Number:</strong> ${invNo}</p>
-                  <hr style="margin: 10px 0; border: none; border-top: 1px solid #e2e8f0;">
-                  <p><strong>Total Due:</strong> INR ${total.toFixed(2)}</p>`;
-      document.getElementById("invoiceContent").innerHTML = html;
-
-      const qrBox = document.getElementById("invoiceQrBox");
-      qrBox.innerHTML = "";
-      if (window.QRCode) {
-        new QRCode(qrBox, { text: upiUrl, width: 140, height: 140 });
-      }
-
-      document.getElementById("invoiceModal").style.display = "flex";
-    }
-
-    function closeInvoiceModal() { document.getElementById("invoiceModal").style.display = "none"; }
-
-    function dispatchInvoiceEmail() {
-      if (!currentInvoiceData || !currentInvoiceData.email) {
-        showToast("Client has no email configured."); return;
-      }
-      showToast("Dispatching invoice email...");
-      jsonp(API_ENDPOINT + `?action=sendInvoiceMail&data=${encodeURIComponent(JSON.stringify(currentInvoiceData))}`, function(res) {
-        showToast(res && res.success ? "Invoice dispatched to client email." : "Failed to send invoice.");
-        closeInvoiceModal();
-      });
-    }
-
-    function openPaymentModal(id, encName) {
-      document.getElementById("payClientId").value = id;
-      document.getElementById("payClientName").value = decodeURIComponent(encName);
-      document.getElementById("payAmount").value = "";
-      document.getElementById("payNote").value = "";
-      document.getElementById("paymentModal").style.display = "flex";
-    }
-
-    function closePaymentModal() { document.getElementById("paymentModal").style.display = "none"; }
-
-    function submitClientPayment() {
-      const clientId = document.getElementById("payClientId").value;
-      const amt = parseFloat(document.getElementById("payAmount").value) || 0;
-      const mode = document.getElementById("payMode").value;
-      const note = document.getElementById("payNote").value.trim();
-
-      if (amt <= 0) { showToast("Enter a valid payment amount."); return; }
-
-      showToast("Recording payment...");
-      jsonp(API_ENDPOINT + `?action=recordAdvancePayment&clientId=${encodeURIComponent(clientId)}&amount=${amt}&mode=${encodeURIComponent(mode)}&note=${encodeURIComponent(note)}`, function(res) {
-        if (res && res.success) {
-          showToast("Payment recorded successfully.");
-          closePaymentModal();
-          syncAllData();
-        } else { showToast("Failed to record payment."); }
-      });
-    }
-
-    function sendReminderMail(id, amt) {
-      if (!confirm("Dispatch payment reminder email for INR " + amt + "?")) return;
-      showToast("Sending reminder...");
-      jsonp(API_ENDPOINT + `?action=sendPaymentReminder&clientId=${encodeURIComponent(id)}&amount=${amt}`, function(res) {
-        showToast(res && res.success ? "Reminder email sent." : "Failed to send reminder.");
-      });
-    }
-
-    function rolloverBillingCycle(id) {
-      const nextDate = prompt("Enter Next Billing Date (YYYY-MM-DD):", new Date(Date.now() + 30*24*60*60*1000).toISOString().substring(0,10));
-      if (!nextDate) return;
-      showToast("Rolling over cycle...");
-      jsonp(API_ENDPOINT + `?action=rolloverCycle&clientId=${encodeURIComponent(id)}&nextDate=${encodeURIComponent(nextDate)}`, function(res) {
-        showToast("Cycle updated.");
-        syncAllData();
-      });
-    }
-
-    // ================= TASK APPROVALS & DELEGATION =================
-    function renderTaskApprovals() {
-      const tBody = document.getElementById("taskApprovalBody");
-      const allBody = document.getElementById("allTasksBody");
-      let approvalHtml = "";
-      let allHtml = "";
-      const tasks = state.tasks || [];
-
-      tasks.forEach(t => {
-        const tId = Array.isArray(t) ? t[0] : (t.taskId || t.id);
-        const sName = Array.isArray(t) ? t[2] : (t.staffName || t.name);
-        const title = Array.isArray(t) ? t[3] : (t.taskTitle || t.title);
-        const date = Array.isArray(t) ? t[5] : t.date;
-        const status = Array.isArray(t) ? t[6] : t.status;
-        const sRemark = Array.isArray(t) ? (t[7] || "—") : (t.staffRemark || "—");
-        const aRemark = Array.isArray(t) ? (t[8] || "—") : (t.adminRemark || "—");
-
-        if (status === "Pending Approval") {
-          approvalHtml += `<tr>
-            <td><strong>${tId}</strong></td>
-            <td><strong>${title}</strong></td>
-            <td>${sName}</td>
-            <td>${sRemark}</td>
-            <td><span class="status-badge" style="background:#fef3c7; color:#d97706;">Pending Approval</span></td>
-            <td style="text-align: right; white-space: nowrap;">
-              <button class="btn-primary" style="padding:5px 12px; font-size:11px;" onclick="approveDeliverable('${tId}')">Approve</button>
-              <button class="btn-del" style="padding:5px 12px; font-size:11px; margin-left:4px;" onclick="rejectDeliverable('${tId}')">Reject</button>
-            </td>
-          </tr>`;
-        }
-
-        allHtml += `<tr>
-          <td><strong>${tId}</strong></td>
-          <td>${title}</td>
-          <td>${sName}</td>
-          <td>${date ? date.substring(0, 16) : '—'}</td>
-          <td><span class="status-badge" style="background:${status === 'Approved' ? '#dcfce7' : (status === 'Pending Approval' ? '#fef3c7' : '#e0f2fe')}; color:${status === 'Approved' ? '#166534' : (status === 'Pending Approval' ? '#d97706' : '#0284c7')}">${status}</span></td>
-          <td>${aRemark}</td>
-        </tr>`;
-      });
-
-      tBody.innerHTML = approvalHtml || '<tr><td colspan="6" style="text-align:center;">No deliverables currently awaiting approval.</td></tr>';
-      allBody.innerHTML = allHtml || '<tr><td colspan="6" style="text-align:center;">No task history found.</td></tr>';
-    }
-
-    function approveDeliverable(taskId) {
-      if (!confirm("Approve task " + taskId + "?")) return;
-      showToast("Approving task deliverable...");
-      jsonp(API_ENDPOINT + "?action=approveTask&taskId=" + encodeURIComponent(taskId) + "&remark=Approved", function(res) {
-        if (res && res.success) {
-          showToast("Deliverable marked as Approved!");
-          syncAllData();
-        } else {
-          showToast((res && res.error) ? res.error : "Failed to approve deliverable.");
-        }
-      });
-    }
-
-    function rejectDeliverable(taskId) {
-      const reason = prompt("Enter revision note / reason for rejection:", "Needs rework according to brand guidelines");
-      if (reason === null) return;
-      showToast("Rejecting task deliverable...");
-      jsonp(API_ENDPOINT + "?action=rejectTask&taskId=" + encodeURIComponent(taskId) + "&remark=" + encodeURIComponent(reason), function(res) {
-        if (res && res.success) {
-          showToast("Task marked as Rejected for revision.");
-          syncAllData();
-        } else {
-          showToast("Failed to reject deliverable.");
-        }
-      });
-    }
-
-    function assignStaffTask() {
-      const sel = document.getElementById("taskStaffSelect");
-      const title = document.getElementById("taskTitle").value.trim();
-      const desc = document.getElementById("taskDesc").value.trim();
-
-      if (!sel.value || !title) {
-        showToast("Please choose an associate and enter a task title."); return;
-      }
-
-      const task = {
-        staffId: sel.value,
-        staffName: sel.options[sel.selectedIndex].getAttribute("data-name"),
-        title: title,
-        description: desc
-      };
-
-      showToast("Assigning deliverable & sending notification...");
-      jsonp(API_ENDPOINT + `?action=assignTask&data=${encodeURIComponent(JSON.stringify(task))}`, function(res) {
-        if (res && res.success) {
-          showToast(res.emailSent ? "Task assigned & notification email dispatched!" : "Task assigned successfully!");
-          document.getElementById("taskTitle").value = "";
-          document.getElementById("taskDesc").value = "";
-          syncAllData();
-        } else {
-          showToast("Failed to assign deliverable.");
-        }
-      });
-    }
-
-    // ================= WORKFORCE & ATTENDANCE =================
     function renderStaffDirectory() {
       const sBody = document.getElementById("staffTableBody");
-      const sSelect = document.getElementById("taskStaffSelect");
-      const chatSelect = document.getElementById("chatStaffSelect");
+      const sSelect = document.getElementById("staffSelect");
+      if (!sBody) return;
+
       let html = "";
-      let optHtml = '<option value="">Choose Staff Member</option>';
+      let optHtml = '<option value="">Choose Staff Profile</option>';
 
       const staffList = state.staff || [];
+      if (staffList.length === 0) {
+        sBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No staff members found.</td></tr>';
+        if (sSelect) sSelect.innerHTML = optHtml;
+        return;
+      }
+
       staffList.forEach(s => {
         const id = Array.isArray(s) ? s[0] : (s.staffId || s.id);
         const name = Array.isArray(s) ? s[1] : (s.staffName || s.name);
@@ -1002,9 +1333,8 @@
           <td>${name}</td>
           <td>${email || '—'}</td>
           <td>${role || 'Associate'}</td>
-          <td><span class="status-badge" style="background:#e0f2fe; color:#0284c7;">${status}</span></td>
+          <td><span class="status-badge">${status}</span></td>
           <td style="text-align: right; white-space: nowrap;">
-            <button class="btn-chat" onclick="openAdminChat('${id}', '${name}')">Chat</button>
             <button class="btn-edit" onclick="editStaffRecord('${id}')">Edit</button> 
             <button class="btn-del" onclick="deleteStaffRecord('${id}')">Delete</button>
           </td>
@@ -1013,201 +1343,360 @@
         optHtml += `<option value="${id}" data-name="${name}">${name} (${id} - ${role || 'Staff'})</option>`;
       });
 
-      sBody.innerHTML = html || '<tr><td colspan="6" style="text-align:center;">No workforce members recorded.</td></tr>';
+      sBody.innerHTML = html || '<tr><td colspan="6" style="text-align:center;">No staff found.</td></tr>';
       if (sSelect) sSelect.innerHTML = optHtml;
-      if (chatSelect) chatSelect.innerHTML = optHtml;
     }
 
-    function saveStaffRecord() {
-      const editId = document.getElementById("staffEditId").value;
-      const s = {
-        id: document.getElementById("stfId").value.trim(),
-        name: document.getElementById("stfName").value.trim(),
-        email: document.getElementById("stfEmail").value.trim(),
-        role: document.getElementById("stfRole").value.trim()
-      };
+    function renderTaskApprovals() {
+      const tBody = document.getElementById("taskApprovalBody");
+      if (!tBody) return;
 
-      if (!s.id || !s.name) { showToast("Associate ID and Name are required."); return; }
+      let html = "";
+      (state.tasks || []).forEach(t => {
+        const tId = Array.isArray(t) ? t[0] : (t.taskId || t.id);
+        const sName = Array.isArray(t) ? t[2] : (t.staffName || t.name);
+        const title = Array.isArray(t) ? t[3] : (t.taskTitle || t.title);
+        const status = Array.isArray(t) ? t[6] : t.status;
+        const remark = Array.isArray(t) ? (t[7] || "—") : (t.staffRemark || "—");
 
-      showToast("Saving associate record...");
-      jsonp(API_ENDPOINT + `?action=${editId ? 'editStaff' : 'addStaff'}&data=${encodeURIComponent(JSON.stringify(s))}`, function(res) {
-        if (res && res.success) {
-          showToast("Associate record saved.");
-          cancelStaffEdit();
-          syncAllData();
-        } else { showToast("Failed to save associate."); }
+        if (status === "Pending Approval" || status === "Assigned") {
+          html += `<tr>
+            <td><strong>${title}</strong></td>
+            <td>${sName}</td>
+            <td>${remark}</td>
+            <td><span class="status-badge" style="background:${status === 'Pending Approval' ? '#fef3c7' : '#e0f2fe'}; color:${status === 'Pending Approval' ? '#d97706' : '#0284c7'};">${status}</span></td>
+            <td>
+              ${status === 'Pending Approval' ? `<button class="btn-primary" style="padding:4px 10px; font-size:11px;" onclick="approveTask('\${tId}')">Approve</button>` : `<span style="font-size:11px; color:#64748b;">In Progress</span>`}
+            </td>
+          </tr>`;
+        }
       });
-    }
 
-    function editStaffRecord(id) {
-      const s = (state.staff || []).find(item => (Array.isArray(item) ? item[0] : (item.staffId || item.id)) === String(id).trim());
-      if (!s) return;
-      const sid = Array.isArray(s) ? s[0] : (s.staffId || s.id);
-      const name = Array.isArray(s) ? s[1] : (s.staffName || s.name);
-      const email = Array.isArray(s) ? s[2] : s.email;
-      const role = Array.isArray(s) ? s[3] : s.role;
-
-      document.getElementById("staffEditId").value = sid;
-      document.getElementById("stfId").value = sid;
-      document.getElementById("stfId").readOnly = true;
-      document.getElementById("stfName").value = name || "";
-      document.getElementById("stfEmail").value = email || "";
-      document.getElementById("stfRole").value = role || "";
-      document.getElementById("staffFormTitle").innerText = "Edit Associate: " + name;
-      document.getElementById("btnSaveStaff").innerText = "Update Associate";
-      document.getElementById("btnCancelStaffEdit").style.display = "inline-block";
-      switchTab('staff');
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-
-    function cancelStaffEdit() {
-      document.getElementById("staffEditId").value = "";
-      document.getElementById("stfId").value = "";
-      document.getElementById("stfId").readOnly = false;
-      document.getElementById("stfName").value = "";
-      document.getElementById("stfEmail").value = "";
-      document.getElementById("stfRole").value = "";
-      document.getElementById("staffFormTitle").innerText = "Add New Workforce / Staff Member";
-      document.getElementById("btnSaveStaff").innerText = "Commit Associate Record";
-      document.getElementById("btnCancelStaffEdit").style.display = "none";
+      tBody.innerHTML = html || '<tr><td colspan="5" style="text-align:center;">No deliverables awaiting approval.</td></tr>';
     }
 
     function deleteStaffRecord(id) {
-      if (confirm("Remove workforce member " + id + "?")) {
-        showToast("Removing associate...");
-        jsonp(API_ENDPOINT + `?action=deleteStaff&staffId=${encodeURIComponent(id)}`, function(res) {
-          if (res && res.success) { showToast("Staff deleted."); syncAllData(); }
-        });
-      }
-    }
-
-    function renderAttendanceLogs() {
-      const aBody = document.getElementById("attendanceTableBody");
-      let html = "";
-      const logs = (state.attendance || []).slice(-15).reverse();
-
-      logs.forEach(a => {
-        const attId = Array.isArray(a) ? a[0] : a.attendanceId;
-        const sId = Array.isArray(a) ? a[1] : a.staffId;
-        const sName = Array.isArray(a) ? a[2] : a.staffName;
-        const date = Array.isArray(a) ? a[3] : a.date;
-        const time = Array.isArray(a) ? a[4] : a.checkInTime;
-        const status = Array.isArray(a) ? a[5] : a.status;
-
-        html += `<tr>
-          <td><span style="font-family:'JetBrains Mono'; font-size:11px;">${attId}</span></td>
-          <td><strong>${sId}</strong></td>
-          <td>${sName}</td>
-          <td>${date}</td>
-          <td>${time}</td>
-          <td><span class="status-badge" style="background:#ecfdf5; color:#059669;">${status || 'Present'}</span></td>
-        </tr>`;
+      showCustomConfirm("Delete Staff", "Are you sure you want to remove staff profile " + id + "?", function() {
+        showToast("Deleting staff...");
+        jsonp(API_ENDPOINT + `?action=deleteStaff&staffId=${encodeURIComponent(id)}`, "onStaffDeleted");
       });
+    }
+    window.onStaffDeleted = function(res) {
+      if (res && res.success) { showToast("Staff deleted."); syncAllData(); }
+      else { showToast("Failed to delete staff."); }
+    };
 
-      aBody.innerHTML = html || '<tr><td colspan="6" style="text-align:center;">No attendance records found.</td></tr>';
+    function openAdminChatModal() {
+      document.getElementById("adminChatModal").style.display = "flex";
+      renderAdminStaffChatList();
+    }
+    function closeAdminChatModal() { document.getElementById("adminChatModal").style.display = "none"; }
+
+    function renderAdminStaffChatList() {
+      const listDiv = document.getElementById("adminStaffChatList");
+      let html = '<div style="font-size:12px; font-weight:700; color:#64748b; margin-bottom:8px;">Active Workforce</div>';
+      (state.staff || []).forEach(s => {
+        const id = Array.isArray(s) ? s[0] : (s.staffId || s.id);
+        const name = Array.isArray(s) ? s[1] : (s.staffName || s.name);
+        const isSelected = selectedChatStaffId === id;
+        html += `<div onclick="selectChatStaff('${id}', '${name}')" style="padding:10px 12px; border-radius:6px; cursor:pointer; font-size:13px; font-weight:600; margin-bottom:6px; background:${isSelected ? '#e0f2fe' : '#fff'}; color:${isSelected ? '#0369a1' : '#334155'}; border:1px solid ${isSelected ? '#bae6fd' : '#e2e8f0'};">${name}<br><span style="font-size:10px; color:#64748b;">ID: ${id}</span></div>`;
+      });
+      listDiv.innerHTML = html || '<div style="font-size:12px; color:#64748b;">No staff found.</div>';
     }
 
-    // ================= LIVE ADMIN SUPPORT CHAT =================
-    function openAdminChat(preSelectedStaffId, preSelectedName) {
-      document.getElementById("adminChatModal").style.display = "flex";
-      const sel = document.getElementById("chatStaffSelect");
-      if (preSelectedStaffId) {
-        sel.value = preSelectedStaffId;
-      }
+    function selectChatStaff(id, name) {
+      selectedChatStaffId = id;
+      document.getElementById("activeChatStaffName").innerText = `Chat with: ${name} (${id})`;
+      renderAdminStaffChatList();
       loadAdminChatMessages();
     }
 
-    function closeAdminChat() {
-      document.getElementById("adminChatModal").style.display = "none";
+    function loadAdminChatMessages() {
+      if (!selectedChatStaffId) return;
+      showToast("Syncing chat...");
+      jsonp(API_ENDPOINT + `?action=getChatMessages&staffId=${encodeURIComponent(selectedChatStaffId)}`, "onAdminChatLoaded");
     }
 
-    function loadAdminChatMessages() {
-      const sel = document.getElementById("chatStaffSelect");
-      const staffId = sel.value;
-      const box = document.getElementById("adminChatMessagesBox");
-
-      if (!staffId) {
-        box.innerHTML = '<div style="text-align:center; color:var(--text-muted); font-size:0.82rem; margin:auto;">Select an associate above to read messages.</div>';
+    window.onAdminChatLoaded = function(res) {
+      const box = document.getElementById("adminChatMessages");
+      if (!res || !res.success || !res.data || res.data.length === 0) {
+        box.innerHTML = '<div style="text-align:center; color:#64748b; font-size:12px;">No messages in this thread yet.</div>';
         return;
       }
-
-      showToast("Fetching conversation...");
-      jsonp(API_ENDPOINT + "?action=getChatMessages&staffId=" + encodeURIComponent(staffId), function(res) {
-        if (!res || !res.success || !res.data || res.data.length === 0) {
-          box.innerHTML = '<div style="text-align:center; color:var(--text-muted); font-size:0.8rem; margin:auto;">No message history with this associate. Type a message below to connect.</div>';
-          return;
+      let html = "";
+      res.data.forEach(m => {
+        const isAdmin = m.senderType === "Admin";
+        const senderLabel = isAdmin ? "Admin" : m.staffName;
+        let attachMarkup = "";
+        if (m.attachmentUrl) {
+          if (m.attachmentType.includes("image")) attachMarkup = `<br><a href="${m.attachmentUrl}" target="_blank"><img src="${m.attachmentUrl}" style="max-width:140px; border-radius:6px; margin-top:4px;"></a>`;
+          else if (m.attachmentType.includes("audio")) attachMarkup = `<br><audio controls src="${m.attachmentUrl}" style="width:180px; height:32px; margin-top:4px;"></audio>`;
+          else attachMarkup = `<br><a href="${m.attachmentUrl}" target="_blank" style="font-weight:bold;">Download File</a>`;
         }
-
-        let html = "";
-        res.data.forEach(function(m) {
-          const isAdmin = m.senderType === "Admin";
-          const bubbleClass = isAdmin ? "msg-admin" : "msg-staff";
-          const senderLabel = isAdmin ? "Admin (You)" : (m.staffName || m.staffId || "Staff");
-          let attachMarkup = "";
-
-          if (m.attachmentUrl) {
-            if (m.attachmentType && m.attachmentType.indexOf("image") >= 0) {
-              attachMarkup = '<br><a href="' + m.attachmentUrl + '" target="_blank"><img src="' + m.attachmentUrl + '" style="max-width:160px; border-radius:6px; margin-top:6px; display:block;"></a>';
-            } else if (m.attachmentType && m.attachmentType.indexOf("audio") >= 0) {
-              attachMarkup = '<br><audio controls src="' + m.attachmentUrl + '" style="width:200px; height:32px; margin-top:6px;"></audio>';
-            } else {
-              attachMarkup = '<br><a href="' + m.attachmentUrl + '" target="_blank" style="color:inherit; font-weight:700; text-decoration:underline;">Download Attached File</a>';
-            }
-          }
-
-          html += `<div class="msg-bubble ${bubbleClass}">
-            <b>${senderLabel}:</b> ${m.messageText}${attachMarkup}
-            <div class="msg-time">${m.timestamp || ''}</div>
-          </div>`;
-        });
-
-        box.innerHTML = html;
-        box.scrollTop = box.scrollHeight;
+        html += `<div style="max-width:75%; padding:10px 12px; border-radius:8px; font-size:12.5px; line-height:1.4; ${isAdmin ? 'background:#e0f2fe; color:#0369a1; align-self:flex-end;' : 'background:#fff; color:#0f172a; align-self:flex-start; border:1px solid #e2e8f0;'}"><b>${senderLabel}:</b> ${m.messageText}${attachMarkup}<div style="font-size:9px; opacity:0.7; text-align:right; margin-top:2px;">${m.timestamp}</div></div>`;
       });
-    }
+      box.innerHTML = html;
+      box.scrollTop = box.scrollHeight;
+    };
 
-    function handleAdminChatAttachment(input) {
+    function handleAdminAttachment(input) {
       if (input.files && input.files[0]) {
-        const file = input.files[0];
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          adminAttachment.url = e.target.result;
-          adminAttachment.type = file.type;
-          showToast("File staged for transmission.");
-        };
+        var file = input.files[0];
+        var reader = new FileReader();
+        reader.onload = function(e) { adminActiveAttachment.url = e.target.result; adminActiveAttachment.type = file.type; showToast("Attachment ready!"); };
         reader.readAsDataURL(file);
       }
     }
 
     function sendAdminChatMessage() {
-      const sel = document.getElementById("chatStaffSelect");
-      const staffId = sel.value;
-      const textInput = document.getElementById("adminChatTextInput");
-      const text = textInput.value.trim();
+      if (!selectedChatStaffId) { showToast("Select a staff member first."); return; }
+      const input = document.getElementById("adminChatInput");
+      const text = input.value.trim();
+      if (!text && !adminActiveAttachment.url) return;
 
-      if (!staffId) { showToast("Please select an associate first."); return; }
-      if (!text && !adminAttachment.url) return;
+      const payload = { staffId: selectedChatStaffId, staffName: "Admin", senderType: "Admin", messageText: text, attachmentUrl: adminActiveAttachment.url, attachmentType: adminActiveAttachment.type };
 
-      const staffName = sel.options[sel.selectedIndex].getAttribute("data-name") || staffId;
+      window.onAdminChatSent = function() { input.value = ""; adminActiveAttachment = { url: "", type: "" }; loadAdminChatMessages(); };
+      jsonp(API_ENDPOINT + `?action=sendChatMessage&data=${encodeURIComponent(JSON.stringify(payload))}`, "onAdminChatSent");
+    }
 
-      const payload = {
-        staffId: staffId,
-        staffName: staffName,
-        senderType: "Admin",
-        messageText: text,
-        attachmentUrl: adminAttachment.url,
-        attachmentType: adminAttachment.type
-      };
+    function handleAdminChatKey(e) { if (e.key === "Enter") sendAdminChatMessage(); }
 
-      showToast("Transmitting message...");
-      jsonp(API_ENDPOINT + `?action=sendChatMessage&data=${encodeURIComponent(JSON.stringify(payload))}`, function(res) {
-        textInput.value = "";
-        adminAttachment = { url: "", type: "" };
-        loadAdminChatMessages();
+    function setTimeFilter(filter, el) {
+      activeTimeFilter = filter;
+      customFilterStartDate = null;
+      customFilterEndDate = null;
+      document.getElementById("analyticsFromDate").value = "";
+      document.getElementById("analyticsToDate").value = "";
+      document.querySelectorAll(".time-pill").forEach(btn => btn.classList.remove("active"));
+      if (el) el.classList.add("active");
+      renderMetaAnalytics();
+    }
+
+    function applyCustomAnalyticsDate() {
+      const fromVal = document.getElementById("analyticsFromDate").value;
+      const toVal = document.getElementById("analyticsToDate").value;
+      if (fromVal && toVal) {
+        customFilterStartDate = parseLocalDate(fromVal);
+        const endParsed = parseLocalDate(toVal);
+        customFilterEndDate = new Date(endParsed.getFullYear(), endParsed.getMonth(), endParsed.getDate(), 23, 59, 59, 999);
+        activeTimeFilter = "custom";
+        document.querySelectorAll(".time-pill").forEach(btn => btn.classList.remove("active"));
+        renderMetaAnalytics();
+      }
+    }
+
+    function setClientCategoryFilter(cat, el) {
+      activeClientCategory = cat;
+      document.querySelectorAll(".cat-pill").forEach(btn => btn.classList.remove("active"));
+      if (el) el.classList.add("active");
+      renderAdminDashboard();
+    }
+
+    function renderPaymentLedger() {
+      const tbody = document.getElementById("recoveryLedgerBody");
+      let totalDemandMonth = 0, totalPaidMonth = 0, totalPendingMonth = 0, rowsHtml = "";
+
+      (state.clients || []).forEach(c => {
+        if (String(c[11] || "").trim().toLowerCase() === "cancelled") return;
+        const clientId = String(c[0] || "").trim();
+        const clientName = c[1] || "Account";
+        const phone = c[2] || "—";
+        const email = c[3] || "—";
+        
+        const m = calculateClientCycleMetrics(c, state.payments);
+        totalDemandMonth += m.activeCycleDemand;
+        totalPaidMonth += m.activeCycleReceived;
+        totalPendingMonth += m.activePendingDue;
+
+        rowsHtml += `<tr>
+          <td><span class="badge-link" onclick="openCustomerProfileModal('${clientId}')" title="Click to view full client dossier">${clientId}</span></td>
+          <td><strong>${clientName}</strong></td>
+          <td>${phone}<br><span style="font-size:0.75rem; color:#64748b;">${email}</span></td>
+          <td><strong>INR ${m.activeCycleDemand.toFixed(2)}</strong></td>
+          <td style="color:#059669; font-weight:700;">INR ${m.activeCycleReceived.toFixed(2)}</td>
+          <td style="color:${m.activePendingDue > 0 ? '#ea580c' : '#64748b'}; font-weight:700;">INR ${m.activePendingDue.toFixed(2)}</td>
+          <td><span class="${m.statusClass}">${m.statusLabel}</span></td>
+          <td style="text-align: right; white-space: nowrap;">
+            <button class="btn-profile" onclick="openCustomerProfileModal('${clientId}')">Directory</button> 
+            <button class="btn-adjust" onclick="openPaymentAdjustmentModal('${clientId}')">Adjust</button> 
+            ${m.activePendingDue > 0 ? `<button class="btn-reminder" onclick="sendPaymentReminderMail('${clientId}', '${m.activePendingDue.toFixed(2)}')">Reminder</button>` : `<span style="font-size:0.75rem; color:#059669; font-weight:700;">Settled</span>`}
+          </td>
+        </tr>`;
+      });
+
+      tbody.innerHTML = rowsHtml || '<tr><td colspan="8" style="text-align:center;">No accounts available.</td></tr>';
+      document.getElementById("todaySales").innerText = "INR " + totalDemandMonth.toFixed(2);
+      document.getElementById("kpiTotalPaid").innerText = "INR " + totalPaidMonth.toFixed(2);
+      document.getElementById("kpiTotalPending").innerText = "INR " + totalPendingMonth.toFixed(2);
+    }
+
+    function openCustomerProfileModal(clientId) {
+      const c = (state.clients || []).find(item => String(item[0]).trim() === String(clientId).trim());
+      if (!c) return;
+      const m = calculateClientCycleMetrics(c, state.payments);
+      
+      document.getElementById("profClientName").innerText = `${c[1]} — Master Dossier`;
+      document.getElementById("profClientDetails").innerText = `Client ID: ${c[0]} | Billing Ledger & Lifetime Payment Timeline`;
+      document.getElementById("profAccId").innerText = c[0];
+      document.getElementById("profAccPhone").innerText = c[2] || "Not Specified";
+      document.getElementById("profAccEmail").innerText = c[3] || "Not Specified";
+      document.getElementById("profAccDate").innerText = c[10] ? String(c[10]).substring(0, 10) : "N/A";
+
+      const sBox = document.getElementById("profServicesBreakdown");
+      let servHtml = "";
+      if (c[4] && parseFloat(c[5]) > 0) servHtml += `<div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px;"><span style="color:#64748b; font-size:0.72rem; text-transform:uppercase; font-weight:700; display:block;">One-Time Contract</span><strong style="color:#0f172a;">${c[4]}</strong><div style="font-weight:800; color:#f25c3b; margin-top:2px;">INR ${parseFloat(c[5]).toFixed(2)}</div></div>`;
+      if (c[6] && parseFloat(c[7]) > 0) servHtml += `<div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px;"><span style="color:#64748b; font-size:0.72rem; text-transform:uppercase; font-weight:700; display:block;">Monthly Retainer</span><strong style="color:#0f172a;">${c[6]}</strong><div style="font-weight:800; color:#1877f2; margin-top:2px;">INR ${parseFloat(c[7]).toFixed(2)} / month</div></div>`;
+      if (c[8] && parseFloat(c[9]) > 0) servHtml += `<div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px;"><span style="color:#64748b; font-size:0.72rem; text-transform:uppercase; font-weight:700; display:block;">Annual Support</span><strong style="color:#0f172a;">${c[8]}</strong><div style="font-weight:800; color:#10b981; margin-top:2px;">INR ${parseFloat(c[9]).toFixed(2)} / year</div></div>`;
+      sBox.innerHTML = servHtml || '<div style="color:#64748b;">No active services configured.</div>';
+
+      document.getElementById("profBilledAmt").innerText = "INR " + m.lifetimeBilled.toFixed(2);
+      document.getElementById("profReceivedAmt").innerText = "INR " + m.lifetimeReceived.toFixed(2);
+      document.getElementById("profPendingAmt").innerText = "INR " + m.activePendingDue.toFixed(2);
+      document.getElementById("profPendingAlertTag").innerHTML = `<span class="${m.statusClass}">${m.statusLabel}</span>`;
+
+      let historyRows = "";
+      (state.payments || []).forEach(p => {
+        if (String(p[1] || "").trim() === String(clientId).trim()) {
+          const amt = parseFloat(p[4]) || 0;
+          historyRows += `<tr>
+            <td>${p[5] ? String(p[5]).substring(0, 10) : "—"}</td>
+            <td><strong>${p[3]}</strong></td>
+            <td style="font-weight:700; color:${amt < 0 ? '#dc2626' : '#059669'};">INR ${amt.toFixed(2)}</td>
+            <td>${p[6] || '—'}</td>
+          </tr>`;
+        }
+      });
+      document.getElementById("profPaymentsHistoryBody").innerHTML = historyRows || '<tr><td colspan="4" style="text-align:center; padding:16px;">No transaction records found for this account.</td></tr>';
+      
+      document.getElementById("customerProfileModal").style.display = "flex";
+    }
+    function closeCustomerProfileModal() { document.getElementById("customerProfileModal").style.display = "none"; }
+
+    function openPaymentAdjustmentModal(clientId) {
+      const c = (state.clients || []).find(item => String(item[0]).trim() === String(clientId).trim());
+      if (!c) return;
+      const m = calculateClientCycleMetrics(c, state.payments);
+      document.getElementById("adjClientId").value = c[0];
+      document.getElementById("adjClientName").innerText = `${c[1]} (${c[0]})`;
+      document.getElementById("adjBilledVal").innerText = "INR " + m.activeCycleDemand.toFixed(2);
+      document.getElementById("adjCurrentPaidVal").innerText = "INR " + m.activeCycleReceived.toFixed(2);
+      document.getElementById("paymentAdjustmentModal").style.display = "flex";
+    }
+    function closePaymentAdjustmentModal() { document.getElementById("paymentAdjustmentModal").style.display = "none"; }
+
+    function savePaymentAdjustment() {
+      const clientId = document.getElementById("adjClientId").value;
+      const amount = parseFloat(document.getElementById("adjAmount").value) || 0;
+      if (amount <= 0) { showToast("Enter valid amount."); return; }
+      jsonp(API_ENDPOINT + `?action=adjustClientPayment&clientId=${encodeURIComponent(clientId)}&amount=${encodeURIComponent(amount)}&type=${encodeURIComponent(document.getElementById("adjActionType").value)}&remark=${encodeURIComponent(document.getElementById("adjRemark").value)}`, "onAdjSaved");
+    }
+    window.onAdjSaved = function() { showToast("Adjustment saved."); closePaymentAdjustmentModal(); syncAllData(); };
+
+    function cancelClientService(clientId) {
+      showCustomConfirm("Cancel Service", "Cancel service for client " + clientId + "?", function() {
+        window.onServiceCancelled = function(res) { if (res && res.success) { showToast("Cancelled."); syncAllData(); } else { showToast("Failed."); } };
+        jsonp(API_ENDPOINT + `?action=deactivateClient&clientId=${encodeURIComponent(clientId)}`, "onServiceCancelled");
       });
     }
 
-    window.onload = checkAuthOnLoad;
-  </script>
-</body>
-</html>
+    function deleteClientRecord(id) {
+      showCustomConfirm("Delete Client", "Delete client " + id + "?", function() {
+        window.onClientDeleted = function(res) { if (res && res.success) { showToast("Deleted."); syncAllData(); } else { showToast("Failed."); } };
+        jsonp(API_ENDPOINT + `?action=deleteClient&clientId=${encodeURIComponent(id)}`, "onClientDeleted");
+      });
+    }
+
+    function sendPaymentReminderMail(clientId, dueAmt) {
+      showToast("Sending reminder...");
+      jsonp(API_ENDPOINT + `?action=sendPaymentReminder&clientId=${encodeURIComponent(clientId)}&amount=${encodeURIComponent(dueAmt)}`, "onReminderDispatched");
+    }
+    window.onReminderDispatched = function(res) { showToast(res && res.success ? res.message : "Failed."); };
+
+    function renderMetaAnalytics() {
+      const now = new Date();
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+      const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+
+      let filterStartDate = null;
+      let filterEndDate = todayEnd;
+      let subPeriodTitle = "All Time Pipeline";
+
+      if (activeTimeFilter === "today") {
+        filterStartDate = todayStart;
+        subPeriodTitle = "Today";
+      } else if (activeTimeFilter === "7d") {
+        filterStartDate = new Date(todayStart.getTime() - (6 * 24 * 60 * 60 * 1000));
+        subPeriodTitle = "Last 7 Days";
+      } else if (activeTimeFilter === "30d") {
+        filterStartDate = new Date(todayStart.getTime() - (29 * 24 * 60 * 60 * 1000));
+        subPeriodTitle = "Last 30 Days";
+      } else if (activeTimeFilter === "month") {
+        filterStartDate = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+        subPeriodTitle = "This Month";
+      } else if (activeTimeFilter === "custom" && customFilterStartDate && customFilterEndDate) {
+        filterStartDate = customFilterStartDate;
+        filterEndDate = customFilterEndDate;
+        subPeriodTitle = "Custom Range (" + filterStartDate.toISOString().substring(0,10) + " to " + filterEndDate.toISOString().substring(0,10) + ")";
+      }
+
+      document.getElementById("chartTimelineSubtitle").innerText = subPeriodTitle;
+
+      let totalCollected = 0;
+      let timelineBuckets = {};
+
+      if (filterStartDate) {
+        let runner = new Date(filterStartDate.getTime());
+        while (runner <= filterEndDate) {
+          const y = runner.getFullYear();
+          const m = String(runner.getMonth() + 1).padStart(2, "0");
+          const d = String(runner.getDate()).padStart(2, "0");
+          timelineBuckets[`${y}-${m}-${d}`] = 0;
+          runner.setDate(runner.getDate() + 1);
+        }
+      }
+
+      (state.payments || []).forEach(p => {
+        const amt = parseFloat(p[4]) || 0;
+        const pDate = parseLocalDate(p[5]);
+        if (!pDate) return;
+
+        if (!filterStartDate || (pDate >= filterStartDate && pDate <= filterEndDate)) {
+          totalCollected += amt;
+          const y = pDate.getFullYear();
+          const m = String(pDate.getMonth() + 1).padStart(2, "0");
+          const d = String(pDate.getDate()).padStart(2, "0");
+          const key = `${y}-${m}-${d}`;
+          timelineBuckets[key] = (timelineBuckets[key] || 0) + amt;
+        }
+      });
+
+      let lifetimeGross = 0, totalMrr = 0, activeAccounts = 0;
+      let activeCycleDemandTotal = 0, activeCycleDueTotal = 0;
+      let oneTimeSum = 0, monthlySum = 0, annualSum = 0;
+
+      (state.clients || []).forEach(c => {
+        if (String(c[11] || "").trim().toLowerCase() === "cancelled") return;
+        const ot = parseFloat(c[5]) || 0, mo = parseFloat(c[7]) || 0, an = parseFloat(c[9]) || 0;
+        oneTimeSum += ot; monthlySum += mo; annualSum += an;
+        totalMrr += mo;
+        activeAccounts++;
+
+        const m = calculateClientCycleMetrics(c, state.payments);
+        lifetimeGross += m.lifetimeBilled;
+        activeCycleDemandTotal += m.activeCycleDemand;
+        activeCycleDueTotal += m.activePendingDue;
+      });
+
+      let displayTarget = activeTimeFilter === "all" ? lifetimeGross : activeCycleDemandTotal;
+      let displayDue = activeTimeFilter === "all" ? Math.max(0, lifetimeGross - totalCollected) : activeCycleDueTotal;
+
+      let tasksTotal = (state.tasks || []).length;
+      let tasksDone = (state.tasks || []).filter(t => t[6] === "Approved").length;
+
+      document.getElementById("metaKpiGross").innerText = "INR " + Math.round(displayTarget).toLocaleString("en-IN");
+      document.getElementById("metaKpiGrossSub").innerText = activeTimeFilter === "all" ? "Total contracted value" : "Demand in " + subPeriodTitle;
+      document.getElementById("metaKpiMrr").innerText = "INR " + totalMrr.toLocaleString("en-IN");
+      document.getElementById("metaKpiPaid").innerText = "INR " + totalCollected.toLocaleString("en-IN");
+      document.getElementById("metaKpiPaidSub").innerText = "Realized in " + subPeriodTitle;
+      document.getElementById("metaKpiDue").innerText = "INR " + Math.round(displayDue).toLocaleString("en
